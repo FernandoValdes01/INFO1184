@@ -1,2 +1,2 @@
 # INFO1184
-Ramo de inteligencia de negocio
+Ramo de inteligencia de negocios
