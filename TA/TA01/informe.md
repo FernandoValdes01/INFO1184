@@ -132,7 +132,7 @@ Se proponen cuatro esquemas logicos de datos:
 | Maestro | `region`, `ciudad`, `segmento_publico`, `vino`, `alianza` | Contiene catalogos estables del negocio y evita duplicidad en ubicaciones, publicos, productos y socios. |
 | Operacional de ferias | `feria`, `feria_alianza`, `stand`, `inventario_feria` | Modela la ejecucion del evento: donde se realiza, con quien se apoya y que recursos se asignan. |
 | Interaccion comercial | `visitante`, `degustacion`, `venta`, `detalle_venta` | Registra la experiencia del visitante y la conversion comercial en feria. |
-| Analitico | Consultas en `kpi_queries.sql`, exportaciones CSV y `dashboard_data.js` | Consolida KPI para tablero y analisis de desempeno. |
+| Analitico | Consultas en `kpi_queries.sql`, exportaciones CSV y modelos dbt `mart_*` | Consolida KPI para Lightdash y analisis de desempeno. |
 
 Adicionalmente, el diccionario relacional queda asi:
 
@@ -285,42 +285,73 @@ erDiagram
 
 ## Parte III - Evaluacion y esquema relacional
 
-### 1. Base de datos creada
+### 1. Base de datos de referencia y base objetivo
 
-Se implemento una base `SQLite` llamada `ta01_feria_vinos.db`, generada por el script `generate_db.py` a partir del archivo `schema.sql`.
+La implementacion original del caso se prototipo en `SQLite` mediante `ta01_feria_vinos.db`, generada por `generate_db.py` a partir de `schema.sql`. Esa base se conserva como referencia local y academica.
+
+Sin embargo, el subproyecto fue actualizado para que la implementacion objetivo de analitica quede orientada a:
+
+- PostgreSQL como warehouse final
+- dbt como capa de modelado y transformacion
+- Lightdash como capa oficial de dashboard
 
 ### 2. Modelo fisico de la base de datos
 
-El modelo fisico esta implementado en `schema.sql` y usa:
+El modelo fisico de referencia sigue definido en `schema.sql` y contiene:
 
-- Claves primarias en todas las tablas.
-- Claves foraneas para integridad referencial.
-- Restricciones `UNIQUE` para evitar duplicidad.
-- Restricciones `CHECK` para validar dominios de datos.
-- Indices para mejorar consultas de ferias, visitantes, ventas e inventario.
+- Claves primarias en todas las tablas
+- Claves foraneas para integridad referencial
+- Restricciones `UNIQUE` para evitar duplicidad
+- Restricciones `CHECK` para validar dominios de datos
+- Indices para consultas de ferias, visitantes, ventas e inventario
 
-### 3. Poblacion de la base de datos
+Para la migracion conceptual a PostgreSQL, se asume que las tablas operacionales base cargadas en el warehouse conservaran la misma estructura logica y los mismos nombres de tabla definidos en `schema.sql`.
 
-La base queda poblada automaticamente con mas de 150 registros distribuidos entre maestros, ferias, visitantes, degustaciones, ventas y detalle de ventas.
+### 3. Poblacion de la base de datos de referencia
 
-Conteo total esperado al ejecutar el script:
+La base SQLite de referencia queda poblada automaticamente con mas de 150 registros distribuidos entre maestros, ferias, visitantes, degustaciones, ventas y detalle de ventas.
+
+Conteo esperado al ejecutar `python3 generate_db.py`:
 
 - 13 tablas pobladas
 - 345 registros totales
 
-### 4. Relaciones propuestas en la parte II
+### 4. Alineacion con dbt
 
-Las relaciones conceptuales fueron materializadas en la implementacion mediante:
+Se creo un proyecto dbt valido dentro de `TA/TA01` con los siguientes componentes:
 
-- `FOREIGN KEY` en `schema.sql`
-- Datos consistentes generados por `generate_db.py`
-- Consultas de control en `kpi_queries.sql`
+- `dbt_project.yml`
+- `packages.yml`
+- `models/staging/`
+- `models/marts/`
+- `seeds/`
+- `macros/`
+- `tests/`
+
+Las tablas base del caso quedaron declaradas como `sources` en `models/staging/sources.yml`, usando `schema: "{{ target.schema }}"` para no fijar esquemas rigidos ni credenciales en el repositorio.
+
+Los modelos `stg_*` representan una capa de staging minima sobre las tablas operacionales. Los `marts` creados reutilizan la logica ya clara en `kpi_queries.sql` para dejar listas las vistas analiticas mas utiles para Lightdash:
+
+- `mart_kpi_resumen`
+- `mart_ventas_por_feria`
+- `mart_ingresos_por_segmento`
+- `mart_mix_vinos`
+- `mart_estado_inventario`
+
+### 5. Relaciones propuestas en la parte II
+
+Las relaciones conceptuales se reflejan ahora en dos niveles:
+
+- En la base de referencia SQLite, mediante `FOREIGN KEY` en `schema.sql`
+- En la capa analitica dbt, mediante `sources`, `refs`, documentacion de columnas y tests basicos en `models/staging/staging.yml` y `models/marts/marts.yml`
 
 ## Parte IV - Visualizacion de datos
 
-Se construyo un tablero local en `dashboard.html` que consume datos resumidos desde `dashboard_data.js`, archivo generado a partir de la base SQLite.
+### 1. Cambio de herramienta de dashboard
 
-### KPI mostrados
+El dashboard HTML/JS local fue descontinuado para evitar una doble implementacion de visualizacion. La visualizacion oficial del TA01 pasa a construirse en Lightdash, consumiendo los modelos dbt del subproyecto ubicado en `TA/TA01`.
+
+### 2. KPI que quedan expuestos para Lightdash
 
 - Ferias ejecutadas
 - Visitantes
@@ -330,11 +361,17 @@ Se construyo un tablero local en `dashboard.html` que consume datos resumidos de
 - Conversion de visitantes
 - Ticket promedio
 - Opt-in de contacto
+- Ingresos por feria
+- Ingresos por segmento
+- Mix de vinos
+- Estado del inventario
 
-### Uso del tablero
+### 3. Flujo recomendado
 
-1. Ejecutar `python3 generate_db.py`
-2. Abrir `dashboard.html` en el navegador
+1. Cargar las tablas operacionales del caso en PostgreSQL con los mismos nombres base del modelo.
+2. Configurar Lightdash para usar `Project directory path = /TA/TA01`.
+3. Configurar el warehouse desde la UI de Lightdash, sin versionar credenciales en el repo.
+4. Ejecutar dbt y construir el dashboard oficial sobre los modelos `mart_*`.
 
 ## Anexos
 
@@ -343,10 +380,11 @@ Se construyo un tablero local en `dashboard.html` que consume datos resumidos de
 - `anexos/evidencia_bd.html`
 - `anexos/evidencia_bd.png`
 
-### Evidencia del tablero
+### Evidencia historica del dashboard anterior
 
-- `dashboard.html`
 - `anexos/dashboard.png`
+
+Nota: `dashboard.html` y `dashboard_data.js` quedan solo como archivos descontinuados para explicitar la migracion hacia Lightdash; ya no representan el dashboard oficial del proyecto.
 
 ### Exportaciones para analisis
 

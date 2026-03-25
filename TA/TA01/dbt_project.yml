@@ -1,0 +1,24 @@
+name: info1184_ta01
+version: 1.0.0
+config-version: 2
+
+profile: info1184_ta01
+require-dbt-version: [">=1.11.0", "<1.12.0"]
+
+model-paths: ["models"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+test-paths: ["tests"]
+
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  info1184_ta01:
+    +materialized: view
+    staging:
+      +tags: ["ta01", "staging"]
+    marts:
+      +tags: ["ta01", "mart"]

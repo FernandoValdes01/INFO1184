@@ -1,0 +1,76 @@
+version: 2
+
+models:
+  - name: mart_kpi_resumen
+    description: "Resumen ejecutivo de KPI principales para el dashboard final en Lightdash."
+    columns:
+      - name: total_ferias
+        description: "Cantidad total de ferias registradas."
+      - name: total_visitantes
+        description: "Cantidad total de visitantes registrados."
+      - name: total_ventas
+        description: "Cantidad total de ventas."
+      - name: ingresos_totales
+        description: "Suma neta de ventas."
+      - name: tasa_conversion_visitante
+        description: "Porcentaje de visitantes con compra vinculada."
+      - name: tasa_optin_contacto
+        description: "Porcentaje de visitantes que aceptaron contacto."
+
+  - name: mart_ventas_por_feria
+    description: "Agregacion por feria para analisis comercial y visualizacion en Lightdash."
+    columns:
+      - name: feria_id
+        description: "Identificador unico de feria."
+        tests:
+          - not_null
+          - unique
+      - name: feria
+        description: "Nombre de la feria."
+      - name: ingresos
+        description: "Ingreso neto agregado por feria."
+      - name: botellas_vendidas
+        description: "Botellas vendidas por feria."
+
+  - name: mart_ingresos_por_segmento
+    description: "Resumen de visitantes, ventas e ingresos por segmento de publico."
+    columns:
+      - name: segmento_id
+        description: "Identificador unico del segmento."
+        tests:
+          - not_null
+          - unique
+      - name: segmento
+        description: "Nombre del segmento."
+      - name: ingresos
+        description: "Ingreso neto asociado al segmento."
+
+  - name: mart_mix_vinos
+    description: "Desempeno comercial de cada vino segun detalle de venta."
+    columns:
+      - name: vino_id
+        description: "Identificador unico del vino."
+        tests:
+          - not_null
+          - unique
+      - name: vino
+        description: "Nombre del vino."
+      - name: botellas_vendidas
+        description: "Cantidad total de botellas vendidas."
+      - name: ingresos_brutos
+        description: "Ingreso bruto acumulado por vino."
+
+  - name: mart_estado_inventario
+    description: "Inventario planificado y ejecutado por feria y producto."
+    columns:
+      - name: inventario_id
+        description: "Identificador unico de inventario."
+        tests:
+          - not_null
+          - unique
+      - name: feria_id
+        description: "Identificador de la feria."
+      - name: vino_id
+        description: "Identificador del vino."
+      - name: stock_cierre
+        description: "Stock disponible al cierre de la feria."
