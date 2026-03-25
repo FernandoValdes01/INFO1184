@@ -1,14 +1,13 @@
 # Trazabilidad de requerimientos - TA01
 
-## Alcance actual del subproyecto
+## Estado final del subproyecto
 
-El contenido academico del caso se mantiene, pero la implementacion tecnica de analitica fue reorientada para un flujo objetivo con:
+El subproyecto TA01 queda alineado al siguiente flujo oficial:
 
-- PostgreSQL como base de datos objetivo
-- dbt como capa de transformacion
-- Lightdash como capa oficial de dashboard
-
-La base `SQLite` y el dashboard HTML/JS quedan solo como referencia historica/local.
+1. SQLite local como referencia historica
+2. Neon / PostgreSQL como base raw definitiva
+3. dbt como capa de transformacion
+4. Lightdash como dashboard oficial
 
 ## Parte I - Estrategia y cuadro de mando integral
 
@@ -30,50 +29,55 @@ La base `SQLite` y el dashboard HTML/JS quedan solo como referencia historica/lo
 | Crear esquema entidad relacion con cardinalidades y atributos | `informe.md` -> `Parte II - Analisis y modelo de datos` -> `4. Esquema entidad relacion` |
 | Identificar el subconjunto de relaciones necesario para cada proceso | `informe.md` -> `Parte II - Analisis y modelo de datos` -> `5. Subconjunto de relaciones por proceso` |
 
-## Parte III - Implementacion tecnica alineada a PostgreSQL + dbt
+## Parte III - Implementacion real hacia Neon / PostgreSQL
 
 | Requerimiento tecnico | Donde se cumple |
 | --- | --- |
-| Crear un proyecto dbt valido dentro de `TA/TA01` | `dbt_project.yml`, `packages.yml`, `README_dbt.md` |
-| Dejar compatibilidad minima con dbt Core 1.11 | `dbt_project.yml` -> `require-dbt-version` |
-| Definir rutas relativas correctas del proyecto | `dbt_project.yml` |
-| Crear estructura `models`, `seeds`, `macros`, `tests` | `TA/TA01/models/`, `TA/TA01/seeds/`, `TA/TA01/macros/`, `TA/TA01/tests/` |
-| Definir sources en base a las tablas reales de `schema.sql` | `models/staging/sources.yml` |
-| Crear staging models `stg_*` por tabla base importante | `models/staging/stg_*.sql` |
-| Documentar modelos y columnas con tests basicos | `models/staging/staging.yml`, `models/marts/marts.yml` |
-| Crear marts simples a partir de los KPI existentes | `models/marts/mart_kpi_resumen.sql`, `models/marts/mart_ventas_por_feria.sql`, `models/marts/mart_ingresos_por_segmento.sql`, `models/marts/mart_mix_vinos.sql`, `models/marts/mart_estado_inventario.sql` |
-| No versionar credenciales ni secretos | `README_dbt.md`, `.gitignore` |
-| Preparar el proyecto para Lightdash | `README_dbt.md` y `dbt_project.yml` |
+| DDL PostgreSQL limpio e idempotente | `sql/schema_postgres.sql` |
+| Carga real desde SQLite a Neon/PostgreSQL | `scripts/migrate_to_neon.py` |
+| Validacion de datos cargados | `scripts/validate_neon.py`, `sql/validate_neon_data.sql` |
+| Variables de entorno sin credenciales versionadas | `.env.example`, `.gitignore`, `README_dbt.md` |
+| Proyecto dbt compatible con Lightdash | `dbt_project.yml`, `packages.yml`, `models/staging/`, `models/marts/` |
+| Sources dbt alineadas a tablas reales en Neon | `models/staging/sources.yml` |
+| Staging models sobre tablas raw | `models/staging/stg_*.sql` |
+| Marts listos para Lightdash | `models/marts/mart_*.sql` |
+| Documentacion de ejecucion completa | `README_dbt.md` |
 
-## Parte IV - Dashboard oficial y descontinuacion del dashboard local
+## Parte IV - Visualizacion final
 
 | Requerimiento tecnico | Donde se cumple |
 | --- | --- |
-| Declarar que el dashboard oficial se construira en Lightdash | `README_dbt.md`, `informe.md`, `README.md` |
-| Descontinuar el dashboard HTML/JS local | `dashboard.html`, `dashboard_data.js` |
-| Mantener evidencia historica sin tratarla como dashboard vigente | `anexos/dashboard.png` y menciones en `README_dbt.md` / `informe.md` |
+| Dashboard oficial en Lightdash | `README_dbt.md`, `informe.md`, `README.md` |
+| Dashboard HTML/JS local descontinuado | `dashboard.html`, `dashboard_data.js` |
+| Evidencia historica conservada sin usarla como flujo oficial | `anexos/dashboard.png` |
 
-## Nota de migracion desde SQLite a PostgreSQL
+## Flujo oficial del proyecto
 
-| Tema | Estado final |
+| Capa | Activo principal |
 | --- | --- |
-| Base local historica | `ta01_feria_vinos.db` y `generate_db.py` quedan como referencia local |
-| Base objetivo | PostgreSQL |
-| Transformacion | dbt en `TA/TA01` |
-| Dashboard oficial | Lightdash |
-| Path de proyecto en Lightdash | `/TA/TA01` |
+| Fuente local historica | `ta01_feria_vinos.db`, `generate_db.py` |
+| Carga a Neon | `sql/schema_postgres.sql`, `scripts/migrate_to_neon.py` |
+| Validacion | `scripts/validate_neon.py`, `sql/validate_neon_data.sql` |
+| Transformacion | `dbt_project.yml`, `models/staging/`, `models/marts/` |
+| Dashboard | Lightdash con `Project directory path = /TA/TA01` |
+
+## Componentes obsoletos / deprecated
+
+| Componente | Estado |
+| --- | --- |
+| `dashboard.html` | Conservado solo como aviso de deprecacion |
+| `dashboard_data.js` | Conservado solo como stub de deprecacion |
+| `anexos/dashboard.png` | Evidencia historica, no flujo vigente |
 
 ## Archivos principales
 
 | Archivo | Rol |
 | --- | --- |
+| `README_dbt.md` | Guia operativa completa de migracion y uso |
+| `sql/schema_postgres.sql` | Esquema raw definitivo para Neon/PostgreSQL |
+| `scripts/migrate_to_neon.py` | Carga idempotente desde SQLite |
+| `scripts/validate_neon.py` | Validacion de destino |
+| `sql/validate_neon_data.sql` | Queries manuales de validacion |
 | `dbt_project.yml` | Configuracion raiz del proyecto dbt |
-| `packages.yml` | Archivo minimo para `dbt deps` |
-| `README_dbt.md` | Instrucciones para Lightdash y nota de migracion |
-| `models/staging/sources.yml` | Definicion de sources |
-| `models/staging/stg_*.sql` | Modelos staging por tabla base |
-| `models/marts/mart_*.sql` | Marts simples para KPI y exploracion |
-| `models/staging/staging.yml` | Documentacion y tests de staging |
-| `models/marts/marts.yml` | Documentacion y tests de marts |
-| `informe.md` | Informe academico actualizado al nuevo flujo tecnico |
-| `generate_db.py` | Prototipo SQLite historico y exportador local |
+| `models/staging/sources.yml` | Sources alineadas a Neon |
+| `models/marts/mart_*.sql` | Vistas analiticas para Lightdash |

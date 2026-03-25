@@ -291,7 +291,7 @@ La implementacion original del caso se prototipo en `SQLite` mediante `ta01_feri
 
 Sin embargo, el subproyecto fue actualizado para que la implementacion objetivo de analitica quede orientada a:
 
-- PostgreSQL como warehouse final
+- Neon/PostgreSQL como warehouse final
 - dbt como capa de modelado y transformacion
 - Lightdash como capa oficial de dashboard
 
@@ -316,7 +316,20 @@ Conteo esperado al ejecutar `python3 generate_db.py`:
 - 13 tablas pobladas
 - 345 registros totales
 
-### 4. Alineacion con dbt
+### 4. Migracion real a Neon / PostgreSQL
+
+La migracion real del prototipo local hacia la base definitiva se separo en capas:
+
+- Fuente local historica: `ta01_feria_vinos.db`
+- Creacion del esquema raw: `sql/schema_postgres.sql`
+- Carga de datos: `scripts/migrate_to_neon.py`
+- Validacion: `scripts/validate_neon.py` y `sql/validate_neon_data.sql`
+- Transformacion: dbt en `models/staging/` y `models/marts/`
+- Visualizacion final: Lightdash
+
+Esta separacion evita mezclar carga, transformacion y visualizacion en un solo archivo.
+
+### 5. Alineacion con dbt
 
 Se creo un proyecto dbt valido dentro de `TA/TA01` con los siguientes componentes:
 
@@ -338,7 +351,7 @@ Los modelos `stg_*` representan una capa de staging minima sobre las tablas oper
 - `mart_mix_vinos`
 - `mart_estado_inventario`
 
-### 5. Relaciones propuestas en la parte II
+### 6. Relaciones propuestas en la parte II
 
 Las relaciones conceptuales se reflejan ahora en dos niveles:
 
@@ -368,10 +381,13 @@ El dashboard HTML/JS local fue descontinuado para evitar una doble implementacio
 
 ### 3. Flujo recomendado
 
-1. Cargar las tablas operacionales del caso en PostgreSQL con los mismos nombres base del modelo.
-2. Configurar Lightdash para usar `Project directory path = /TA/TA01`.
-3. Configurar el warehouse desde la UI de Lightdash, sin versionar credenciales en el repo.
-4. Ejecutar dbt y construir el dashboard oficial sobre los modelos `mart_*`.
+1. Crear el schema raw en Neon/PostgreSQL con `sql/schema_postgres.sql`.
+2. Migrar los datos desde SQLite con `scripts/migrate_to_neon.py`.
+3. Validar el destino con `scripts/validate_neon.py`.
+4. Cargar las tablas operacionales del caso en el mismo schema configurado para dbt.
+5. Configurar Lightdash para usar `Project directory path = /TA/TA01`.
+6. Configurar el warehouse desde la UI de Lightdash, sin versionar credenciales en el repo.
+7. Ejecutar dbt y construir el dashboard oficial sobre los modelos `mart_*`.
 
 ## Anexos
 
@@ -385,6 +401,14 @@ El dashboard HTML/JS local fue descontinuado para evitar una doble implementacio
 - `anexos/dashboard.png`
 
 Nota: `dashboard.html` y `dashboard_data.js` quedan solo como archivos descontinuados para explicitar la migracion hacia Lightdash; ya no representan el dashboard oficial del proyecto.
+
+### Componentes obsoletos
+
+- `dashboard.html`
+- `dashboard_data.js`
+- `anexos/dashboard.png`
+
+Estos componentes se mantienen solo como respaldo historico del prototipo anterior.
 
 ### Exportaciones para analisis
 

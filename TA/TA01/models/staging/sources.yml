@@ -2,7 +2,7 @@ version: 2
 
 sources:
   - name: ta01_raw
-    description: "Tablas operacionales base del caso TA01 cargadas en PostgreSQL."
+    description: "Tablas operacionales raw del caso TA01 cargadas en Neon/PostgreSQL."
     schema: "{{ target.schema }}"
     tables:
       - name: alianza
