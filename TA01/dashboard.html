@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tablero TA01 - Feria de Vinos</title>
+  <style>
+    :root {
+      --bg: #f4ede3;
+      --ink: #261c1a;
+      --muted: #6a5650;
+      --card: rgba(255, 250, 244, 0.88);
+      --line: rgba(38, 28, 26, 0.12);
+      --accent: #8f2d1f;
+      --accent-2: #d77f3c;
+      --accent-3: #396a4e;
+      --shadow: 0 18px 42px rgba(38, 28, 26, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(215, 127, 60, 0.28), transparent 28%),
+        radial-gradient(circle at top right, rgba(143, 45, 31, 0.18), transparent 24%),
+        linear-gradient(180deg, #fbf6f0 0%, var(--bg) 100%);
+      min-height: 100vh;
+    }
+
+    .shell {
+      width: min(1200px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 36px 0 48px;
+    }
+
+    .hero {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .eyebrow {
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-size: 0.72rem;
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    h1 {
+      margin: 0;
+      font-family: "Iowan Old Style", "Palatino Linotype", serif;
+      font-size: clamp(2.2rem, 4vw, 3.5rem);
+      line-height: 0.98;
+      max-width: 12ch;
+    }
+
+    .lead {
+      margin: 0;
+      max-width: 72ch;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+
+    .grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    .kpi-grid {
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      margin-bottom: 20px;
+    }
+
+    .panel-grid {
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      align-items: start;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+      padding: 20px;
+      backdrop-filter: blur(10px);
+    }
+
+    .card h2 {
+      margin: 0 0 4px;
+      font-size: 1rem;
+    }
+
+    .kpi-label {
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin-bottom: 10px;
+    }
+
+    .kpi-value {
+      font-size: 1.9rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+    }
+
+    .kpi-foot {
+      color: var(--muted);
+      font-size: 0.83rem;
+      margin-top: 10px;
+    }
+
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .section-title p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .bars {
+      display: grid;
+      gap: 14px;
+    }
+
+    .bar-row {
+      display: grid;
+      gap: 6px;
+    }
+
+    .bar-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 0.92rem;
+    }
+
+    .bar-track {
+      height: 12px;
+      border-radius: 999px;
+      background: rgba(38, 28, 26, 0.08);
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+    }
+
+    th,
+    td {
+      padding: 10px 0;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    td:last-child,
+    th:last-child {
+      text-align: right;
+    }
+
+    .funnel {
+      display: grid;
+      gap: 10px;
+    }
+
+    .funnel-step {
+      border-radius: 18px;
+      padding: 16px;
+      color: #fff;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+    }
+
+    .funnel-step:nth-child(2) {
+      width: 88%;
+      background: linear-gradient(135deg, var(--accent-2) 0%, #bf5e28 100%);
+    }
+
+    .funnel-step:nth-child(3) {
+      width: 72%;
+      background: linear-gradient(135deg, var(--accent-3) 0%, #4d8d68 100%);
+    }
+
+    .funnel-step strong {
+      display: block;
+      font-size: 1.4rem;
+      margin-top: 4px;
+    }
+
+    .footer-note {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    @media (max-width: 720px) {
+      .shell {
+        width: min(100% - 20px, 1200px);
+        padding-top: 24px;
+      }
+
+      .card {
+        border-radius: 18px;
+      }
+
+      .funnel-step:nth-child(2),
+      .funnel-step:nth-child(3) {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <section class="hero">
+      <div class="eyebrow">INFO1184 · Tarea 01</div>
+      <h1>Tablero de mando para ferias de vinos</h1>
+      <p class="lead">
+        Seguimiento comercial del requerimiento de exhibicion en feria: afluencia, degustacion,
+        conversion de visitantes, ventas e inventario para los dos vinos del portafolio.
+      </p>
+    </section>
+
+    <section class="grid kpi-grid" id="kpiGrid"></section>
+
+    <section class="grid panel-grid">
+      <article class="card">
+        <div class="section-title">
+          <div>
+            <h2>Ingresos por feria</h2>
+            <p>Comparativo entre eventos ejecutados durante 2026.</p>
+          </div>
+        </div>
+        <div class="bars" id="fairBars"></div>
+      </article>
+
+      <article class="card">
+        <div class="section-title">
+          <div>
+            <h2>Embudo comercial</h2>
+            <p>Visitantes, degustaciones y compradores vinculados.</p>
+          </div>
+        </div>
+        <div class="funnel" id="funnel"></div>
+      </article>
+
+      <article class="card">
+        <div class="section-title">
+          <div>
+            <h2>Segmentos de publico</h2>
+            <p>Visitantes y venta vinculada a cada segmento.</p>
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Segmento</th>
+              <th>Visitantes</th>
+              <th>Ingresos</th>
+            </tr>
+          </thead>
+          <tbody id="segmentTable"></tbody>
+        </table>
+      </article>
+
+      <article class="card">
+        <div class="section-title">
+          <div>
+            <h2>Mix de vinos</h2>
+            <p>Participacion de los dos productos del portafolio.</p>
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Vino</th>
+              <th>Botellas</th>
+              <th>Ingresos</th>
+            </tr>
+          </thead>
+          <tbody id="wineTable"></tbody>
+        </table>
+      </article>
+    </section>
+
+    <p class="footer-note" id="generatedAt"></p>
+  </main>
+
+  <script src="./dashboard_data.js"></script>
+  <script>
+    const data = window.dashboardData;
+
+    const money = new Intl.NumberFormat("es-CL", {
+      style: "currency",
+      currency: "CLP",
+      maximumFractionDigits: 0
+    });
+
+    const decimal = new Intl.NumberFormat("es-CL", {
+      maximumFractionDigits: 2
+    });
+
+    const kpis = [
+      ["Ferias ejecutadas", data.kpis.total_ferias, "Cobertura nacional del plan 2026"],
+      ["Visitantes", data.kpis.total_visitantes, "Flujo total registrado en las ferias"],
+      ["Ventas", data.kpis.total_ventas, "Transacciones cerradas en stand"],
+      ["Botellas vendidas", data.kpis.botellas_vendidas, "Unidades comercializadas en feria"],
+      ["Ingresos netos", money.format(data.kpis.ingresos_totales), "Venta neta acumulada"],
+      ["Conversion", `${decimal.format(data.kpis.tasa_conversion)}%`, "Visitantes con compra vinculada"],
+      ["Ticket promedio", money.format(data.kpis.ticket_promedio), "Valor medio por transaccion"],
+      ["Opt-in contacto", `${decimal.format(data.kpis.tasa_optin)}%`, "Leads que aceptaron seguimiento"]
+    ];
+
+    const kpiGrid = document.getElementById("kpiGrid");
+    kpis.forEach(([label, value, foot]) => {
+      const card = document.createElement("article");
+      card.className = "card";
+      card.innerHTML = `
+        <div class="kpi-label">${label}</div>
+        <div class="kpi-value">${value}</div>
+        <div class="kpi-foot">${foot}</div>
+      `;
+      kpiGrid.appendChild(card);
+    });
+
+    const fairBars = document.getElementById("fairBars");
+    const fairMax = Math.max(...data.ferias.map(item => item.ingresos));
+    data.ferias.forEach(item => {
+      const row = document.createElement("div");
+      row.className = "bar-row";
+      row.innerHTML = `
+        <div class="bar-head">
+          <span>${item.feria}</span>
+          <strong>${money.format(item.ingresos)}</strong>
+        </div>
+        <div class="bar-track">
+          <div class="bar-fill" style="width:${(item.ingresos / fairMax) * 100}%"></div>
+        </div>
+        <div class="kpi-foot">${item.ciudad} · ${item.visitantes} visitantes · ${item.botellas} botellas</div>
+      `;
+      fairBars.appendChild(row);
+    });
+
+    const funnel = document.getElementById("funnel");
+    const funnelItems = [
+      ["Visitantes", data.embudo.visitantes],
+      ["Degustaciones", data.embudo.degustaciones],
+      ["Compradores", data.embudo.compradores]
+    ];
+    funnelItems.forEach(([label, value]) => {
+      const block = document.createElement("div");
+      block.className = "funnel-step";
+      block.innerHTML = `${label}<strong>${value}</strong>`;
+      funnel.appendChild(block);
+    });
+
+    const conversion = document.createElement("p");
+    conversion.className = "kpi-foot";
+    conversion.textContent = `Conversion desde degustacion: ${decimal.format(data.embudo.conversion_desde_degustacion)}%`;
+    funnel.appendChild(conversion);
+
+    const segmentTable = document.getElementById("segmentTable");
+    data.segmentos.forEach(item => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${item.segmento}</td>
+        <td>${item.visitantes}</td>
+        <td>${money.format(item.ingresos)}</td>
+      `;
+      segmentTable.appendChild(row);
+    });
+
+    const wineTable = document.getElementById("wineTable");
+    data.vinos.forEach(item => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${item.vino}</td>
+        <td>${item.botellas}</td>
+        <td>${money.format(item.ingresos_brutos)}</td>
+      `;
+      wineTable.appendChild(row);
+    });
+
+    document.getElementById("generatedAt").textContent =
+      `Datos generados automaticamente desde SQLite: ${new Date(data.generated_at).toLocaleString("es-CL")}.`;
+  </script>
+</body>
+</html>

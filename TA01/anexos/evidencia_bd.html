@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Evidencia Base de Datos TA01</title>
+  <style>
+    :root {
+      --bg: #fff9f4;
+      --ink: #231917;
+      --muted: #6e5a54;
+      --line: rgba(35, 25, 23, 0.1);
+      --accent: #8c2f22;
+      --accent-2: #356049;
+      --card: #ffffff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      padding: 24px;
+      font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        linear-gradient(180deg, rgba(140, 47, 34, 0.08), transparent 28%),
+        var(--bg);
+    }
+
+    .wrap {
+      width: min(1200px, 100%);
+      margin: 0 auto;
+      display: grid;
+      gap: 18px;
+    }
+
+    .hero,
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 18px 20px;
+    }
+
+    .hero h1,
+    .card h2 {
+      margin: 0 0 8px;
+    }
+
+    .hero p,
+    .meta,
+    .card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .grid {
+      display: grid;
+      gap: 18px;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    }
+
+    .pill-grid {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    }
+
+    .pill {
+      border-radius: 14px;
+      padding: 12px 14px;
+      background: linear-gradient(135deg, rgba(140, 47, 34, 0.08), rgba(53, 96, 73, 0.08));
+      border: 1px solid var(--line);
+    }
+
+    .pill strong {
+      display: block;
+      font-size: 1.3rem;
+      margin-top: 4px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+    }
+
+    th,
+    td {
+      padding: 9px 0;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th:last-child,
+    td:last-child {
+      text-align: right;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    pre {
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      background: #f8f2ec;
+      border-radius: 12px;
+      padding: 12px;
+      margin: 0;
+      font-size: 0.82rem;
+      line-height: 1.45;
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="hero">
+      <h1>Evidencia de implementacion</h1>
+      <p>Resumen de la base SQLite construida para el requerimiento de exhibicion y venta en ferias de vinos.</p>
+      <p class="meta" id="generatedAt"></p>
+    </section>
+
+    <section class="card">
+      <h2>Cantidad de registros</h2>
+      <div class="pill-grid" id="tableCounts"></div>
+    </section>
+
+    <section class="grid">
+      <article class="card">
+        <h2>Ferias y resultados</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Feria</th>
+              <th>Visitantes</th>
+              <th>Ventas</th>
+              <th>Ingresos</th>
+            </tr>
+          </thead>
+          <tbody id="fairSummary"></tbody>
+        </table>
+      </article>
+
+      <article class="card">
+        <h2>Muestra de ventas</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Feria</th>
+              <th>Pago</th>
+              <th>Monto</th>
+            </tr>
+          </thead>
+          <tbody id="sampleSales"></tbody>
+        </table>
+      </article>
+    </section>
+
+    <section class="grid" id="schemaCards"></section>
+  </main>
+
+  <script src="./db_evidence.js"></script>
+  <script>
+    const data = window.dbEvidence;
+    const money = new Intl.NumberFormat("es-CL", {
+      style: "currency",
+      currency: "CLP",
+      maximumFractionDigits: 0
+    });
+
+    document.getElementById("generatedAt").textContent =
+      `Registros totales: ${data.total_records}. Generado: ${new Date(data.generated_at).toLocaleString("es-CL")}.`;
+
+    const countRoot = document.getElementById("tableCounts");
+    data.table_counts.forEach(item => {
+      const node = document.createElement("div");
+      node.className = "pill";
+      node.innerHTML = `${item.tabla}<strong>${item.registros}</strong>`;
+      countRoot.appendChild(node);
+    });
+
+    const fairSummary = document.getElementById("fairSummary");
+    data.fair_summary.forEach(item => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${item.feria}</td>
+        <td>${item.visitantes}</td>
+        <td>${item.ventas}</td>
+        <td>${money.format(item.ingresos)}</td>
+      `;
+      fairSummary.appendChild(row);
+    });
+
+    const sampleSales = document.getElementById("sampleSales");
+    data.sample_sales.forEach(item => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${item.venta_id}</td>
+        <td>${item.feria}</td>
+        <td>${item.medio_pago}</td>
+        <td>${money.format(item.monto_neto)}</td>
+      `;
+      sampleSales.appendChild(row);
+    });
+
+    const schemaCards = document.getElementById("schemaCards");
+    data.schema_excerpt.forEach(item => {
+      const card = document.createElement("article");
+      card.className = "card";
+      card.innerHTML = `<h2>${item.name}</h2><pre>${item.sql}</pre>`;
+      schemaCards.appendChild(card);
+    });
+  </script>
+</body>
+</html>
