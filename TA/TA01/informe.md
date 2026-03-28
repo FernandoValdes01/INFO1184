@@ -1,5 +1,11 @@
 # Tarea 01 - INFO1184
 
+## Proposito del documento
+
+Este archivo corresponde a la documentacion academica de la `TA01`. Su funcion es responder lo solicitado en la tarea mediante explicaciones teoricas, analisis del caso, modelado conceptual y justificacion de la propuesta.
+
+No debe leerse como manual tecnico de ejecucion. La guia operativa del proyecto se encuentra en `README_dbt.md`.
+
 ## Caso
 
 Se propone una empresa vitivinicola chilena que producira y comercializara dos vinos:
@@ -285,6 +291,8 @@ erDiagram
 
 ## Parte III - Evaluacion y esquema relacional
 
+En esta parte se explica la implementacion desde una perspectiva academica y justificativa. Es decir, se describe que se hizo y por que se hizo. Los pasos operativos detallados para ejecutar la solucion se documentan por separado en `README_dbt.md`.
+
 ### 1. Base de datos de referencia y base objetivo
 
 La implementacion original del caso se prototipo en `SQLite` mediante `ta01_feria_vinos.db`, generada por `generate_db.py` a partir de `schema.sql`. Esa base se conserva como referencia local y academica.
@@ -329,6 +337,12 @@ La migracion real del prototipo local hacia la base definitiva se separo en capa
 
 Esta separacion evita mezclar carga, transformacion y visualizacion en un solo archivo.
 
+Desde la perspectiva de la tarea, esta decision mejora la claridad del trabajo porque permite distinguir entre:
+
+- la solucion conceptual pedida en el analisis
+- la implementacion tecnica usada para materializarla
+- la herramienta final elegida para explotar los datos
+
 ### 5. Alineacion con dbt
 
 Se creo un proyecto dbt valido dentro de `TA/TA01` con los siguientes componentes:
@@ -359,6 +373,8 @@ Las relaciones conceptuales se reflejan ahora en dos niveles:
 - En la capa analitica dbt, mediante `sources`, `refs`, documentacion de columnas y tests basicos en `models/staging/staging.yml` y `models/marts/marts.yml`
 
 ## Parte IV - Visualizacion de datos
+
+Esta parte describe la decision de visualizacion tomada en el proyecto. La configuracion tecnica especifica de Lightdash y el flujo de ejecucion se encuentran en `README_dbt.md`.
 
 ### 1. Cambio de herramienta de dashboard
 

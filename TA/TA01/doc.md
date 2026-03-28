@@ -1,83 +1,105 @@
-# Trazabilidad de requerimientos - TA01
+# Estructura y trazabilidad documental - TA01
 
-## Estado final del subproyecto
+Este archivo normaliza la documentacion del subproyecto `TA01` y deja explicito que existen dos tipos de documentacion con objetivos distintos.
 
-El subproyecto TA01 queda alineado al siguiente flujo oficial:
+## 1. Tipos de documentacion del proyecto
 
-1. SQLite local como referencia historica
-2. Neon / PostgreSQL como base raw definitiva
-3. dbt como capa de transformacion
-4. Lightdash como dashboard oficial
+### Documentacion academica
 
-## Parte I - Estrategia y cuadro de mando integral
+Corresponde al material que responde lo solicitado en la Tarea 01. Aqui deben quedar la parte teorica, el analisis del caso, la justificacion del modelo de datos y la explicacion conceptual del trabajo.
 
-| Requerimiento | Donde se cumple |
+Documento principal:
+
+- `informe.md`
+
+### Documentacion tecnica
+
+Corresponde al material que sirve para ejecutar, mantener y entender la implementacion del proyecto. Aqui deben quedar los pasos operativos, los archivos del flujo de datos, las herramientas usadas y las instrucciones para correr el trabajo.
+
+Documento principal:
+
+- `README_dbt.md`
+
+## 2. Como debe leerse esta documentacion
+
+Si el lector necesita revisar la entrega academica y verificar que la tarea esta respondida, debe partir por `informe.md`.
+
+Si el lector necesita ejecutar la solucion, revisar el flujo SQLite -> PostgreSQL/Neon -> dbt -> Lightdash, o entender como se trabaja tecnicamente el proyecto, debe partir por `README_dbt.md`.
+
+Este archivo `doc.md` funciona como puente entre ambos mundos: explica la separacion documental y deja trazabilidad entre los requerimientos y los archivos del repositorio.
+
+## 3. Distribucion de contenidos
+
+| Tipo de contenido | Documento correcto | Motivo |
+| --- | --- | --- |
+| Vision del negocio | `informe.md` | Es una respuesta conceptual solicitada por la tarea. |
+| Foco estrategico | `informe.md` | Forma parte del analisis academico del caso. |
+| Procesos estrategicos | `informe.md` | Responde directamente preguntas de estrategia y gestion. |
+| Mapa estrategico | `informe.md` | Es parte del desarrollo teorico de la tarea. |
+| Matriz 3M | `informe.md` | Corresponde a la resolucion academica del caso. |
+| Identificacion de procesos, entidades y relaciones | `informe.md` | Explica el razonamiento del modelo de datos. |
+| Esquema entidad relacion | `informe.md` | Presenta la solucion conceptual pedida en la tarea. |
+| Flujo tecnico del proyecto | `README_dbt.md` | Sirve para guiar la implementacion real. |
+| Migracion a Neon/PostgreSQL | `README_dbt.md` | Es una instruccion operativa. |
+| Validacion de datos | `README_dbt.md` | Es parte del procedimiento tecnico. |
+| Ejecucion de dbt | `README_dbt.md` | Es documentacion de uso del proyecto. |
+| Integracion con Lightdash | `README_dbt.md` | Explica el despliegue del dashboard final. |
+
+## 4. Trazabilidad de la entrega academica
+
+### Parte I - Estrategia y cuadro de mando integral
+
+| Requerimiento | Se responde en |
 | --- | --- |
-| Describir la vision de la empresa | `informe.md` -> `Parte I - Estrategia y cuadro de mando integral` -> `1. Vision de la empresa` |
-| Describir el foco de la empresa | `informe.md` -> `Parte I - Estrategia y cuadro de mando integral` -> `2. Foco de la empresa` |
-| Analizar, discutir y elaborar cinco procesos estrategicos segun cinco perspectivas | `informe.md` -> `Parte I - Estrategia y cuadro de mando integral` -> `3. Cinco procesos estrategicos por perspectiva` |
-| Construir mapa estrategico con perspectivas y flujos | `informe.md` -> `Parte I - Estrategia y cuadro de mando integral` -> `4. Mapa estrategico del negocio` |
-| Elaborar matriz 3M con al menos tres medidas, tres metas y tres medios por perspectiva | `informe.md` -> `Parte I - Estrategia y cuadro de mando integral` -> `5. Matriz 3M` |
+| Vision de la empresa | `informe.md` -> `Parte I` -> `1. Vision de la empresa` |
+| Foco de la empresa | `informe.md` -> `Parte I` -> `2. Foco de la empresa` |
+| Cinco procesos estrategicos por perspectiva | `informe.md` -> `Parte I` -> `3. Cinco procesos estrategicos por perspectiva` |
+| Mapa estrategico | `informe.md` -> `Parte I` -> `4. Mapa estrategico del negocio` |
+| Matriz 3M | `informe.md` -> `Parte I` -> `5. Matriz 3M` |
 
-## Parte II - Analisis y modelo de datos
+### Parte II - Analisis y modelo de datos
 
-| Requerimiento | Donde se cumple |
+| Requerimiento | Se responde en |
 | --- | --- |
-| Identificar los procesos mas importantes para el requerimiento | `informe.md` -> `Parte II - Analisis y modelo de datos` -> `1. Procesos mas importantes para el requerimiento` |
-| Identificar las entidades | `informe.md` -> `Parte II - Analisis y modelo de datos` -> `2. Entidades identificadas` |
-| Describir los esquemas de los datos | `informe.md` -> `Parte II - Analisis y modelo de datos` -> `3. Esquemas de datos y descripcion` |
-| Crear esquema entidad relacion con cardinalidades y atributos | `informe.md` -> `Parte II - Analisis y modelo de datos` -> `4. Esquema entidad relacion` |
-| Identificar el subconjunto de relaciones necesario para cada proceso | `informe.md` -> `Parte II - Analisis y modelo de datos` -> `5. Subconjunto de relaciones por proceso` |
+| Procesos mas importantes del requerimiento | `informe.md` -> `Parte II` -> `1. Procesos mas importantes para el requerimiento` |
+| Entidades identificadas | `informe.md` -> `Parte II` -> `2. Entidades identificadas` |
+| Esquemas de datos y descripcion | `informe.md` -> `Parte II` -> `3. Esquemas de datos y descripcion` |
+| Esquema entidad relacion | `informe.md` -> `Parte II` -> `4. Esquema entidad relacion` |
+| Subconjunto de relaciones por proceso | `informe.md` -> `Parte II` -> `5. Subconjunto de relaciones por proceso` |
 
-## Parte III - Implementacion real hacia Neon / PostgreSQL
+### Parte III - Implementacion y soporte tecnico
 
-| Requerimiento tecnico | Donde se cumple |
+Esta parte tiene una doble lectura:
+
+- `informe.md` explica la logica de implementacion y justifica el cambio de arquitectura.
+- `README_dbt.md` explica como ejecutar esa implementacion en la practica.
+
+| Necesidad | Documento recomendado |
 | --- | --- |
-| DDL PostgreSQL limpio e idempotente | `sql/schema_postgres.sql` |
-| Carga real desde SQLite a Neon/PostgreSQL | `scripts/migrate_to_neon.py` |
-| Validacion de datos cargados | `scripts/validate_neon.py`, `sql/validate_neon_data.sql` |
-| Variables de entorno sin credenciales versionadas | `.env.example`, `.gitignore`, `README_dbt.md` |
-| Proyecto dbt compatible con Lightdash | `dbt_project.yml`, `packages.yml`, `models/staging/`, `models/marts/` |
-| Sources dbt alineadas a tablas reales en Neon | `models/staging/sources.yml` |
-| Staging models sobre tablas raw | `models/staging/stg_*.sql` |
-| Marts listos para Lightdash | `models/marts/mart_*.sql` |
-| Documentacion de ejecucion completa | `README_dbt.md` |
+| Entender por que se usa PostgreSQL/Neon, dbt y Lightdash | `informe.md` |
+| Crear el esquema raw y migrar datos | `README_dbt.md` |
+| Validar la carga | `README_dbt.md` |
+| Ejecutar modelos dbt | `README_dbt.md` |
+| Configurar Lightdash | `README_dbt.md` |
 
-## Parte IV - Visualizacion final
+## 5. Archivos tecnicos principales
 
-| Requerimiento tecnico | Donde se cumple |
+| Archivo | Rol tecnico |
 | --- | --- |
-| Dashboard oficial en Lightdash | `README_dbt.md`, `informe.md`, `README.md` |
-| Dashboard HTML/JS local descontinuado | `dashboard.html`, `dashboard_data.js` |
-| Evidencia historica conservada sin usarla como flujo oficial | `anexos/dashboard.png` |
+| `README_dbt.md` | Guia operativa principal del proyecto |
+| `sql/schema_postgres.sql` | DDL idempotente para PostgreSQL/Neon |
+| `scripts/migrate_to_neon.py` | Migracion desde SQLite hacia PostgreSQL/Neon |
+| `scripts/validate_neon.py` | Validacion automatica de la carga |
+| `sql/validate_neon_data.sql` | Validacion manual por SQL |
+| `dbt_project.yml` | Configuracion del proyecto dbt |
+| `models/staging/sources.yml` | Declaracion de fuentes raw |
+| `models/staging/stg_*.sql` | Capa de staging |
+| `models/marts/mart_*.sql` | Capa analitica consumida por Lightdash |
 
-## Flujo oficial del proyecto
+## 6. Criterio de separacion adoptado
 
-| Capa | Activo principal |
-| --- | --- |
-| Fuente local historica | `ta01_feria_vinos.db`, `generate_db.py` |
-| Carga a Neon | `sql/schema_postgres.sql`, `scripts/migrate_to_neon.py` |
-| Validacion | `scripts/validate_neon.py`, `sql/validate_neon_data.sql` |
-| Transformacion | `dbt_project.yml`, `models/staging/`, `models/marts/` |
-| Dashboard | Lightdash con `Project directory path = /TA/TA01` |
+La regla aplicada para normalizar la documentacion es la siguiente:
 
-## Componentes obsoletos / deprecated
-
-| Componente | Estado |
-| --- | --- |
-| `dashboard.html` | Conservado solo como aviso de deprecacion |
-| `dashboard_data.js` | Conservado solo como stub de deprecacion |
-| `anexos/dashboard.png` | Evidencia historica, no flujo vigente |
-
-## Archivos principales
-
-| Archivo | Rol |
-| --- | --- |
-| `README_dbt.md` | Guia operativa completa de migracion y uso |
-| `sql/schema_postgres.sql` | Esquema raw definitivo para Neon/PostgreSQL |
-| `scripts/migrate_to_neon.py` | Carga idempotente desde SQLite |
-| `scripts/validate_neon.py` | Validacion de destino |
-| `sql/validate_neon_data.sql` | Queries manuales de validacion |
-| `dbt_project.yml` | Configuracion raiz del proyecto dbt |
-| `models/staging/sources.yml` | Sources alineadas a Neon |
-| `models/marts/mart_*.sql` | Vistas analiticas para Lightdash |
+- Si el contenido responde una pregunta de la Tarea 01, va en `informe.md`.
+- Si el contenido sirve para ejecutar o mantener la solucion, va en `README_dbt.md`.
+- Si el contenido sirve para ubicar al lector y explicar donde esta cada cosa, va en `doc.md`.
