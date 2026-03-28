@@ -13,7 +13,7 @@ La solucion implementada para `TA01` trabaja con la siguiente arquitectura:
 3. `dbt` como capa de transformacion
 4. `Lightdash` como herramienta oficial de visualizacion
 
-El dashboard HTML/JS local ya no forma parte del flujo oficial. Se conserva solo como antecedente historico del prototipo.
+La visualizacion oficial del proyecto se implementa en `Lightdash` a partir de los `marts` construidos por `dbt`.
 
 ## 2. Cuando usar este documento
 
@@ -178,16 +178,6 @@ Los cambios principales son:
 
 Esta adaptacion permite que la capa raw quede mejor tipada y que `dbt` trabaje sobre tipos mas claros y estables.
 
-## 10. Componentes obsoletos
-
-Los siguientes archivos ya no son parte del flujo oficial:
-
-- `dashboard.html`
-- `dashboard_data.js`
-- `anexos/dashboard.png`
-
-Se mantienen solo como referencia historica o evidencia academica del prototipo previo.
-
-## 11. Nota sobre carpetas declaradas por dbt
+## 10. Nota sobre carpetas declaradas por dbt
 
 `seeds/`, `macros/` y `tests/` siguen declaradas en `dbt_project.yml` porque forman parte de la estructura esperada por dbt, aunque hoy no sean carpetas operativas del flujo. Se dejaron como convencion del proyecto y como espacio natural para crecimiento futuro.

@@ -1,6 +1,6 @@
 # Estructura y trazabilidad documental - TA01
 
-Este archivo normaliza la documentacion del subproyecto `TA01` y deja explicito que existen dos tipos de documentacion con objetivos distintos.
+Este archivo normaliza la documentacion del subproyecto `TA01`, deja explicito que existen dos tipos de documentacion con objetivos distintos y fija a `Lightdash` como unica solucion oficial de visualizacion.
 
 ## 1. Tipos de documentacion del proyecto
 

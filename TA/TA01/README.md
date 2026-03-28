@@ -57,4 +57,4 @@ El trabajo tecnico del subproyecto sigue esta arquitectura:
 3. `dbt` como capa de transformacion
 4. `Lightdash` como capa oficial de visualizacion
 
-El dashboard HTML/JS local queda solo como referencia historica y ya no representa el flujo oficial.
+La visualizacion oficial del proyecto se implementa exclusivamente en `Lightdash` sobre los modelos analiticos construidos con `dbt`.

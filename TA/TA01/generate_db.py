@@ -4,7 +4,7 @@ from __future__ import annotations
 Utilidad local e historica para regenerar el prototipo SQLite de TA01.
 
 Este script no representa el flujo objetivo de analitica del subproyecto.
-La implementacion objetivo pasa a PostgreSQL + dbt + Lightdash y las
+La implementacion oficial del proyecto se apoya en PostgreSQL + dbt + Lightdash y las
 credenciales del warehouse no se versionan en el repositorio.
 """
 
@@ -19,7 +19,6 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 DB_PATH = ROOT / "ta01_feria_vinos.db"
 SCHEMA_PATH = ROOT / "schema.sql"
-LEGACY_DASHBOARD_JS_PATH = ROOT / "dashboard_data.js"
 EVIDENCE_JS_PATH = ROOT / "anexos" / "db_evidence.js"
 EXPORTS_DIR = ROOT / "exports"
 
@@ -36,16 +35,6 @@ def write_js_assignment(path: Path, variable_name: str, payload: dict) -> None:
         f"window.{variable_name} = {json.dumps(payload, ensure_ascii=True, indent=2)};\n",
         encoding="utf-8",
     )
-
-
-def write_legacy_dashboard_notice(path: Path) -> None:
-    payload = {
-        "status": "deprecated",
-        "official_dashboard": "Lightdash",
-        "project_directory_path": "/TA/TA01",
-        "note": "El dashboard HTML/JS local fue descontinuado. El dashboard oficial debe construirse en Lightdash sobre dbt y PostgreSQL.",
-    }
-    write_js_assignment(path, "ta01DashboardDeprecated", payload)
 
 
 def export_csv(path: Path, rows: list[sqlite3.Row]) -> None:
@@ -410,8 +399,6 @@ def main() -> None:
         ORDER BY botellas DESC
         """
     ).fetchall()
-
-    write_legacy_dashboard_notice(LEGACY_DASHBOARD_JS_PATH)
 
     table_counts = conn.execute(
         """

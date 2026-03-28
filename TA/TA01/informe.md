@@ -372,15 +372,11 @@ Las relaciones conceptuales se reflejan ahora en dos niveles:
 - En la base de referencia SQLite, mediante `FOREIGN KEY` en `schema.sql`
 - En la capa analitica dbt, mediante `sources`, `refs`, documentacion de columnas y tests basicos en `models/staging/staging.yml` y `models/marts/marts.yml`
 
-## Parte IV - Visualizacion de datos
+## Parte IV - Visualizacion oficial del proyecto
 
-Esta parte describe la decision de visualizacion tomada en el proyecto. La configuracion tecnica especifica de Lightdash y el flujo de ejecucion se encuentran en `README_dbt.md`.
+La visualizacion del `TA01` se implementa en `Lightdash`, consumiendo los modelos analiticos construidos en `dbt`. De este modo, el tablero de mando del proyecto queda alineado con la arquitectura oficial del trabajo: `SQLite -> PostgreSQL/Neon -> dbt -> Lightdash`.
 
-### 1. Cambio de herramienta de dashboard
-
-El dashboard HTML/JS local fue descontinuado para evitar una doble implementacion de visualizacion. La visualizacion oficial del TA01 pasa a construirse en Lightdash, consumiendo los modelos dbt del subproyecto ubicado en `TA/TA01`.
-
-### 2. KPI que quedan expuestos para Lightdash
+### 1. KPI expuestos para Lightdash
 
 - Ferias ejecutadas
 - Visitantes
@@ -395,7 +391,7 @@ El dashboard HTML/JS local fue descontinuado para evitar una doble implementacio
 - Mix de vinos
 - Estado del inventario
 
-### 3. Flujo recomendado
+### 2. Flujo de implementacion del tablero
 
 1. Crear el schema raw en Neon/PostgreSQL con `sql/schema_postgres.sql`.
 2. Migrar los datos desde SQLite con `scripts/migrate_to_neon.py`.
@@ -410,21 +406,9 @@ El dashboard HTML/JS local fue descontinuado para evitar una doble implementacio
 ### Evidencia de base de datos
 
 - `anexos/evidencia_bd.html`
-- `anexos/evidencia_bd.png`
+- `anexos/db_evidence.js`
 
-### Evidencia historica del dashboard anterior
-
-- `anexos/dashboard.png`
-
-Nota: `dashboard.html` y `dashboard_data.js` quedan solo como archivos descontinuados para explicitar la migracion hacia Lightdash; ya no representan el dashboard oficial del proyecto.
-
-### Componentes obsoletos
-
-- `dashboard.html`
-- `dashboard_data.js`
-- `anexos/dashboard.png`
-
-Estos componentes se mantienen solo como respaldo historico del prototipo anterior.
+Estos anexos muestran evidencia de la base de datos de referencia utilizada en el desarrollo del caso.
 
 ### Exportaciones para analisis
 
