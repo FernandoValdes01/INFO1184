@@ -1,0 +1,196 @@
+version: 2
+
+models:
+  - name: stg_region
+    description: "Regiones base del caso TA01."
+    columns:
+      - name: region_id
+        description: "Identificador unico de region."
+        tests:
+          - not_null
+          - unique
+      - name: nombre
+        description: "Nombre de la region."
+
+  - name: stg_ciudad
+    description: "Ciudades donde se realizan ferias o se registran origenes de visitantes."
+    columns:
+      - name: ciudad_id
+        description: "Identificador unico de ciudad."
+        tests:
+          - not_null
+          - unique
+      - name: region_id
+        description: "Region a la que pertenece la ciudad."
+        tests:
+          - not_null
+      - name: nombre
+        description: "Nombre de la ciudad."
+
+  - name: stg_segmento_publico
+    description: "Segmentos comerciales del publico objetivo."
+    columns:
+      - name: segmento_id
+        description: "Identificador unico de segmento."
+        tests:
+          - not_null
+          - unique
+      - name: nombre
+        description: "Nombre del segmento."
+
+  - name: stg_vino
+    description: "Catalogo de vinos comercializados en el caso."
+    columns:
+      - name: vino_id
+        description: "Identificador unico del vino."
+        tests:
+          - not_null
+          - unique
+      - name: nombre
+        description: "Nombre comercial del vino."
+      - name: precio_lista
+        description: "Precio de lista del vino."
+
+  - name: stg_alianza
+    description: "Catalogo de alianzas estrategicas."
+    columns:
+      - name: alianza_id
+        description: "Identificador unico de alianza."
+        tests:
+          - not_null
+          - unique
+      - name: nombre
+        description: "Nombre de la alianza."
+
+  - name: stg_feria
+    description: "Ferias comerciales del caso con fechas normalizadas."
+    columns:
+      - name: feria_id
+        description: "Identificador unico de feria."
+        tests:
+          - not_null
+          - unique
+      - name: ciudad_id
+        description: "Ciudad donde ocurre la feria."
+        tests:
+          - not_null
+      - name: fecha_inicio
+        description: "Fecha de inicio de la feria."
+      - name: fecha_fin
+        description: "Fecha de termino de la feria."
+
+  - name: stg_feria_alianza
+    description: "Relacion entre ferias y alianzas activadas."
+    columns:
+      - name: feria_id
+        description: "Identificador de feria."
+        tests:
+          - not_null
+      - name: alianza_id
+        description: "Identificador de alianza."
+        tests:
+          - not_null
+
+  - name: stg_stand
+    description: "Stands operativos por feria."
+    columns:
+      - name: stand_id
+        description: "Identificador unico del stand."
+        tests:
+          - not_null
+          - unique
+      - name: feria_id
+        description: "Feria a la que pertenece el stand."
+        tests:
+          - not_null
+      - name: codigo
+        description: "Codigo visible del stand."
+
+  - name: stg_inventario_feria
+    description: "Inventario planificado y ejecutado por feria y vino."
+    columns:
+      - name: inventario_id
+        description: "Identificador unico de inventario."
+        tests:
+          - not_null
+          - unique
+      - name: feria_id
+        description: "Feria del inventario."
+        tests:
+          - not_null
+      - name: vino_id
+        description: "Vino asociado al inventario."
+        tests:
+          - not_null
+
+  - name: stg_visitante
+    description: "Visitantes registrados con fecha normalizada y flag booleano de contacto."
+    columns:
+      - name: visitante_id
+        description: "Identificador unico de visitante."
+        tests:
+          - not_null
+          - unique
+      - name: feria_id
+        description: "Feria visitada."
+        tests:
+          - not_null
+      - name: segmento_id
+        description: "Segmento al que pertenece el visitante."
+        tests:
+          - not_null
+      - name: acepta_contacto
+        description: "Indica si el visitante acepto seguimiento comercial."
+
+  - name: stg_degustacion
+    description: "Eventos de degustacion asociados a visitantes, vinos y stands."
+    columns:
+      - name: degustacion_id
+        description: "Identificador unico de degustacion."
+        tests:
+          - not_null
+          - unique
+      - name: visitante_id
+        description: "Visitante asociado."
+        tests:
+          - not_null
+      - name: vino_id
+        description: "Vino degustado."
+        tests:
+          - not_null
+
+  - name: stg_venta
+    description: "Cabecera de ventas con timestamp normalizado."
+    columns:
+      - name: venta_id
+        description: "Identificador unico de venta."
+        tests:
+          - not_null
+          - unique
+      - name: feria_id
+        description: "Feria donde se concreto la venta."
+        tests:
+          - not_null
+      - name: stand_id
+        description: "Stand donde se concreto la venta."
+        tests:
+          - not_null
+      - name: monto_neto
+        description: "Monto neto de la venta."
+
+  - name: stg_detalle_venta
+    description: "Detalle por item vendido."
+    columns:
+      - name: detalle_venta_id
+        description: "Identificador unico del detalle."
+        tests:
+          - not_null
+          - unique
+      - name: venta_id
+        description: "Venta asociada."
+        tests:
+          - not_null
+      - name: vino_id
+        description: "Vino vendido."
+        tests:
+          - not_null

@@ -1,5 +1,11 @@
 # Tarea 01 - INFO1184
 
+## Proposito del documento
+
+Este archivo corresponde a la documentacion academica de la `TA01`. Su funcion es responder lo solicitado en la tarea mediante explicaciones teoricas, analisis del caso, modelado conceptual y justificacion de la propuesta.
+
+No debe leerse como manual tecnico de ejecucion. La guia operativa del proyecto se encuentra en `README_dbt.md`.
+
 ## Caso
 
 Se propone una empresa vitivinicola chilena que producira y comercializara dos vinos:
@@ -132,7 +138,7 @@ Se proponen cuatro esquemas logicos de datos:
 | Maestro | `region`, `ciudad`, `segmento_publico`, `vino`, `alianza` | Contiene catalogos estables del negocio y evita duplicidad en ubicaciones, publicos, productos y socios. |
 | Operacional de ferias | `feria`, `feria_alianza`, `stand`, `inventario_feria` | Modela la ejecucion del evento: donde se realiza, con quien se apoya y que recursos se asignan. |
 | Interaccion comercial | `visitante`, `degustacion`, `venta`, `detalle_venta` | Registra la experiencia del visitante y la conversion comercial en feria. |
-| Analitico | Consultas en `kpi_queries.sql`, exportaciones CSV y `dashboard_data.js` | Consolida KPI para tablero y analisis de desempeno. |
+| Analitico | Consultas en `kpi_queries.sql`, exportaciones CSV y modelos dbt `mart_*` | Consolida KPI para Lightdash y analisis de desempeno. |
 
 Adicionalmente, el diccionario relacional queda asi:
 
@@ -285,42 +291,92 @@ erDiagram
 
 ## Parte III - Evaluacion y esquema relacional
 
-### 1. Base de datos creada
+En esta parte se explica la implementacion desde una perspectiva academica y justificativa. Es decir, se describe que se hizo y por que se hizo. Los pasos operativos detallados para ejecutar la solucion se documentan por separado en `README_dbt.md`.
 
-Se implemento una base `SQLite` llamada `ta01_feria_vinos.db`, generada por el script `generate_db.py` a partir del archivo `schema.sql`.
+### 1. Base de datos de referencia y base objetivo
+
+La implementacion original del caso se prototipo en `SQLite` mediante `ta01_feria_vinos.db`, generada por `generate_db.py` a partir de `schema.sql`. Esa base se conserva como referencia local y academica.
+
+Sin embargo, el subproyecto fue actualizado para que la implementacion objetivo de analitica quede orientada a:
+
+- Neon/PostgreSQL como warehouse final
+- dbt como capa de modelado y transformacion
+- Lightdash como capa oficial de dashboard
 
 ### 2. Modelo fisico de la base de datos
 
-El modelo fisico esta implementado en `schema.sql` y usa:
+El modelo fisico de referencia sigue definido en `schema.sql` y contiene:
 
-- Claves primarias en todas las tablas.
-- Claves foraneas para integridad referencial.
-- Restricciones `UNIQUE` para evitar duplicidad.
-- Restricciones `CHECK` para validar dominios de datos.
-- Indices para mejorar consultas de ferias, visitantes, ventas e inventario.
+- Claves primarias en todas las tablas
+- Claves foraneas para integridad referencial
+- Restricciones `UNIQUE` para evitar duplicidad
+- Restricciones `CHECK` para validar dominios de datos
+- Indices para consultas de ferias, visitantes, ventas e inventario
 
-### 3. Poblacion de la base de datos
+Para la migracion conceptual a PostgreSQL, se asume que las tablas operacionales base cargadas en el warehouse conservaran la misma estructura logica y los mismos nombres de tabla definidos en `schema.sql`.
 
-La base queda poblada automaticamente con mas de 150 registros distribuidos entre maestros, ferias, visitantes, degustaciones, ventas y detalle de ventas.
+### 3. Poblacion de la base de datos de referencia
 
-Conteo total esperado al ejecutar el script:
+La base SQLite de referencia queda poblada automaticamente con mas de 150 registros distribuidos entre maestros, ferias, visitantes, degustaciones, ventas y detalle de ventas.
+
+Conteo esperado al ejecutar `python3 generate_db.py`:
 
 - 13 tablas pobladas
 - 345 registros totales
 
-### 4. Relaciones propuestas en la parte II
+### 4. Migracion real a Neon / PostgreSQL
 
-Las relaciones conceptuales fueron materializadas en la implementacion mediante:
+La migracion real del prototipo local hacia la base definitiva se separo en capas:
 
-- `FOREIGN KEY` en `schema.sql`
-- Datos consistentes generados por `generate_db.py`
-- Consultas de control en `kpi_queries.sql`
+- Fuente local historica: `ta01_feria_vinos.db`
+- Creacion del esquema raw: `sql/schema_postgres.sql`
+- Carga de datos: `scripts/migrate_to_neon.py`
+- Validacion: `scripts/validate_neon.py` y `sql/validate_neon_data.sql`
+- Transformacion: dbt en `models/staging/` y `models/marts/`
+- Visualizacion final: Lightdash
 
-## Parte IV - Visualizacion de datos
+Esta separacion evita mezclar carga, transformacion y visualizacion en un solo archivo.
 
-Se construyo un tablero local en `dashboard.html` que consume datos resumidos desde `dashboard_data.js`, archivo generado a partir de la base SQLite.
+Desde la perspectiva de la tarea, esta decision mejora la claridad del trabajo porque permite distinguir entre:
 
-### KPI mostrados
+- la solucion conceptual pedida en el analisis
+- la implementacion tecnica usada para materializarla
+- la herramienta final elegida para explotar los datos
+
+### 5. Alineacion con dbt
+
+Se creo un proyecto dbt valido dentro de `TA/TA01` con los siguientes componentes:
+
+- `dbt_project.yml`
+- `packages.yml`
+- `models/staging/`
+- `models/marts/`
+- `seeds/`
+- `macros/`
+- `tests/`
+
+Las tablas base del caso quedaron declaradas como `sources` en `models/staging/sources.yml`, usando `schema: "{{ target.schema }}"` para no fijar esquemas rigidos ni credenciales en el repositorio.
+
+Los modelos `stg_*` representan una capa de staging minima sobre las tablas operacionales. Los `marts` creados reutilizan la logica ya clara en `kpi_queries.sql` para dejar listas las vistas analiticas mas utiles para Lightdash:
+
+- `mart_kpi_resumen`
+- `mart_ventas_por_feria`
+- `mart_ingresos_por_segmento`
+- `mart_mix_vinos`
+- `mart_estado_inventario`
+
+### 6. Relaciones propuestas en la parte II
+
+Las relaciones conceptuales se reflejan ahora en dos niveles:
+
+- En la base de referencia SQLite, mediante `FOREIGN KEY` en `schema.sql`
+- En la capa analitica dbt, mediante `sources`, `refs`, documentacion de columnas y tests basicos en `models/staging/staging.yml` y `models/marts/marts.yml`
+
+## Parte IV - Visualizacion oficial del proyecto
+
+La visualizacion del `TA01` se implementa en `Lightdash`, consumiendo los modelos analiticos construidos en `dbt`. De este modo, el tablero de mando del proyecto queda alineado con la arquitectura oficial del trabajo: `SQLite -> PostgreSQL/Neon -> dbt -> Lightdash`.
+
+### 1. KPI expuestos para Lightdash
 
 - Ferias ejecutadas
 - Visitantes
@@ -330,23 +386,29 @@ Se construyo un tablero local en `dashboard.html` que consume datos resumidos de
 - Conversion de visitantes
 - Ticket promedio
 - Opt-in de contacto
+- Ingresos por feria
+- Ingresos por segmento
+- Mix de vinos
+- Estado del inventario
 
-### Uso del tablero
+### 2. Flujo de implementacion del tablero
 
-1. Ejecutar `python3 generate_db.py`
-2. Abrir `dashboard.html` en el navegador
+1. Crear el schema raw en Neon/PostgreSQL con `sql/schema_postgres.sql`.
+2. Migrar los datos desde SQLite con `scripts/migrate_to_neon.py`.
+3. Validar el destino con `scripts/validate_neon.py`.
+4. Cargar las tablas operacionales del caso en el mismo schema configurado para dbt.
+5. Configurar Lightdash para usar `Project directory path = /TA/TA01`.
+6. Configurar el warehouse desde la UI de Lightdash, sin versionar credenciales en el repo.
+7. Ejecutar dbt y construir el dashboard oficial sobre los modelos `mart_*`.
 
 ## Anexos
 
 ### Evidencia de base de datos
 
 - `anexos/evidencia_bd.html`
-- `anexos/evidencia_bd.png`
+- `anexos/db_evidence.js`
 
-### Evidencia del tablero
-
-- `dashboard.html`
-- `anexos/dashboard.png`
+Estos anexos muestran evidencia de la base de datos de referencia utilizada en el desarrollo del caso.
 
 ### Exportaciones para analisis
 

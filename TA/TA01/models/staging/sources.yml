@@ -1,0 +1,33 @@
+version: 2
+
+sources:
+  - name: ta01_raw
+    description: "Tablas operacionales raw del caso TA01 cargadas en Neon/PostgreSQL."
+    schema: "{{ target.schema }}"
+    tables:
+      - name: alianza
+        description: "Catalogo de alianzas estrategicas."
+      - name: ciudad
+        description: "Catalogo de ciudades."
+      - name: degustacion
+        description: "Eventos de degustacion por visitante."
+      - name: detalle_venta
+        description: "Lineas de producto por venta."
+      - name: feria
+        description: "Ferias y eventos comerciales."
+      - name: feria_alianza
+        description: "Relacion entre ferias y alianzas."
+      - name: inventario_feria
+        description: "Inventario por feria y vino."
+      - name: region
+        description: "Catalogo de regiones."
+      - name: segmento_publico
+        description: "Segmentos de publico objetivo."
+      - name: stand
+        description: "Stands operativos dentro de cada feria."
+      - name: venta
+        description: "Cabecera de ventas realizadas en feria."
+      - name: vino
+        description: "Portafolio de vinos del caso."
+      - name: visitante
+        description: "Visitantes registrados en feria."

@@ -1,5 +1,13 @@
 from __future__ import annotations
 
+"""
+Utilidad local e historica para regenerar el prototipo SQLite de TA01.
+
+Este script no representa el flujo objetivo de analitica del subproyecto.
+La implementacion oficial del proyecto se apoya en PostgreSQL + dbt + Lightdash y las
+credenciales del warehouse no se versionan en el repositorio.
+"""
+
 import csv
 import json
 import sqlite3
@@ -11,7 +19,6 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 DB_PATH = ROOT / "ta01_feria_vinos.db"
 SCHEMA_PATH = ROOT / "schema.sql"
-DASHBOARD_JS_PATH = ROOT / "dashboard_data.js"
 EVIDENCE_JS_PATH = ROOT / "anexos" / "db_evidence.js"
 EXPORTS_DIR = ROOT / "exports"
 
@@ -330,32 +337,6 @@ def main() -> None:
 
     conn.commit()
 
-    kpis = conn.execute(
-        """
-        WITH compras_visitante AS (
-            SELECT DISTINCT visitante_id
-            FROM venta
-            WHERE visitante_id IS NOT NULL
-        )
-        SELECT
-            (SELECT COUNT(*) FROM feria) AS total_ferias,
-            (SELECT COUNT(*) FROM visitante) AS total_visitantes,
-            (SELECT COUNT(*) FROM degustacion) AS total_degustaciones,
-            (SELECT COUNT(*) FROM venta) AS total_ventas,
-            (SELECT SUM(cantidad) FROM detalle_venta) AS botellas_vendidas,
-            ROUND((SELECT SUM(monto_neto) FROM venta), 2) AS ingresos_totales,
-            ROUND((SELECT AVG(monto_neto) FROM venta), 2) AS ticket_promedio,
-            ROUND(
-                100.0 * (SELECT COUNT(*) FROM compras_visitante) / (SELECT COUNT(*) FROM visitante),
-                2
-            ) AS tasa_conversion,
-            ROUND(
-                100.0 * (SELECT SUM(acepta_contacto) FROM visitante) / (SELECT COUNT(*) FROM visitante),
-                2
-            ) AS tasa_optin
-        """
-    ).fetchone()
-
     fair_summary = conn.execute(
         """
         WITH visitor_cte AS (
@@ -418,34 +399,6 @@ def main() -> None:
         ORDER BY botellas DESC
         """
     ).fetchall()
-
-    funnel_summary = conn.execute(
-        """
-        WITH compradores AS (
-            SELECT DISTINCT visitante_id
-            FROM venta
-            WHERE visitante_id IS NOT NULL
-        )
-        SELECT
-            (SELECT COUNT(*) FROM visitante) AS visitantes,
-            (SELECT COUNT(*) FROM degustacion) AS degustaciones,
-            (SELECT COUNT(*) FROM compradores) AS compradores,
-            ROUND(
-                100.0 * (SELECT COUNT(*) FROM compradores) / (SELECT COUNT(*) FROM degustacion),
-                2
-            ) AS conversion_desde_degustacion
-        """
-    ).fetchone()
-
-    dashboard_payload = {
-        "generated_at": datetime.now().isoformat(timespec="seconds"),
-        "kpis": dict(kpis),
-        "ferias": [dict(row) for row in fair_summary],
-        "segmentos": [dict(row) for row in segment_summary],
-        "vinos": [dict(row) for row in wine_summary],
-        "embudo": dict(funnel_summary),
-    }
-    write_js_assignment(DASHBOARD_JS_PATH, "dashboardData", dashboard_payload)
 
     table_counts = conn.execute(
         """
