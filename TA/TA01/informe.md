@@ -21,9 +21,13 @@ La empresa busca cobertura nacional, crecimiento rentable y mejor desempeno en e
 
 Ser una vitivinicola chilena reconocida a nivel nacional por ofrecer experiencias de vino memorables, con un portafolio corto pero diferenciado, capaz de crecer en ventas mediante ferias, alianzas comerciales y una operacion consistente en todo Chile.
 
+Para alcanzar esa vision, la empresa necesita un sistema de inteligencia de negocios que permita medir el desempeno comercial en cada feria, evaluar la efectividad de las alianzas y orientar las decisiones de expansion con datos concretos en lugar de intuicion.
+
 ### 2. Foco de la empresa
 
 El foco del negocio es posicionar dos vinos de alta rotacion y margen saludable en el mercado chileno, usando ferias como canal de exhibicion, degustacion, captura de leads y venta directa. La alianza estrategica permite amplificar la llegada a segmentos como turistas, restaurantes, hoteles y tiendas especializadas.
+
+Desde la perspectiva de datos, este foco se traduce en medir la conversion de visitantes a compradores, la rentabilidad por feria y por vino, y la efectividad de cada alianza. Estos indicadores permiten decidir en que ferias participar, como distribuir el inventario y donde concentrar los esfuerzos comerciales.
 
 ### 3. Cinco procesos estrategicos por perspectiva
 
