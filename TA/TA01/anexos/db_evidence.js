@@ -1,6 +1,6 @@
 window.dbEvidence = {
-  "generated_at": "2026-03-25T17:59:18",
-  "total_records": 345,
+  "generated_at": "2026-03-28T22:51:32",
+  "total_records": 458,
   "table_counts": [
     {
       "tabla": "region",
@@ -40,19 +40,19 @@ window.dbEvidence = {
     },
     {
       "tabla": "visitante",
-      "registros": 84
+      "registros": 114
     },
     {
       "tabla": "degustacion",
-      "registros": 84
+      "registros": 114
     },
     {
       "tabla": "venta",
-      "registros": 48
+      "registros": 66
     },
     {
       "tabla": "detalle_venta",
-      "registros": 60
+      "registros": 95
     }
   ],
   "schema_excerpt": [
@@ -75,110 +75,110 @@ window.dbEvidence = {
   ],
   "fair_summary": [
     {
-      "feria": "ExpoVino Santiago 2026",
-      "ciudad": "Santiago",
-      "visitantes": 14,
-      "ventas": 8,
-      "ingresos": 296654.0,
-      "botellas": 36
+      "feria": "Festival del Vino Talca 2026",
+      "ciudad": "Talca",
+      "visitantes": 26,
+      "ventas": 16,
+      "ingresos": 684647.9,
+      "botellas": 74
     },
     {
       "feria": "Muestra Enologica Concepcion 2026",
       "ciudad": "Concepcion",
-      "visitantes": 14,
-      "ventas": 8,
-      "ingresos": 296654.0,
-      "botellas": 36
+      "visitantes": 24,
+      "ventas": 14,
+      "ingresos": 569395.2,
+      "botellas": 64
     },
     {
-      "feria": "Festival del Vino Talca 2026",
-      "ciudad": "Talca",
-      "visitantes": 14,
-      "ventas": 8,
-      "ingresos": 296654.0,
-      "botellas": 36
+      "feria": "ExpoVino Santiago 2026",
+      "ciudad": "Santiago",
+      "visitantes": 20,
+      "ventas": 12,
+      "ingresos": 494777.92,
+      "botellas": 55
     },
     {
       "feria": "Feria del Pacifico 2026",
       "ciudad": "Vina del Mar",
-      "visitantes": 14,
-      "ventas": 8,
-      "ingresos": 293980.0,
-      "botellas": 36
+      "visitantes": 16,
+      "ventas": 9,
+      "ingresos": 347921.68,
+      "botellas": 41
     },
     {
       "feria": "Feria del Valle Curico 2026",
       "ciudad": "Curico",
-      "visitantes": 14,
+      "visitantes": 15,
       "ventas": 8,
-      "ingresos": 293980.0,
-      "botellas": 36
+      "ingresos": 290279.92,
+      "botellas": 37
     },
     {
       "feria": "Expo Sabores Temuco 2026",
       "ciudad": "Temuco",
-      "visitantes": 14,
-      "ventas": 8,
-      "ingresos": 293980.0,
-      "botellas": 36
+      "visitantes": 13,
+      "ventas": 7,
+      "ingresos": 251587.32,
+      "botellas": 34
     }
   ],
   "sample_sales": [
     {
       "venta_id": 1,
       "feria": "ExpoVino Santiago 2026",
-      "fecha_hora": "2026-04-18T12:00",
+      "fecha_hora": "2026-04-18T11:07",
       "medio_pago": "Tarjeta",
-      "monto_neto": 46552
+      "monto_neto": 69652.8
     },
     {
       "venta_id": 2,
       "feria": "ExpoVino Santiago 2026",
-      "fecha_hora": "2026-04-19T13:00",
+      "fecha_hora": "2026-04-19T12:18",
       "medio_pago": "Efectivo",
-      "monto_neto": 26700
+      "monto_neto": 34531.84
     },
     {
       "venta_id": 3,
       "feria": "ExpoVino Santiago 2026",
-      "fecha_hora": "2026-04-20T14:00",
+      "fecha_hora": "2026-04-20T13:29",
       "medio_pago": "Transferencia",
-      "monto_neto": 32800
+      "monto_neto": 28336
     },
     {
       "venta_id": 4,
       "feria": "ExpoVino Santiago 2026",
-      "fecha_hora": "2026-04-18T15:00",
+      "fecha_hora": "2026-04-18T14:40",
       "medio_pago": "Tarjeta",
-      "monto_neto": 42275
+      "monto_neto": 19936
     },
     {
       "venta_id": 5,
       "feria": "ExpoVino Santiago 2026",
-      "fecha_hora": "2026-04-19T16:00",
+      "fecha_hora": "2026-04-19T15:51",
       "medio_pago": "Efectivo",
-      "monto_neto": 46552
+      "monto_neto": 29904
     },
     {
       "venta_id": 6,
       "feria": "ExpoVino Santiago 2026",
-      "fecha_hora": "2026-04-20T17:00",
+      "fecha_hora": "2026-04-20T16:02",
       "medio_pago": "Transferencia",
-      "monto_neto": 26700
+      "monto_neto": 75801.6
     },
     {
       "venta_id": 7,
       "feria": "ExpoVino Santiago 2026",
-      "fecha_hora": "2026-04-18T18:00",
+      "fecha_hora": "2026-04-18T17:13",
       "medio_pago": "Tarjeta",
-      "monto_neto": 32800
+      "monto_neto": 29904
     },
     {
       "venta_id": 8,
       "feria": "ExpoVino Santiago 2026",
-      "fecha_hora": "2026-04-19T19:00",
+      "fecha_hora": "2026-04-19T18:24",
       "medio_pago": "Efectivo",
-      "monto_neto": 42275
+      "monto_neto": 29120
     }
   ]
 };

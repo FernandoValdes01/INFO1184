@@ -23,6 +23,58 @@ EVIDENCE_JS_PATH = ROOT / "anexos" / "db_evidence.js"
 EXPORTS_DIR = ROOT / "exports"
 
 
+FAIR_PROFILES = {
+    1: {
+        "visitor_count": 20,
+        "sales_count": 12,
+        "tinto_bias": 0.65,
+        "premium_factor": 1.12,
+        "contact_rate": 0.78,
+        "inventory_multiplier": 1.18,
+    },
+    2: {
+        "visitor_count": 16,
+        "sales_count": 9,
+        "tinto_bias": 0.45,
+        "premium_factor": 1.06,
+        "contact_rate": 0.69,
+        "inventory_multiplier": 1.04,
+    },
+    3: {
+        "visitor_count": 24,
+        "sales_count": 14,
+        "tinto_bias": 0.62,
+        "premium_factor": 1.10,
+        "contact_rate": 0.74,
+        "inventory_multiplier": 1.22,
+    },
+    4: {
+        "visitor_count": 15,
+        "sales_count": 8,
+        "tinto_bias": 0.40,
+        "premium_factor": 0.98,
+        "contact_rate": 0.63,
+        "inventory_multiplier": 0.96,
+    },
+    5: {
+        "visitor_count": 26,
+        "sales_count": 16,
+        "tinto_bias": 0.70,
+        "premium_factor": 1.15,
+        "contact_rate": 0.81,
+        "inventory_multiplier": 1.28,
+    },
+    6: {
+        "visitor_count": 13,
+        "sales_count": 7,
+        "tinto_bias": 0.35,
+        "premium_factor": 0.93,
+        "contact_rate": 0.58,
+        "inventory_multiplier": 0.88,
+    },
+}
+
+
 def daterange(start_iso: str, end_iso: str) -> list[date]:
     start = date.fromisoformat(start_iso)
     end = date.fromisoformat(end_iso)
@@ -140,10 +192,12 @@ def main() -> None:
     inventarios = []
     inventario_id = 1
     for feria_id, *_ in ferias:
+        profile = FAIR_PROFILES[feria_id]
         for vino_id, _, estilo, *_rest in vinos:
-            base_plan = 185 if estilo == "Tinto" else 170
-            planificadas = base_plan + feria_id * 12
-            recibidas = planificadas - 8
+            base_plan = 188 if estilo == "Tinto" else 168
+            style_factor = 1.08 if estilo == "Tinto" else 0.94
+            planificadas = round(base_plan * profile["inventory_multiplier"] * style_factor)
+            recibidas = max(planificadas - (6 + feria_id % 4), 0)
             inventarios.append((inventario_id, feria_id, vino_id, planificadas, recibidas, 0, recibidas))
             inventario_id += 1
     conn.executemany(
@@ -176,17 +230,26 @@ def main() -> None:
 
     for feria in ferias:
         feria_id, _, _, _, fecha_inicio, fecha_fin, *_ = feria
+        profile = FAIR_PROFILES[feria_id]
         fechas = daterange(fecha_inicio, fecha_fin)
         tasting_stand, sales_stand = fair_stands[feria_id]
 
-        for idx in range(14):
-            segmento_id = ((feria_id + idx - 1) % len(segmentos)) + 1
+        for idx in range(profile["visitor_count"]):
+            if idx % 5 == 0:
+                segmento_id = 2 if feria_id in (2, 4, 6) else 1
+            elif idx % 5 == 1:
+                segmento_id = 3 if feria_id in (1, 3, 5) else 5
+            elif idx % 5 == 2:
+                segmento_id = 6 if profile["contact_rate"] >= 0.75 else 4
+            else:
+                segmento_id = ((feria_id + idx - 1) % len(segmentos)) + 1
             ciudad_origen_id = city_ids[(feria_id * 3 + idx) % len(city_ids)]
             fecha_visita = fechas[idx % len(fechas)].isoformat()
-            acepta_contacto = 0 if idx % 4 == 0 else 1
-            interes_vino_id = 1 if segmento_id in (1, 3, 5, 6) else 2
-            if idx % 5 == 0:
-                interes_vino_id = 2 if interes_vino_id == 1 else 1
+            threshold = int(round(profile["contact_rate"] * 10))
+            acepta_contacto = 1 if (idx * 3 + feria_id) % 10 < threshold else 0
+            interes_vino_id = 1 if ((idx + feria_id) % 10) < int(profile["tinto_bias"] * 10) else 2
+            if segmento_id in (2, 4) and idx % 3 == 0:
+                interes_vino_id = 2
 
             visitantes.append(
                 (
@@ -201,8 +264,8 @@ def main() -> None:
             )
             visitors_by_fair[feria_id].append(visitante_id)
 
-            puntaje = 3 + ((idx + feria_id) % 3)
-            intencion = 2 + ((idx * 2 + feria_id) % 4)
+            puntaje = min(5, 3 + ((idx + feria_id) % 3) + (1 if profile["premium_factor"] > 1.08 and idx % 6 == 0 else 0))
+            intencion = min(5, 2 + ((idx * 2 + feria_id) % 4) + (1 if acepta_contacto else 0))
             degustaciones.append(
                 (
                     degustacion_id,
@@ -246,33 +309,42 @@ def main() -> None:
 
     for feria in ferias:
         feria_id, _, _, _, fecha_inicio, fecha_fin, *_ = feria
+        profile = FAIR_PROFILES[feria_id]
         fechas = daterange(fecha_inicio, fecha_fin)
         sales_stand = fair_stands[feria_id][1]
         linked_visitors = visitors_by_fair[feria_id]
 
-        for sale_idx in range(8):
-            visitor_ref = linked_visitors[sale_idx] if sale_idx % 3 != 0 else None
+        for sale_idx in range(profile["sales_count"]):
+            visitor_ref = linked_visitors[(sale_idx * 2) % len(linked_visitors)] if sale_idx % 4 != 0 else None
             sale_date = fechas[sale_idx % len(fechas)]
             sale_timestamp = datetime.combine(
                 sale_date, datetime.min.time()
-            ) + timedelta(hours=12 + sale_idx)
+            ) + timedelta(hours=11 + (sale_idx % 9), minutes=(sale_idx * 11 + feria_id * 7) % 60)
 
-            primary_wine = 1 if (sale_idx + feria_id) % 2 == 0 else 2
+            primary_wine = 1 if ((sale_idx * 3 + feria_id) % 10) < int(profile["tinto_bias"] * 10) else 2
             secondary_wine = 2 if primary_wine == 1 else 1
 
             items: list[tuple[int, int]] = []
-            if sale_idx % 4 == 0:
-                items.append((primary_wine, 4 + (sale_idx % 2)))
-                items.append((secondary_wine, 2))
+            if sale_idx % 5 == 0:
+                items.append((primary_wine, 5 + (sale_idx % 3)))
+                items.append((secondary_wine, 2 + ((feria_id + sale_idx) % 2)))
+            elif sale_idx % 5 == 1:
+                items.append((secondary_wine, 3 + (sale_idx % 2)))
+            elif sale_idx % 5 == 2:
+                items.append((primary_wine, 2))
+                items.append((secondary_wine, 1))
             else:
-                items.append((primary_wine, 2 + (sale_idx % 4)))
+                items.append((primary_wine, 2 + ((sale_idx + feria_id) % 4)))
 
             gross_amount = 0.0
             for wine_id, quantity in items:
-                gross_amount += wine_price[wine_id] * quantity
+                unit_price = round(wine_price[wine_id] * profile["premium_factor"], 2)
+                gross_amount += unit_price * quantity
 
             total_qty = sum(quantity for _, quantity in items)
-            discount_rate = 0.08 if len(items) > 1 else (0.05 if total_qty >= 5 else 0.0)
+            discount_rate = 0.10 if len(items) > 1 and total_qty >= 6 else (0.06 if total_qty >= 4 else 0.0)
+            if feria_id in (5, 6) and sale_idx % 3 == 0:
+                discount_rate += 0.02
             discount_amount = round(gross_amount * discount_rate, 2)
             net_amount = round(gross_amount - discount_amount, 2)
 
@@ -291,14 +363,15 @@ def main() -> None:
             )
 
             for wine_id, quantity in items:
-                subtotal = round(wine_price[wine_id] * quantity, 2)
+                unit_price = round(wine_price[wine_id] * profile["premium_factor"], 2)
+                subtotal = round(unit_price * quantity, 2)
                 detalles.append(
                     (
                         detalle_id,
                         venta_id,
                         wine_id,
                         quantity,
-                        wine_price[wine_id],
+                        unit_price,
                         subtotal,
                     )
                 )
