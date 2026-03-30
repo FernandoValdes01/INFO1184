@@ -1,0 +1,115 @@
+Debes partir situando al pingüino de Humboldt como objeto de estudio:
+
+Especie marina que habita la corriente de Humboldt (Chile–Perú)
+Vive en costas rocosas e islas
+Estado de conservación: Vulnerable
+Alta dependencia del ecosistema marino
+
+Idea clave que debes transmitir:
+No estás hablando solo de un animal, sino de un indicador del estado del ecosistema costero.
+
+2. Problema (Comprensión del negocio)
+
+Aquí defines el “para qué” del análisis.
+
+La especie enfrenta múltiples amenazas:
+pesca (captura incidental)
+basura marina (plásticos, redes)
+turismo no regulado
+cambio climático (El Niño)
+Estas amenazas afectan:
+reproducción
+disponibilidad de alimento
+supervivencia
+
+Pregunta central:
+
+¿Qué factores explican el estado de conservación del pingüino de Humboldt?
+
+Objetivo:
+Analizar variables ambientales y humanas para entender su impacto en la especie.
+
+3. Biología de la especie (base para el análisis)
+
+Aquí justificas las variables que luego usarás como “datos”.
+
+Reproducción
+Nidificación en cuevas o guano
+~2 huevos por nidada
+Ambos padres participan
+Dependiente de condiciones ambientales
+Alimentación
+Peces (anchoveta, sardina)
+Cefalópodos y crustáceos
+Dependiente de la disponibilidad marina
+Salud
+Parásitos
+Enfermedades como malaria aviar (baja prevalencia)
+Menor disponibilidad de datos
+Hábitat
+Colonias distribuidas en costa Chile–Perú
+Alta fidelidad a sitios de nidificación
+4. Comprensión de los datos
+
+Aquí debes mostrar que piensas como analista.
+
+Tipos de datos que usarías:
+
+Colonias (ubicación, región)
+Nidos activos (indicador clave)
+Dieta (tipo de presa)
+Amenazas (pesca, basura, turismo)
+Variables ambientales (ej: El Niño)
+
+Idea clave:
+Los datos se organizan en 5 dimensiones:
+
+hábitat
+reproducción
+alimentación
+salud
+amenazas
+5. Preparación de los datos
+
+Aquí muestras criterio técnico.
+
+Estandarizar:
+nombres de colonias
+regiones
+fechas
+Construir dataset tipo:
+colonia + año
+
+Variables importantes:
+
+nidos activos
+presencia de amenazas
+tipo de dieta
+condiciones ambientales
+
+Transformaciones clave:
+
+agrupar amenazas
+crear indicadores (ej: presión humana)
+manejar datos faltantes (especialmente salud)
+6. Análisis esperado (aunque no te lo pidan explícito)
+
+Esto eleva mucho la presentación.
+
+Relación entre:
+alimento ↔ reproducción
+amenazas ↔ éxito reproductivo
+Identificar:
+colonias más vulnerables
+factores más críticos
+7. Conclusión (muy importante)
+
+Aquí debes cerrar con una idea fuerte:
+
+El pingüino de Humboldt es una especie cuya supervivencia depende del equilibrio entre factores naturales y presión humana; el análisis de datos permite identificar riesgos y orientar estrategias de conservación.
+
+Y rematas con algo clave:
+
+La basura marina y la pesca son amenazas críticas
+La reproducción es el indicador más importante
+La toma de decisiones debe basarse en datos

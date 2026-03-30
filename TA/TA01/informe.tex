@@ -1,0 +1,430 @@
+\documentclass[10pt,a4paper]{article}
+
+% --- Margenes segun rubrica: 1.5 sup, 1.5 izq, 1.5 der, 2 inf ---
+\usepackage[top=1.5cm, bottom=2cm, left=1.5cm, right=1.5cm]{geometry}
+
+% --- Paquetes ---
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{setspace}       % interlineado
+\usepackage{booktabs}       % tablas
+\usepackage{longtable}      % tablas largas
+\usepackage{array}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{hyperref}
+\usepackage{parskip}        % separacion entre parrafos sin sangria
+\usepackage{enumitem}
+
+% --- Interlineado simple ---
+\singlespacing
+
+% --- Sin sangria ---
+\setlength{\parindent}{0pt}
+
+% --- Tablas mas compactas ---
+\renewcommand{\arraystretch}{1.3}
+
+\begin{document}
+
+% ============================================================
+% 1) IDENTIFICACION (parte superior, no ocupa hoja completa)
+% ============================================================
+\begin{center}
+    {\Large \textbf{Tarea 1 -- Investigaci\'on y Desarrollo}}
+
+    \vspace{0.4cm}
+
+    Nombre1 Apellido1, Nombre2 Apellido2, Nombre3 Apellido3 \\
+    correo1, correo2, correo3 \\
+    Tarea 1, INFO1184, Semestre I-2026
+\end{center}
+
+\vspace{0.5cm}
+
+% ============================================================
+% 2) RESUMEN (150--200 palabras)
+% ============================================================
+\section*{Resumen}
+
+Este trabajo aborda el dise\~no de una soluci\'on de inteligencia de negocios para una empresa vitivin\'icola chilena que produce dos vinos ---Reserva Andes Carm\'en\`ere y Costa Blanca Sauvignon Blanc--- y los comercializa mediante ferias a p\'ublico general. Se aplica la metodolog\'ia CRISP-DM en su fase de comprensi\'on empresarial para definir la visi\'on, el foco y los procesos estrat\'egicos del negocio, organizados en cinco perspectivas del cuadro de mando integral: financiera, cliente y mercado, procesos internos, producto e innovaci\'on, y aprendizaje y alianzas. A partir de ello se construye un mapa estrat\'egico, una matriz 3M con medidas, metas y medios, y un modelo de datos relacional de 13 entidades que cubre desde la planificaci\'on de ferias hasta la evaluaci\'on post-evento. La base de datos se implementa en SQLite con 345 registros, se migra a PostgreSQL y se transforma con dbt para alimentar un tablero de indicadores en Lightdash. El resultado es un sistema integrado que permite medir conversi\'on, rentabilidad y efectividad de alianzas para la toma de decisiones basada en datos.
+
+% ============================================================
+% 3) INTRODUCCION
+% ============================================================
+\section{Introducci\'on}
+
+Un empresario chileno dispone de capital para invertir en la fabricaci\'on de vinos, con el objetivo de elaborar dos tipos de vino y llegar con su producto a todo Chile. Dentro de sus contactos, ha podido generar una alianza estrat\'egica para aumentar las ventas. La necesidad urgente del empresario es generar un mapa estrat\'egico para tener una inteligencia del negocio del producto y dar respuesta a un requerimiento relacionado con el mercado de exhibici\'on en ferias de vinos al p\'ublico en general.
+
+Se propone una empresa vitivin\'icola que producir\'a y comercializar\'a dos vinos: \textit{Reserva Andes Carm\'en\`ere} y \textit{Costa Blanca Sauvignon Blanc}. La empresa busca cobertura nacional, crecimiento rentable y mejor desempe\~no en el canal de ferias, apoyada por alianzas estrat\'egicas con actores del turismo, gastronom\'ia y comercio.
+
+El presente informe responde a las cuatro partes solicitadas en la tarea: estrategia y cuadro de mando integral, an\'alisis y modelo de datos, evaluaci\'on e implementaci\'on del esquema relacional, y visualizaci\'on de datos mediante un tablero de indicadores.
+
+% ============================================================
+% 4) FUNDAMENTOS DE TEORIA
+% ============================================================
+\section{Fundamentos de teor\'ia}
+
+El desarrollo de este trabajo se apoya en la metodolog\'ia CRISP-DM (CRoss-Industry Standard Process for Data Mining), un est\'andar iterativo para proyectos de miner\'ia de datos y anal\'itica que comprende seis fases: comprensi\'on empresarial, comprensi\'on de los datos, preparaci\'on de los datos, modelamiento, evaluaci\'on y despliegue \cite{crisp2000}.
+
+La Parte~I del trabajo se enmarca en la \textbf{Fase~1: Comprensi\'on empresarial}, cuyo prop\'osito es enunciar los objetivos y requisitos del proyecto en t\'erminos de negocio, traducir dichos objetivos a una formulaci\'on de problema de datos y preparar una estrategia preliminar para lograrlos.
+
+Adicionalmente, se utiliza el modelo del \textbf{Cuadro de Mando Integral} (Balanced Scorecard) propuesto por Kaplan y Norton \cite{kaplan1996}, que organiza la estrategia en cuatro perspectivas cl\'asicas ---financiera, cliente, procesos internos y aprendizaje--- a las que se a\~nade, para este caso, una perspectiva de producto e innovaci\'on. La \textbf{Matriz 3M} (medida, meta, medios) permite operacionalizar cada perspectiva con indicadores concretos.
+
+En la Parte~II se aplican fundamentos de \textbf{modelado entidad-relaci\'on} para dise\~nar un esquema de datos que responda al requerimiento de exhibici\'on en ferias. La Parte~III implementa dicho modelo en un gestor de bases de datos relacional, y la Parte~IV materializa la visualizaci\'on de los KPI resultantes.
+
+% ============================================================
+% 5) DESARROLLO DEL TRABAJO
+% ============================================================
+\section{Desarrollo del trabajo}
+
+% --- PARTE I ---
+\subsection{Parte I -- Estrategia y cuadro de mando integral}
+
+\subsubsection{Visi\'on de la empresa}
+
+Ser una vitivin\'icola chilena reconocida a nivel nacional por ofrecer experiencias de vino memorables, con un portafolio corto pero diferenciado, capaz de crecer en ventas mediante ferias, alianzas comerciales y una operaci\'on consistente en todo Chile.
+
+Para alcanzar esa visi\'on, la empresa necesita un sistema de inteligencia de negocios que permita medir el desempe\~no comercial en cada feria, evaluar la efectividad de las alianzas y orientar las decisiones de expansi\'on con datos concretos en lugar de intuici\'on.
+
+\subsubsection{Foco de la empresa}
+
+El foco del negocio es posicionar dos vinos de alta rotaci\'on y margen saludable en el mercado chileno, usando ferias como canal de exhibici\'on, degustaci\'on, captura de leads y venta directa. La alianza estrat\'egica permite amplificar la llegada a segmentos como turistas, restaurantes, hoteles y tiendas especializadas.
+
+Desde la perspectiva de datos, este foco se traduce en medir la conversi\'on de visitantes a compradores, la rentabilidad por feria y por vino, y la efectividad de cada alianza. Estos indicadores permiten decidir en qu\'e ferias participar, c\'omo distribuir el inventario y d\'onde concentrar los esfuerzos comerciales.
+
+\subsubsection{Cinco procesos estrat\'egicos por perspectiva}
+
+\begin{table}[H]
+\centering
+\caption{Procesos estrat\'egicos por perspectiva del cuadro de mando integral.}
+\label{tab:procesos}
+\small
+\begin{tabular}{p{2.8cm} p{3.5cm} p{7.5cm}}
+\toprule
+\textbf{Perspectiva} & \textbf{Proceso estrat\'egico} & \textbf{An\'alisis aplicado al caso} \\
+\midrule
+Financiera & Gestionar rentabilidad por feria & Cada feria debe justificar su costo con ventas, leads y visibilidad. La empresa debe medir ingresos, ticket promedio y costo por evento para decidir continuidad y expansi\'on. \\
+Cliente y mercado & Convertir degustaciones en ventas y recompra & La feria permite educar al visitante, captar preferencias y transformar la interacci\'on en compra inmediata o seguimiento comercial posterior. \\
+Procesos internos & Planificar stock, stand y operaci\'on comercial & El \'exito de la feria depende de llegar con inventario correcto, montaje oportuno, personal preparado y control diario del desempe\~no del stand. \\
+Producto e innovaci\'on & Ajustar propuesta de valor de los dos vinos & Los dos vinos deben exhibirse con relato, maridaje y promociones coherentes. El aprendizaje del p\'ublico permite mejorar empaque, mensajes y ofertas. \\
+Aprendizaje y alianzas & Activar alianzas y capitalizar informaci\'on & Las alianzas aumentan tr\'afico y credibilidad. La empresa debe capturar datos, aprender del p\'ublico y transferir ese aprendizaje a futuras ferias. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Mapa estrat\'egico del negocio}
+
+% TODO: Insertar imagen del mapa estrategico cuando este disponible
+% \begin{figure}[H]
+% \centering
+% \includegraphics[width=0.85\textwidth]{img/mapa_estrategico.png}
+% \caption{Mapa estrat\'egico del negocio vitivin\'icola.}
+% \label{fig:mapa}
+% \end{figure}
+
+El mapa estrat\'egico organiza las cinco perspectivas en un flujo causal ascendente:
+
+\begin{enumerate}[nosep]
+    \item \textbf{Aprendizaje y alianzas:} fortalecer convenios, capacitar equipo, capturar datos.
+    \item \textbf{Producto e innovaci\'on:} ajustar propuesta de valor de los dos vinos.
+    \item \textbf{Procesos internos:} planificar ferias, stands, inventario y atenci\'on.
+    \item \textbf{Cliente y mercado:} aumentar visitantes, degustaciones, conversi\'on y recompra.
+    \item \textbf{Financiera:} incrementar ingresos, margen y cobertura nacional.
+\end{enumerate}
+
+Las alianzas y el aprendizaje alimentan la innovaci\'on del producto y la calidad operativa. La buena operaci\'on en feria mejora la experiencia del cliente, y la mejora en cliente y mercado se traduce en ventas, margen y expansi\'on.
+
+\subsubsection{Matriz 3M}
+
+\begin{table}[H]
+\centering
+\caption{Matriz 3M -- Perspectiva financiera.}
+\label{tab:3m_fin}
+\small
+\begin{tabular}{p{4cm} p{4.5cm} p{5.3cm}}
+\toprule
+\textbf{Medida} & \textbf{Meta} & \textbf{Medios} \\
+\midrule
+Ingresos netos por feria & Superar CLP 250\,000 por feria & Promociones por caja y combos degustaci\'on + compra \\
+Ticket promedio & Alcanzar CLP 32\,000 & Venta asistida y packs mixtos de 2 o 6 botellas \\
+Margen bruto por vino & Mantener margen bruto $>$ 45\% & Control de costos, precios consistentes y alianzas \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Matriz 3M -- Perspectiva cliente y mercado.}
+\label{tab:3m_cli}
+\small
+\begin{tabular}{p{4cm} p{4.5cm} p{5.3cm}}
+\toprule
+\textbf{Medida} & \textbf{Meta} & \textbf{Medios} \\
+\midrule
+Conversi\'on visitante a compra & Superar 30\% & Guiar degustaciones y cerrar la venta en el stand \\
+Tasa de aceptaci\'on de contacto & Superar 70\% & Registro r\'apido de leads y beneficio por suscripci\'on \\
+Recompra post feria & 15\% de recompra en 60 d\'ias & Seguimiento digital y ofertas segmentadas \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Matriz 3M -- Perspectiva de procesos internos.}
+\label{tab:3m_proc}
+\small
+\begin{tabular}{p{4cm} p{4.5cm} p{5.3cm}}
+\toprule
+\textbf{Medida} & \textbf{Meta} & \textbf{Medios} \\
+\midrule
+Cumplimiento de stock planificado & Alcanzar 95\% sin quiebres & Proyecci\'on de demanda por feria y reposici\'on diaria \\
+Tiempo de montaje del stand & 100\% completados antes de apertura & Checklist log\'istica y responsable por recinto \\
+Exactitud del registro operativo & 100\% de ventas y visitantes capturados & Base de datos \'unica y rutina diaria de validaci\'on \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Matriz 3M -- Perspectiva de producto e innovaci\'on.}
+\label{tab:3m_prod}
+\small
+\begin{tabular}{p{4cm} p{4.5cm} p{5.3cm}}
+\toprule
+\textbf{Medida} & \textbf{Meta} & \textbf{Medios} \\
+\midrule
+Puntaje promedio de degustaci\'on & Mantener nota $\geq$ 4/5 & Relato de marca, maridaje y mejora de presentaci\'on \\
+Participaci\'on del vino l\'ider & Ning\'un vino bajo 40\% del mix & Exhibici\'on balanceada y ofertas cruzadas \\
+Nuevas propuestas comerciales & Probar 2 acciones por trimestre & Ediciones limitadas, combos y material segmentado \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Matriz 3M -- Perspectiva de aprendizaje y alianzas.}
+\label{tab:3m_apr}
+\small
+\begin{tabular}{p{4cm} p{4.5cm} p{5.3cm}}
+\toprule
+\textbf{Medida} & \textbf{Meta} & \textbf{Medios} \\
+\midrule
+Ferias con alianza activa & 100\% de las ferias & Convenios previos con turismo, horeca y comercio \\
+Capacitaci\'on del equipo comercial & 8 horas trimestrales & Gui\'on de venta, argumentario y protocolo de registro \\
+Hallazgos accionables por feria & Al menos 3 conclusiones por evento & Reuni\'on post feria y tablero con KPI para decisiones \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% --- PARTE II ---
+\subsection{Parte II -- An\'alisis y modelo de datos}
+
+\subsubsection{Procesos m\'as importantes para el requerimiento}
+
+\begin{table}[H]
+\centering
+\caption{Procesos principales del requerimiento de ferias.}
+\label{tab:procesos_req}
+\small
+\begin{tabular}{p{3.5cm} p{4.5cm} p{5.5cm}}
+\toprule
+\textbf{Proceso} & \textbf{Objetivo} & \textbf{Salida esperada} \\
+\midrule
+Planificaci\'on de participaci\'on en feria & Seleccionar feria, ciudad, aforo y alianzas & Calendario de eventos y presupuesto \\
+Dise\~no del stand e inventario & Asignar stands, botellas y recursos & Inventario recibido por vino y feria \\
+Atenci\'on y degustaci\'on & Registrar visitantes, segmento e inter\'es & Historial de degustaciones y preferencias \\
+Venta directa en feria & Registrar pagos y detalle de productos vendidos & Ventas por feria, stand, vino y visitante \\
+Evaluaci\'on post feria & Medir conversi\'on, ingresos y efectividad de alianzas & KPI para decidir continuidad y mejoras \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Entidades identificadas}
+
+Se identifican 13 entidades: \textit{region}, \textit{ciudad}, \textit{segmento\_publico}, \textit{vino}, \textit{alianza}, \textit{feria}, \textit{feria\_alianza}, \textit{stand}, \textit{inventario\_feria}, \textit{visitante}, \textit{degustacion}, \textit{venta} y \textit{detalle\_venta}.
+
+\subsubsection{Esquemas de datos}
+
+Se proponen cuatro esquemas l\'ogicos de datos:
+
+\begin{table}[H]
+\centering
+\caption{Esquemas l\'ogicos de datos.}
+\label{tab:esquemas}
+\small
+\begin{tabular}{p{2.5cm} p{4.5cm} p{6.5cm}}
+\toprule
+\textbf{Esquema} & \textbf{Tablas} & \textbf{Descripci\'on} \\
+\midrule
+Maestro & region, ciudad, segmento\_publico, vino, alianza & Cat\'alogos estables del negocio. Evita duplicidad en ubicaciones, p\'ublicos, productos y socios. \\
+Operacional de ferias & feria, feria\_alianza, stand, inventario\_feria & Ejecuci\'on del evento: d\'onde se realiza, con qui\'en se apoya y qu\'e recursos se asignan. \\
+Interacci\'on comercial & visitante, degustacion, venta, detalle\_venta & Experiencia del visitante y conversi\'on comercial en feria. \\
+Anal\'itico & Modelos dbt mart\_* & Consolida KPI para tablero de indicadores y an\'alisis de desempe\~no. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Esquema entidad-relaci\'on}
+
+% TODO: Insertar diagrama ER cuando este disponible
+% \begin{figure}[H]
+% \centering
+% \includegraphics[width=\textwidth]{img/diagrama_er.png}
+% \caption{Diagrama entidad-relaci\'on del modelo de datos.}
+% \label{fig:er}
+% \end{figure}
+
+El diccionario relacional del modelo se presenta en la Tabla~\ref{tab:diccionario}.
+
+\begin{table}[H]
+\centering
+\caption{Diccionario relacional del modelo de datos.}
+\label{tab:diccionario}
+\footnotesize
+\begin{tabular}{p{2.2cm} p{2.2cm} p{3.5cm} p{5.5cm}}
+\toprule
+\textbf{Tabla} & \textbf{Clave primaria} & \textbf{Claves for\'aneas} & \textbf{Descripci\'on} \\
+\midrule
+region & region\_id & -- & Regiones de Chile consideradas en el plan comercial. \\
+ciudad & ciudad\_id & region\_id & Ciudades donde se realizan ferias o provienen visitantes. \\
+segmento\_publico & segmento\_id & -- & Segmentaci\'on comercial del p\'ublico objetivo. \\
+vino & vino\_id & -- & Portafolio de dos vinos del caso. \\
+alianza & alianza\_id & -- & Socios estrat\'egicos que amplifican la venta. \\
+feria & feria\_id & ciudad\_id & Evento comercial de exhibici\'on y venta de vinos. \\
+feria\_alianza & (feria\_id, alianza\_id) & feria\_id, alianza\_id & Relaci\'on N:M entre feria y alianza. \\
+stand & stand\_id & feria\_id & Punto f\'isico de degustaci\'on o venta en la feria. \\
+inventario\_feria & inventario\_id & feria\_id, vino\_id & Stock planificado, recibido, vendido y de cierre. \\
+visitante & visitante\_id & feria\_id, segmento\_id, ciudad\_origen\_id, interes\_vino\_id & Registro del p\'ublico asistente. \\
+degustacion & degustacion\_id & visitante\_id, stand\_id, vino\_id & Experiencia de prueba del producto. \\
+venta & venta\_id & feria\_id, stand\_id, visitante\_id & Encabezado de la transacci\'on comercial. \\
+detalle\_venta & detalle\_venta\_id & venta\_id, vino\_id & L\'ineas de producto vendidas por transacci\'on. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{Subconjunto de relaciones por proceso}
+
+\begin{table}[H]
+\centering
+\caption{Relaciones necesarias por proceso.}
+\label{tab:relaciones}
+\small
+\begin{tabular}{p{3.5cm} p{10cm}}
+\toprule
+\textbf{Proceso} & \textbf{Relaciones necesarias} \\
+\midrule
+Planificaci\'on de feria & ciudad $\rightarrow$ feria, feria $\rightarrow$ feria\_alianza $\rightarrow$ alianza \\
+Dise\~no operativo & feria $\rightarrow$ stand, feria $\rightarrow$ inventario\_feria $\leftarrow$ vino \\
+Registro de visitantes & feria $\rightarrow$ visitante $\leftarrow$ segmento\_publico, ciudad $\rightarrow$ visitante, vino $\rightarrow$ visitante \\
+Degustaci\'on & visitante $\rightarrow$ degustacion $\leftarrow$ vino, stand $\rightarrow$ degustacion \\
+Venta en feria & feria $\rightarrow$ venta $\leftarrow$ stand, venta $\rightarrow$ detalle\_venta $\leftarrow$ vino, visitante $\rightarrow$ venta \\
+Evaluaci\'on comercial & feria $\rightarrow$ venta $\rightarrow$ detalle\_venta, feria $\rightarrow$ visitante $\rightarrow$ degustacion, feria $\rightarrow$ inventario\_feria \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+% --- PARTE III ---
+\subsection{Parte III -- Evaluaci\'on y esquema relacional}
+
+\subsubsection{Base de datos de referencia}
+
+La implementaci\'on del caso se prototip\'o en SQLite mediante una base de datos generada a partir de un esquema DDL. El modelo f\'isico contiene claves primarias en todas las tablas, claves for\'aneas para integridad referencial, restricciones \texttt{UNIQUE} para evitar duplicidad, restricciones \texttt{CHECK} para validar dominios de datos e \'indices para optimizar consultas frecuentes sobre ferias, visitantes, ventas e inventario.
+
+\subsubsection{Poblaci\'on de la base de datos}
+
+La base de referencia queda poblada con 345 registros distribuidos en 13 tablas, superando el m\'inimo de 150 registros solicitado. Los datos cubren maestros (regiones, ciudades, segmentos, vinos, alianzas), operaci\'on de ferias (6 ferias, 12 stands, inventario por vino) e interacci\'on comercial (84 visitantes, 84 degustaciones, 48 ventas con 60 l\'ineas de detalle).
+
+\subsubsection{Relaciones implementadas}
+
+Las relaciones conceptuales propuestas en la Parte~II se reflejan en la base de datos mediante cl\'ausulas \texttt{FOREIGN KEY} que garantizan la integridad referencial entre todas las entidades del modelo.
+
+% --- PARTE IV ---
+\subsection{Parte IV -- Visualizaci\'on de datos}
+
+La visualizaci\'on del proyecto se implementa en Lightdash, consumiendo modelos anal\'iticos construidos con dbt sobre PostgreSQL. Los KPI expuestos en el tablero incluyen: ferias ejecutadas, visitantes, ventas, botellas vendidas, ingresos netos, conversi\'on de visitantes, ticket promedio, opt-in de contacto, ingresos por feria, ingresos por segmento, mix de vinos y estado del inventario.
+
+% ============================================================
+% 6) DISCUSION Y REFLEXION
+% ============================================================
+\section{Discusi\'on y reflexi\'on}
+
+La soluci\'on propuesta demuestra c\'omo la fase de comprensi\'on empresarial de CRISP-DM permite estructurar un problema de negocio antes de abordarlo con datos. La definici\'on de visi\'on y foco, acompa\~nada de la traducci\'on a indicadores medibles mediante la Matriz~3M, establece un puente claro entre la estrategia y la implementaci\'on t\'ecnica.
+
+El modelo de datos de 13 entidades cubre los cinco procesos identificados y permite responder preguntas como: \textquestiondown qu\'e feria genera m\'as ingresos?, \textquestiondown qu\'e segmento convierte mejor?, \textquestiondown c\'omo se distribuye el mix de vinos? Estas preguntas se alinean directamente con los KPI definidos en el cuadro de mando integral.
+
+La elecci\'on de SQLite como prototipo local y su posterior migraci\'on a PostgreSQL con dbt refleja una separaci\'on clara entre dise\~no conceptual e implementaci\'on t\'ecnica. Esta decisi\'on metodol\'ogica facilita la escalabilidad del proyecto sin comprometer la claridad acad\'emica del an\'alisis.
+
+Una limitaci\'on del trabajo es que los datos son generados sint\'eticamente, por lo que los patrones observados en el tablero no reflejan comportamiento real de mercado. Sin embargo, la estructura del modelo y los indicadores propuestos son transferibles a un escenario productivo.
+
+% ============================================================
+% 7) CONCLUSIONES
+% ============================================================
+\section{Conclusiones}
+
+% Una conclusion por integrante -- adaptar segun el grupo
+
+\begin{itemize}
+    \item La aplicaci\'on de CRISP-DM en su fase de comprensi\'on empresarial permite alinear la estrategia comercial con el dise\~no de la soluci\'on de datos, evitando construir modelos desconectados de las necesidades reales del negocio.
+
+    \item El cuadro de mando integral, operacionalizado con la Matriz~3M, ofrece un marco concreto para definir qu\'e medir, qu\'e metas alcanzar y con qu\'e medios lograrlo, lo que facilita la posterior selecci\'on de KPI para el tablero.
+
+    \item El modelo relacional de 13 entidades responde adecuadamente a los cinco procesos del caso y su implementaci\'on en SQLite con 345 registros demuestra que la estructura es funcional y capaz de soportar consultas anal\'iticas relevantes.
+\end{itemize}
+
+% ============================================================
+% 8) REFERENCIAS (APA)
+% ============================================================
+\begin{thebibliography}{9}
+
+\bibitem{crisp2000}
+Chapman, P., Clinton, J., Kerber, R., Khabaza, T., Reinartz, T., Shearer, C. y Wirth, R. (2000). \textit{CRISP-DM 1.0: Step-by-step data mining guide}. SPSS Inc.
+
+\bibitem{kaplan1996}
+Kaplan, R. S. y Norton, D. P. (1996). \textit{The Balanced Scorecard: Translating Strategy into Action}. Harvard Business School Press.
+
+\bibitem{levanoS3}
+L\'evano, M. (2026). \textit{CRISP-DM (CRoss-Industry Standard Process for Data Mining)} [Diapositivas de clase, semana 1--3]. Universidad Cat\'olica de Temuco, INFO1184.
+
+\end{thebibliography}
+
+% ============================================================
+% 9) ANEXO
+% ============================================================
+\newpage
+\appendix
+\section*{Anexo}
+
+\subsection*{A. Evidencia de base de datos}
+
+Las capturas de pantalla de la base de datos poblada y las consultas de validaci\'on se encuentran disponibles en los archivos adjuntos del repositorio del proyecto.
+
+% TODO: Insertar capturas de pantalla de la BD
+% \begin{figure}[H]
+% \centering
+% \includegraphics[width=0.9\textwidth]{img/evidencia_bd.png}
+% \caption{Evidencia de la base de datos poblada.}
+% \label{fig:evidencia_bd}
+% \end{figure}
+
+\subsection*{B. Bit\'acora de trabajo}
+
+% TODO: Completar bitacora de trabajo del grupo
+\begin{table}[H]
+\centering
+\caption{Bit\'acora de trabajo grupal.}
+\label{tab:bitacora}
+\small
+\begin{tabular}{p{2cm} p{3cm} p{4cm} p{4.5cm}}
+\toprule
+\textbf{Fecha} & \textbf{Integrante} & \textbf{Actividad} & \textbf{Observaci\'on} \\
+\midrule
+ &  &  &  \\
+ &  &  &  \\
+ &  &  &  \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\end{document}
