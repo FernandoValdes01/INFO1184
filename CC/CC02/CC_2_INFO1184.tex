@@ -1,0 +1,414 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{booktabs}
+\usepackage{geometry}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{caption}
+\usepackage{setspace}
+\usepackage{parskip}
+
+% --- Márgenes según pauta: 1.5cm sup, 1.5cm izq, 1.5cm der, 2cm inf ---
+\geometry{top=1.5cm, left=1.5cm, right=1.5cm, bottom=2cm}
+
+% --- Interlineado simple ---
+\singlespacing
+
+% --- Estilo de código R ---
+\lstset{
+  language=R,
+  basicstyle=\ttfamily\footnotesize,
+  backgroundcolor=\color{gray!8},
+  frame=single,
+  breaklines=true,
+  keywordstyle=\color{blue!70!black},
+  commentstyle=\color{green!50!black},
+  stringstyle=\color{red!70!black},
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=5pt,
+  xleftmargin=1.5em,
+  framexleftmargin=1em
+}
+
+\hypersetup{colorlinks=true, linkcolor=blue!60!black, citecolor=blue!60!black, urlcolor=blue!60!black}
+
+\pagestyle{plain}
+
+\begin{document}
+
+% =====================================================================
+% 1) IDENTIFICACIÓN (parte superior, sin ocupar una hoja completa)
+% =====================================================================
+\begin{center}
+{\large \textbf{Control 2: Agrupamiento Aglomerativo Jerárquico}}\\[6pt]
+Nombre1 Apellido1, Nombre2 Apellido2 \textsuperscript{(*)}\\[2pt]
+{\small correo1@alu.uct.cl, correo2@alu.uct.cl}\\[2pt]
+{\small Control 2, INFO1184, Semestre I-2026}
+\end{center}
+
+\noindent\textsuperscript{(*)} Integrantes del grupo.
+
+\vspace{4pt}
+\noindent\rule{\textwidth}{0.4pt}
+
+% =====================================================================
+% 2) RESUMEN (entre 100 a 130 palabras)
+% =====================================================================
+\section*{Resumen}
+
+En el presente control se aborda el problema de agrupamiento aglomerativo jerárquico aplicado a un conjunto de datos unidimensional de 10 observaciones. Se utiliza la norma $L_1$ (Manhattan) como medida de similitud entre los datos. En la Pregunta 2 se implementa en el lenguaje R la generación de dendrogramas, explorando particiones para $k=2$ y $k=3$, y comparando tres métodos de enlace: simple, completo y promedio. En la Pregunta 3 se propone una métrica de separación inter-cluster basada en la distancia entre centroides con norma $L_1$, verificando que cumple las propiedades formales de una métrica. Los resultados muestran que los métodos de enlace completo y promedio producen agrupamientos más claros y compactos para este conjunto de datos.
+% ~120 palabras
+
+% =====================================================================
+% 3) INTRODUCCIÓN
+% =====================================================================
+\section{Introducción}
+
+El análisis de clusters es una técnica fundamental en minería de datos y aprendizaje no supervisado que busca agrupar objetos similares sin etiquetas previas. Entre los métodos existentes, el agrupamiento aglomerativo jerárquico construye una jerarquía de clusters de forma ascendente, partiendo de cada dato como un cluster individual y fusionando progresivamente los pares más cercanos hasta formar un único grupo (Hastie et al., 2009).
+
+El presente trabajo se centra en un dataset unidimensional $X = [23.11, -3.33, 1.30, 29.20, -1.57, 34.10, -8.90, -3.40, 9.09, 3.03]$ de 10 observaciones, utilizando la norma $L_1$ (distancia Manhattan) definida como $d(a,b) = |a - b|$. Se busca responder: ¿cómo se comportan los distintos métodos de enlace al generar dendrogramas?, y ¿qué métrica es adecuada para medir la separación entre los clusters resultantes?
+
+En la Pregunta 2 se implementan scripts en R para generar dendrogramas con los métodos single, complete y average, marcando particiones para $k=2$ y $k=3$. En la Pregunta 3 se propone y justifica formalmente una métrica de separación inter-cluster para $k=2$.
+
+% =====================================================================
+% 4) DESARROLLO
+% =====================================================================
+\section{Desarrollo}
+
+% ----------------------------------------------------------------------
+\subsection{Pregunta 2: Dendrogramas en R}
+
+\subsubsection{a) Script R para elaborar el dendrograma}
+
+Se calcula la matriz de distancias con la norma $L_1$ mediante \texttt{dist(X, method="manhattan")} y se aplica \texttt{hclust()} con el método de enlace correspondiente. El código fuente completo se encuentra en el Anexo; a continuación se muestran las instrucciones principales:
+
+\begin{lstlisting}
+X <- c(23.11, -3.33, 1.30, 29.20, -1.57, 34.10,
+       -8.90, -3.40, 9.09, 3.03)
+names(X) <- paste0("x", 1:10)
+d <- dist(X, method = "manhattan")
+hc <- hclust(d, method = "single")
+plot(hc, main="Dendrograma Single Linkage (L1)",
+     xlab="Datos", ylab="Distancia L1", hang=-1)
+\end{lstlisting}
+
+% Descomentar al subir las imagenes a Overleaf:
+% \begin{figure}[H]
+%   \centering
+%   \includegraphics[width=0.82\textwidth]{dendro_basico.png}
+%   \caption{Dendrograma básico con Single Linkage y distancia $L_1$.}
+%   \label{fig:basico}
+% \end{figure}
+
+\subsubsection{b) Particiones para $k=2$ y $k=3$}
+
+Se utiliza \texttt{rect.hclust(hc, k=...)} para marcar las particiones y \texttt{cutree(hc, k=...)} para obtener la asignación de cada dato a su cluster.
+
+\textbf{Partición $k=2$:}
+
+\begin{table}[H]
+\centering
+\footnotesize
+\begin{tabular}{p{3.5cm} p{10cm}}
+\toprule
+\textbf{Cluster} & \textbf{Elementos} \\
+\midrule
+Cluster 1 (valores altos) & $x_1(23.11),\ x_4(29.20),\ x_6(34.10)$ \\
+Cluster 2 (valores bajos/medios) & $x_2(-3.33),\ x_3(1.30),\ x_5(-1.57),\ x_7(-8.90),\ x_8(-3.40),\ x_9(9.09),\ x_{10}(3.03)$ \\
+\bottomrule
+\end{tabular}
+\caption{Asignación de clusters para $k=2$ con Single Linkage.}
+\label{tab:k2}
+\end{table}
+
+% \begin{figure}[H]
+%   \centering
+%   \includegraphics[width=0.82\textwidth]{dendro_k2.png}
+%   \caption{Dendrograma con partición $k=2$.}
+%   \label{fig:k2}
+% \end{figure}
+
+\textbf{Partición $k=3$:}
+
+\begin{table}[H]
+\centering
+\footnotesize
+\begin{tabular}{p{2cm} p{11cm}}
+\toprule
+\textbf{Cluster} & \textbf{Elementos} \\
+\midrule
+Cluster 1 & $x_1(23.11)$ \\
+Cluster 2 & $x_2(-3.33),\ x_3(1.30),\ x_5(-1.57),\ x_7(-8.90),\ x_8(-3.40),\ x_9(9.09),\ x_{10}(3.03)$ \\
+Cluster 3 & $x_4(29.20),\ x_6(34.10)$ \\
+\bottomrule
+\end{tabular}
+\caption{Asignación de clusters para $k=3$ con Single Linkage.}
+\label{tab:k3}
+\end{table}
+
+% \begin{figure}[H]
+%   \centering
+%   \includegraphics[width=0.82\textwidth]{dendro_k3.png}
+%   \caption{Dendrograma con partición $k=3$.}
+%   \label{fig:k3}
+% \end{figure}
+
+\subsubsection{c) Comparación de métodos: Single, Complete y Average}
+
+Los tres métodos difieren en cómo calculan la distancia entre clusters al momento de decidir cuál par fusionar:
+
+\begin{table}[H]
+\centering
+\footnotesize
+\begin{tabular}{p{2.8cm} p{4cm} p{7cm}}
+\toprule
+\textbf{Método} & \textbf{Fórmula} & \textbf{Descripción} \\
+\midrule
+Single (Enlace Simple) & $\displaystyle\min_{\substack{a \in C_1 \\ b \in C_2}} d(a,b)$ & Distancia mínima entre cualquier par de puntos. Tiende a producir cadenas (chaining). \\[8pt]
+Complete (Enlace Completo) & $\displaystyle\max_{\substack{a \in C_1 \\ b \in C_2}} d(a,b)$ & Distancia máxima entre cualquier par. Produce clusters compactos y esféricos. \\[8pt]
+Average (Enlace Promedio) & $\displaystyle\frac{1}{|C_1||C_2|}\sum_{\substack{a \in C_1 \\ b \in C_2}} d(a,b)$ & Promedio de todas las distancias entre pares. Balance entre single y complete. \\
+\bottomrule
+\end{tabular}
+\caption{Resumen de los tres métodos de enlace jerárquico.}
+\label{tab:metodos}
+\end{table}
+
+% \begin{figure}[H]
+%   \centering
+%   \includegraphics[width=\textwidth]{dendro_comparacion.png}
+%   \caption{Comparación lado a lado de los tres métodos de enlace.}
+%   \label{fig:comparacion}
+% \end{figure}
+
+\textbf{Análisis comparativo:} \textit{Single Linkage} muestra el efecto de encadenamiento (chaining): los puntos cercanos se van uniendo uno a uno formando una cadena larga antes de unirse a grupos distantes. La separación entre el cluster de valores altos $\{23.11, 29.20, 34.10\}$ y los demás es visible, pero los subgrupos internos no se distinguen bien. La altura de corte para $k=2$ es $\approx 14.02$.
+
+\textit{Complete Linkage} genera clusters más compactos y equilibrados. La diferencia de altura entre las fusiones internas y la fusión final es mucho mayor ($43.0$ vs $17.99$), indicando una separación más clara entre los dos clusters principales.
+
+\textit{Average Linkage} ofrece un comportamiento intermedio con altura final de fusión de $29.34$ y buena separación visual, sin el efecto de encadenamiento de single ni la sobre-compactación de complete.
+
+\textbf{Conclusión de la comparación:} Los métodos \textbf{Complete} y \textbf{Average Linkage} muestran mejor los agrupamientos naturales, produciendo una separación más clara y proporcionada entre clusters. Complete Linkage resulta especialmente útil cuando se buscan clusters bien separados y compactos.
+
+% ----------------------------------------------------------------------
+\subsection{Pregunta 3: Métrica de separación inter-cluster ($k=2$)}
+
+Para $k=2$ con Single Linkage se obtuvieron los clusters:
+\begin{itemize}
+  \item $C_1 = \{23.11,\ 29.20,\ 34.10\}$ (valores altos)
+  \item $C_2 = \{-8.90,\ -3.40,\ -3.33,\ -1.57,\ 1.30,\ 3.03,\ 9.09\}$ (valores bajos/medios)
+\end{itemize}
+
+\subsubsection{Métrica propuesta: Distancia entre centroides con norma $L_1$}
+
+Sea $c_i$ el centroide (media aritmética) del cluster $C_i$. Se define la métrica de separación inter-cluster como:
+
+\begin{equation}
+D(C_1, C_2) = |c_1 - c_2|
+\label{eq:metrica}
+\end{equation}
+
+donde $c_i = \frac{1}{|C_i|} \displaystyle\sum_{x \in C_i} x$.
+
+\subsubsection{Cálculo numérico}
+
+\begin{align}
+c_1 &= \frac{23.11 + 29.20 + 34.10}{3} = \frac{86.41}{3} = 28.8033 \label{eq:c1} \\[4pt]
+c_2 &= \frac{-8.90 + (-3.40) + (-3.33) + (-1.57) + 1.30 + 3.03 + 9.09}{7} = \frac{-3.78}{7} = -0.5400 \label{eq:c2} \\[4pt]
+D(C_1, C_2) &= |28.8033 - (-0.5400)| = \boxed{29.3433} \label{eq:resultado}
+\end{align}
+
+\subsubsection{Propiedades que debe reunir la métrica}
+
+Para que $D$ sea una métrica válida de separación inter-cluster, debe satisfacer:
+
+\begin{enumerate}
+  \item \textbf{No negatividad:} $D(C_i, C_j) \geq 0$ para todo par de clusters. Se cumple porque $|c_1 - c_2| \geq 0$ por definición del valor absoluto.
+
+  \item \textbf{Simetría:} $D(C_i, C_j) = D(C_j, C_i)$. Se cumple ya que $|c_1 - c_2| = |c_2 - c_1|$ por propiedad del valor absoluto.
+
+  \item \textbf{Identidad:} $D(C_i, C_j) = 0 \iff c_i = c_j$. Si los centroides coinciden, los clusters no están separados. Se verifica: $|c_1 - c_2| = 0 \iff c_1 = c_2$.
+
+  \item \textbf{Desigualdad triangular:} $D(C_i, C_k) \leq D(C_i, C_j) + D(C_j, C_k)$. Se hereda de la norma $L_1$ aplicada sobre los centroides.
+
+  \item \textbf{Interpretabilidad:} Un valor mayor indica mayor separación. $D = 29.34$ significa que los centroides distan $\approx 29$ unidades en la escala original.
+
+  \item \textbf{Coherencia de escala:} La métrica se expresa en las mismas unidades que los datos, y escala proporcionalmente ante transformaciones lineales.
+\end{enumerate}
+
+\subsubsection{Comparación con métricas alternativas}
+
+La distancia entre centroides se elige como propuesta principal porque: (i) resume cada cluster en un punto representativo, (ii) es robusta ante valores extremos, (iii) es computacionalmente eficiente $O(n)$, y (iv) es consistente con la norma $L_1$ utilizada en todo el ejercicio.
+
+\begin{table}[H]
+\centering
+\footnotesize
+\begin{tabular}{lcc}
+\toprule
+\textbf{Métrica} & \textbf{Fórmula} & \textbf{Valor} \\
+\midrule
+Distancia entre centroides & $|c_1 - c_2|$ & 29.3433 \\
+Distancia mínima (single) & $\min |a - b|$ & 14.02 \\
+Distancia máxima (complete) & $\max |a - b|$ & 43.00 \\
+Distancia promedio (average) & $\text{prom } |a - b|$ & 29.3433 \\
+\bottomrule
+\end{tabular}
+\caption{Comparación de métricas de separación inter-cluster para $k=2$.}
+\label{tab:metricas}
+\end{table}
+
+El valor $D = 29.3433$ confirma una separación sustancial entre ambos clusters identificados.
+
+% =====================================================================
+% 5) REFLEXIÓN
+% =====================================================================
+\section{Reflexión}
+
+El desarrollo de este control permitió comprender de manera práctica cómo funciona el agrupamiento aglomerativo jerárquico y la importancia de la elección del método de enlace. Se observó que para datos unidimensionales, el efecto de chaining en Single Linkage es particularmente evidente, generando cadenas elongadas que dificultan la identificación de subgrupos naturales. En contraste, Complete y Average Linkage producen dendrogramas con separaciones más claras y equilibradas.
+
+Un aprendizaje clave fue entender que la métrica de separación inter-cluster no es única: distintas definiciones (mínima, máxima, centroide, promedio) capturan aspectos diferentes de la separación. La elección debe ser coherente con el criterio de enlace y con la norma de distancia empleada. En este caso, la distancia entre centroides con norma $L_1$ resultó natural por su consistencia con el resto del ejercicio.
+
+Finalmente, la implementación en R facilitó la verificación de los cálculos manuales y la exploración visual de los resultados, evidenciando el valor de combinar el entendimiento teórico con herramientas computacionales.
+
+% =====================================================================
+% 6) REFERENCIAS (Norma APA, solo dos)
+% =====================================================================
+\section{Referencias}
+
+Hastie, T., Tibshirani, R., \& Friedman, J. (2009). \textit{The Elements of Statistical Learning: Data Mining, Inference, and Prediction} (2a ed.). Springer.
+
+R Core Team. (2024). \textit{R: A Language and Environment for Statistical Computing}. R Foundation for Statistical Computing. \url{https://www.R-project.org/}
+
+% =====================================================================
+% 7) ANEXO
+% =====================================================================
+\newpage
+\section*{Anexo}
+
+\subsection*{A.1 Script R completo (Pregunta 2)}
+
+\begin{lstlisting}
+# ============================================================
+# Control 2 - INFO1184 - Pregunta 2
+# Agrupamiento Aglomerativo Jerarquico con R
+# ============================================================
+
+# --- Datos ---
+X <- c(23.11, -3.33, 1.30, 29.20, -1.57, 34.10,
+       -8.90, -3.40, 9.09, 3.03)
+names(X) <- paste0("x", 1:10)
+labels_val <- paste0("x", 1:10, "(", X, ")")
+
+# Matriz de distancias L1 (Manhattan)
+d <- dist(X, method = "manhattan")
+
+# --- a) Dendrograma basico ---
+hc_single <- hclust(d, method = "single")
+plot(hc_single, labels = labels_val,
+     main = "Dendrograma - Single Linkage (L1)",
+     xlab = "Datos", ylab = "Distancia L1", hang = -1)
+
+# --- b) Particiones k=2 y k=3 ---
+# k=2
+plot(hc_single, labels = labels_val,
+     main = "Single Linkage - Particion k=2",
+     xlab = "Datos", ylab = "Distancia L1", hang = -1)
+rect.hclust(hc_single, k = 2, border = c("red","blue"))
+clusters_k2 <- cutree(hc_single, k = 2)
+print(clusters_k2)
+
+# k=3
+plot(hc_single, labels = labels_val,
+     main = "Single Linkage - Particion k=3",
+     xlab = "Datos", ylab = "Distancia L1", hang = -1)
+rect.hclust(hc_single, k = 3,
+            border = c("red","blue","green"))
+clusters_k3 <- cutree(hc_single, k = 3)
+print(clusters_k3)
+
+# --- c) Tres metodos ---
+hc_complete <- hclust(d, method = "complete")
+hc_average  <- hclust(d, method = "average")
+
+par(mfrow = c(1, 3))
+plot(hc_single, labels = labels_val,
+     main = "Single Linkage", hang = -1, cex = 0.7)
+rect.hclust(hc_single, k=2, border=c("red","blue"))
+
+plot(hc_complete, labels = labels_val,
+     main = "Complete Linkage", hang = -1, cex = 0.7)
+rect.hclust(hc_complete, k=2, border=c("red","blue"))
+
+plot(hc_average, labels = labels_val,
+     main = "Average Linkage", hang = -1, cex = 0.7)
+rect.hclust(hc_average, k=2, border=c("red","blue"))
+\end{lstlisting}
+
+\subsection*{A.2 Dendrogramas generados}
+
+% Descomentar al subir las imagenes a Overleaf:
+% \begin{figure}[H]
+%   \centering
+%   \includegraphics[width=0.75\textwidth]{dendro_basico.png}
+%   \caption{Dendrograma básico - Single Linkage.}
+% \end{figure}
+%
+% \begin{figure}[H]
+%   \centering
+%   \includegraphics[width=0.75\textwidth]{dendro_k2.png}
+%   \caption{Dendrograma con partición $k=2$.}
+% \end{figure}
+%
+% \begin{figure}[H]
+%   \centering
+%   \includegraphics[width=0.75\textwidth]{dendro_k3.png}
+%   \caption{Dendrograma con partición $k=3$.}
+% \end{figure}
+%
+% \begin{figure}[H]
+%   \centering
+%   \includegraphics[width=0.75\textwidth]{dendro_single.png}
+%   \caption{Dendrograma Single Linkage con $k=2$.}
+% \end{figure}
+%
+% \begin{figure}[H]
+%   \centering
+%   \includegraphics[width=0.75\textwidth]{dendro_complete.png}
+%   \caption{Dendrograma Complete Linkage con $k=2$.}
+% \end{figure}
+%
+% \begin{figure}[H]
+%   \centering
+%   \includegraphics[width=0.75\textwidth]{dendro_average.png}
+%   \caption{Dendrograma Average Linkage con $k=2$.}
+% \end{figure}
+%
+% \begin{figure}[H]
+%   \centering
+%   \includegraphics[width=\textwidth]{dendro_comparacion.png}
+%   \caption{Comparación lado a lado de los tres métodos.}
+% \end{figure}
+
+\subsection*{A.3 Bitácora de trabajo}
+
+\begin{table}[H]
+\centering
+\footnotesize
+\begin{tabular}{p{2.5cm} p{3cm} p{8cm}}
+\toprule
+\textbf{Fecha} & \textbf{Actividad} & \textbf{Descripción} \\
+\midrule
+01/04/2026 & Lectura del enunciado & Comprensión del problema y planificación del enfoque. \\
+01/04/2026 & Desarrollo Pregunta 2 & Implementación del script R, generación de dendrogramas con los tres métodos y particiones $k=2$, $k=3$. \\
+01/04/2026 & Desarrollo Pregunta 3 & Definición de la métrica inter-cluster, verificación de propiedades y cálculo numérico. \\
+01/04/2026 & Redacción del informe & Elaboración del informe en \LaTeX{} según la pauta, integración de figuras y reflexión. \\
+\bottomrule
+\end{tabular}
+\caption{Bitácora de actividades del control.}
+\end{table}
+
+\end{document}
