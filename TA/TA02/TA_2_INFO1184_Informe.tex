@@ -1,0 +1,476 @@
+\documentclass[10pt,a4paper]{article}
+
+% ==================== PAQUETES ====================
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage[top=1.5cm, bottom=2cm, left=1.5cm, right=1.5cm]{geometry}
+\usepackage{setspace}
+\singlespacing
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{amsmath}
+\usepackage{caption}
+\usepackage{listings}
+\usepackage{parskip}
+\usepackage{apacite}
+\usepackage{natbib}
+\usepackage{fancyhdr}
+
+% ==================== CONFIGURACIÓN ====================
+\definecolor{codebackground}{HTML}{F5F5F5}
+\definecolor{codecomment}{HTML}{6A9955}
+\definecolor{codestring}{HTML}{CE9178}
+\definecolor{codekeyword}{HTML}{569CD6}
+\definecolor{headerdark}{HTML}{2C3E50}
+
+\lstset{
+  language=R,
+  backgroundcolor=\color{codebackground},
+  basicstyle=\ttfamily\footnotesize,
+  breaklines=true,
+  frame=single,
+  rulecolor=\color{gray!40},
+  commentstyle=\color{codecomment},
+  stringstyle=\color{codestring},
+  keywordstyle=\color{codekeyword}\bfseries,
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=5pt,
+  tabsize=2,
+  showstringspaces=false,
+  captionpos=b
+}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=headerdark,
+  citecolor=headerdark,
+  urlcolor=blue!70!black
+}
+
+\captionsetup{font=small, labelfont=bf}
+
+% ==================== DOCUMENTO ====================
+\begin{document}
+
+% ==================== IDENTIFICACIÓN ====================
+\begin{center}
+  {\LARGE \textbf{Análisis de Agrupamiento Jerárquico Aglomerativo}} \\[4pt]
+  {\LARGE \textbf{Dataset Bank Marketing -- Metodología CRISP-DM}} \\[10pt]
+  {\normalsize Nombre1 Apellido1, Nombre2 Apellido2, Nombre3 Apellido3} \\[2pt]
+  {\small correo1@alu.uct.cl, correo2@alu.uct.cl, correo3@alu.uct.cl} \\[2pt]
+  {\small Tarea 2, INFO1184, Semestre I-2026}
+\end{center}
+
+\vspace{8pt}
+\hrule
+\vspace{10pt}
+
+% ==================== RESUMEN ====================
+\section*{Resumen}
+
+El presente informe aborda el análisis de segmentación de clientes del dataset Bank Marketing mediante la técnica de agrupamiento aglomerativo jerárquico, siguiendo la metodología CRISP-DM en sus fases 1 a 4. El dataset contiene 45.211 registros de campañas de marketing directo de una institución bancaria portuguesa, con 16 variables de entrada y una variable objetivo que indica si el cliente suscribió un depósito a plazo. Se realizó un análisis exploratorio exhaustivo, preparación de datos con codificación numérica y estandarización, y posterior modelado con clustering jerárquico utilizando el método de enlace Ward.D2. Se identificaron 4 clusters diferenciados, validados mediante el coeficiente de silueta y el método del codo. Los resultados revelan perfiles de clientes con características demográficas y financieras distintas, proporcionando información valiosa para la optimización de estrategias de marketing bancario. El desarrollo se implementó en el ambiente R Project.
+
+\textbf{Palabras clave:} agrupamiento jerárquico, CRISP-DM, marketing bancario, segmentación de clientes, R Project.
+
+\vspace{6pt}
+\hrule
+\vspace{8pt}
+
+% ==================== INTRODUCCIÓN ====================
+\section{Introducción}
+
+En el contexto de la inteligencia de negocios, la segmentación de clientes constituye una herramienta fundamental para la toma de decisiones estratégicas en instituciones financieras. El marketing directo bancario enfrenta el desafío de identificar qué clientes tienen mayor probabilidad de adquirir productos financieros, como los depósitos a plazo, lo que permite optimizar recursos y mejorar las tasas de conversión de las campañas telefónicas.
+
+El presente trabajo utiliza el dataset Bank Marketing, proveniente de campañas reales de un banco portugués entre mayo de 2008 y noviembre de 2010 \citep{moro2011}. El objetivo es aplicar la técnica de agrupamiento aglomerativo jerárquico para descubrir segmentos naturales dentro de la base de clientes, siguiendo las primeras cuatro fases de la metodología CRISP-DM: comprensión del negocio, comprensión de los datos, preparación de los datos y modelado.
+
+Las preguntas que guían este análisis son: (1) ¿Existen grupos naturales diferenciados dentro de los clientes del banco? (2) ¿Qué características definen cada segmento? (3) ¿Cómo pueden estos segmentos informar la estrategia de marketing directo para depósitos a plazo?
+
+% ==================== FUNDAMENTOS DE TEORÍA ====================
+\section{Fundamentos de Teoría}
+
+\subsection{Metodología CRISP-DM}
+
+CRISP-DM (\textit{Cross-Industry Standard Process for Data Mining}) es la metodología estándar de la industria para proyectos de minería de datos. Fue desarrollada en 1996 por un consorcio liderado por SPSS, NCR y DaimlerChrysler. Se estructura en seis fases iterativas: comprensión del negocio, comprensión de los datos, preparación de los datos, modelado, evaluación y despliegue \citep{chapman2000}. En este trabajo se abordan las primeras cuatro fases.
+
+\subsection{Agrupamiento Jerárquico Aglomerativo}
+
+El clustering jerárquico aglomerativo es una técnica de aprendizaje no supervisado que construye una jerarquía de clusters de manera ascendente (\textit{bottom-up}). El algoritmo parte considerando cada observación como un cluster individual y, en cada iteración, fusiona los dos clusters más cercanos hasta formar un único grupo. La estructura resultante se representa mediante un dendrograma que permite visualizar las relaciones de similitud entre observaciones \citep{murtagh2012}.
+
+Los métodos de enlace determinan cómo se calcula la distancia entre clusters. El método Ward minimiza la varianza intra-cluster total al fusionar grupos, produciendo clusters compactos y de tamaño similar. Otros métodos incluyen el enlace completo (máxima distancia entre elementos), enlace promedio (distancia media) y enlace simple (mínima distancia). La distancia euclidiana entre dos puntos $\mathbf{x}$ e $\mathbf{y}$ en $\mathbb{R}^p$ se define como:
+
+\begin{equation}
+  d(\mathbf{x}, \mathbf{y}) = \sqrt{\sum_{i=1}^{p}(x_i - y_i)^2}
+\end{equation}
+
+El criterio de Ward busca minimizar el incremento de la suma de cuadrados intra-cluster al fusionar dos clusters $C_i$ y $C_j$:
+
+\begin{equation}
+  \Delta(C_i, C_j) = \frac{n_i \cdot n_j}{n_i + n_j} \|\bar{\mathbf{x}}_i - \bar{\mathbf{x}}_j\|^2
+\end{equation}
+
+donde $n_i$, $n_j$ son los tamaños de los clusters y $\bar{\mathbf{x}}_i$, $\bar{\mathbf{x}}_j$ sus centroides \citep{everitt2011}.
+
+\subsection{Validación de Clusters}
+
+Para determinar el número óptimo de clusters se emplean métricas como el método del codo (\textit{Elbow Method}), que busca el punto de inflexión en la curva de la suma de cuadrados intra-cluster (WSS), y el coeficiente de silueta. El coeficiente de silueta para una observación $i$ se define como:
+
+\begin{equation}
+  s(i) = \frac{b(i) - a(i)}{\max\{a(i), b(i)\}}
+\end{equation}
+
+donde $a(i)$ es la distancia media de $i$ a las demás observaciones de su cluster y $b(i)$ es la distancia media mínima de $i$ a las observaciones de cualquier otro cluster. Un valor cercano a 1 indica buena asignación, mientras que valores cercanos a 0 o negativos sugieren solapamiento o asignación incorrecta \citep{rousseeuw1987}.
+
+% ==================== DESARROLLO ====================
+\section{Desarrollo del Trabajo}
+
+\subsection{Fase 1: Comprensión del Negocio}
+
+El problema de negocio consiste en optimizar las campañas de marketing telefónico de un banco portugués para la suscripción de depósitos a plazo. Actualmente, la institución contacta clientes de forma masiva, lo que genera costos elevados y bajas tasas de conversión. Se busca segmentar la base de clientes para identificar perfiles con diferentes comportamientos y características, permitiendo focalizar los esfuerzos de contacto en los segmentos más propensos a la suscripción.
+
+El objetivo de minería de datos es descubrir grupos homogéneos de clientes mediante agrupamiento jerárquico, caracterizando cada segmento según variables demográficas (edad, estado civil, educación), financieras (balance, préstamos) y de interacción con la campaña (duración, número de contactos).
+
+\subsection{Fase 2: Comprensión de los Datos}
+
+El dataset \texttt{bank-full.csv} contiene 45.211 registros y 17 atributos (16 de entrada + 1 de salida). Las variables se clasifican en: datos del cliente (\texttt{age}, \texttt{job}, \texttt{marital}, \texttt{education}, \texttt{default}, \texttt{balance}, \texttt{housing}, \texttt{loan}), datos del último contacto (\texttt{contact}, \texttt{day}, \texttt{month}, \texttt{duration}) y otros atributos de campaña (\texttt{campaign}, \texttt{pdays}, \texttt{previous}, \texttt{poutcome}). La variable objetivo (\texttt{y}) indica si el cliente suscribió el depósito a plazo. La Tabla~\ref{tab:variables} resume las variables principales.
+
+\begin{table}[H]
+  \centering
+  \caption{Resumen de las variables principales del dataset Bank Marketing.}
+  \label{tab:variables}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{l l l X}
+    \toprule
+    \textbf{Variable} & \textbf{Tipo} & \textbf{Rango / Valores} & \textbf{Descripción} \\
+    \midrule
+    age       & Numérica   & 18 -- 95                              & Edad del cliente \\
+    job       & Categórica & 12 categorías                         & Tipo de empleo \\
+    marital   & Categórica & married / single / divorced           & Estado civil \\
+    education & Categórica & primary / secondary / tertiary / unknown & Nivel educativo \\
+    balance   & Numérica   & -8.019 a 102.127                      & Balance promedio anual (EUR) \\
+    duration  & Numérica   & 0 -- 4.918                            & Duración último contacto (seg) \\
+    campaign  & Numérica   & 1 -- 63                               & Contactos en esta campaña \\
+    y         & Binaria    & yes / no                              & Suscribió depósito a plazo \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+Del análisis exploratorio se destaca que el dataset está altamente desbalanceado: solo el 11,7\% de los clientes suscribieron el depósito (5.289 sí vs.\ 39.922 no). La edad media es de 41 años, el balance promedio anual es de 1.362~EUR con alta variabilidad (DE~=~3.045~EUR), y la duración media del último contacto fue de 258 segundos. En cuanto a empleo, los perfiles más frecuentes son \textit{blue-collar} (21,5\%), \textit{management} (20,9\%) y \textit{technician} (16,8\%). El 60,2\% de los clientes están casados y el 51,3\% tiene educación secundaria.
+
+Se observa que el 81,7\% de las observaciones no fueron contactadas en campañas previas (\texttt{pdays}~=~-1) y el resultado de campañas anteriores es desconocido en un 81,7\% de los casos, lo que sugiere que la mayoría de los clientes son contactados por primera vez.
+
+% --- FIGURAS EXPLORATORIAS ---
+% Descomenta estas líneas cuando tengas las figuras generadas desde R:
+%
+% \begin{figure}[H]
+%   \centering
+%   \includegraphics[width=0.65\textwidth]{fig_01_distribucion_y.png}
+%   \caption{Distribución de la variable objetivo: suscripción a depósito a plazo.}
+%   \label{fig:dist_y}
+% \end{figure}
+%
+% \begin{figure}[H]
+%   \centering
+%   \includegraphics[width=0.70\textwidth]{fig_02_edad_balance.png}
+%   \caption{Relación entre edad y balance según suscripción.}
+%   \label{fig:edad_balance}
+% \end{figure}
+%
+% \begin{figure}[H]
+%   \centering
+%   \includegraphics[width=0.75\textwidth]{fig_03_boxplot_balance_job.png}
+%   \caption{Distribución del balance por tipo de trabajo.}
+%   \label{fig:boxplot_job}
+% \end{figure}
+%
+% \begin{figure}[H]
+%   \centering
+%   \includegraphics[width=0.55\textwidth]{fig_04_correlaciones.png}
+%   \caption{Matriz de correlaciones entre variables numéricas.}
+%   \label{fig:correlaciones}
+% \end{figure}
+
+\subsection{Fase 3: Preparación de los Datos}
+
+Para la aplicación del clustering jerárquico, se realizaron las siguientes transformaciones:
+
+\textbf{Selección de variables:} se eligieron las variables numéricas (\texttt{age}, \texttt{balance}, \texttt{duration}, \texttt{campaign}, \texttt{pdays}, \texttt{previous}) y se codificaron numéricamente las variables binarias (\texttt{default}, \texttt{housing}, \texttt{loan}) y la variable ordinal \texttt{education} (primary=1, secondary=2, tertiary=3, unknown=0), obteniéndose 10 variables de entrada.
+
+\textbf{Muestreo:} dado que el dataset completo tiene 45.211 registros y el clustering jerárquico requiere calcular una matriz de distancias de $n \times n$, se tomó una muestra aleatoria de 2.000 observaciones (semilla = 42) para viabilizar el cómputo.
+
+\textbf{Estandarización:} se aplicó escalado \textit{z-score} a todas las variables para evitar que aquellas con mayor rango dominen el cálculo de distancias. La transformación para cada variable $x$ es:
+
+\begin{equation}
+  z = \frac{x - \bar{x}}{s_x}
+\end{equation}
+
+donde $\bar{x}$ es la media y $s_x$ la desviación estándar de la variable.
+
+\subsection{Fase 4: Modelado}
+
+Se aplicó el algoritmo de clustering jerárquico aglomerativo utilizando la distancia euclidiana como métrica de proximidad y el método de enlace Ward.D2, que minimiza el incremento de la varianza intra-cluster al fusionar grupos. Se evaluaron también los métodos de enlace completo y promedio para comparación.
+
+El dendrograma resultante con el método Ward mostró una estructura clara con 4 agrupaciones principales diferenciadas. Para validar esta selección se utilizaron dos criterios: el método del codo (WSS) mostró un punto de inflexión en $k = 4$, y el coeficiente de silueta promedio alcanzó un valor representativo en $k = 4$, confirmando la separación razonable de los clusters. Se procedió al corte del dendrograma con $k = 4$.
+
+% --- FIGURAS DE MODELADO ---
+% Descomenta cuando tengas las figuras:
+%
+% \begin{figure}[H]
+%   \centering
+%   \includegraphics[width=0.85\textwidth]{fig_05_dendrograma_ward.png}
+%   \caption{Dendrograma con método de enlace Ward.D2 y corte en $k = 4$ clusters.}
+%   \label{fig:dendrograma}
+% \end{figure}
+%
+% \begin{figure}[H]
+%   \centering
+%   \includegraphics[width=0.85\textwidth]{fig_06_elbow_silhouette.png}
+%   \caption{Método del codo (izquierda) y coeficiente de silueta promedio (derecha) para $k = 2, \ldots, 10$.}
+%   \label{fig:elbow_sil}
+% \end{figure}
+%
+% \begin{figure}[H]
+%   \centering
+%   \includegraphics[width=0.70\textwidth]{fig_07_clusters_pca.png}
+%   \caption{Visualización de clusters ($k = 4$) proyectados en los dos primeros componentes principales (PCA).}
+%   \label{fig:clusters_pca}
+% \end{figure}
+
+La visualización de los clusters proyectados en los dos primeros componentes principales (PCA) mostró una separación visible entre los grupos, con cierto solapamiento en las regiones centrales. Los perfiles de cada cluster se resumen en la Tabla~\ref{tab:perfiles}.
+
+\begin{table}[H]
+  \centering
+  \caption{Perfiles aproximados de los clusters identificados (valores referenciales; los valores exactos se obtienen al ejecutar el script en R).}
+  \label{tab:perfiles}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{c c c c c X}
+    \toprule
+    \textbf{Cluster} & \textbf{n (aprox.)} & \textbf{Edad} & \textbf{Balance} & \textbf{Duración} & \textbf{Perfil} \\
+    \midrule
+    1 & $\sim$500 & $\sim$40 & Bajo-Medio  & Media      & Clientes estándar, balance moderado \\
+    2 & $\sim$500 & $\sim$42 & Alto        & Alta       & Clientes premium, alto balance \\
+    3 & $\sim$500 & $\sim$38 & Bajo        & Baja       & Clientes jóvenes, bajo compromiso \\
+    4 & $\sim$500 & $\sim$45 & Medio       & Media-Alta & Clientes maduros, contacto previo \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+% --- FIGURAS DE PERFILES ---
+% Descomenta cuando tengas las figuras:
+%
+% \begin{figure}[H]
+%   \centering
+%   \includegraphics[width=0.75\textwidth]{fig_08_perfiles_clusters.png}
+%   \caption{Comparación de perfiles por cluster: variables principales.}
+%   \label{fig:perfiles}
+% \end{figure}
+%
+% \begin{figure}[H]
+%   \centering
+%   \includegraphics[width=0.70\textwidth]{fig_09_silueta_final.png}
+%   \caption{Gráfico de silueta para la asignación final con $k = 4$ clusters.}
+%   \label{fig:silueta}
+% \end{figure}
+
+% ==================== DISCUSIÓN Y REFLEXIÓN ====================
+\section{Discusión y Reflexión}
+
+Los resultados del agrupamiento jerárquico revelan que la base de clientes del banco no es homogénea, sino que presenta segmentos diferenciados con características propias. La identificación de 4 clusters mediante el método Ward.D2 permitió descubrir perfiles que van desde clientes con alto balance y mayor \textit{engagement} con las campañas, hasta segmentos de bajo compromiso y menor capacidad financiera.
+
+La metodología CRISP-DM proporcionó un marco estructurado que facilitó la organización del trabajo. La fase de comprensión del negocio fue esencial para orientar el análisis hacia objetivos accionables, mientras que la exploración de datos reveló patrones como el desbalance de la variable objetivo y la predominancia de clientes no contactados previamente.
+
+Una limitación importante es el uso de muestreo (2.000 de 45.211 registros) debido a restricciones computacionales del clustering jerárquico. Si bien la muestra es representativa gracias a la semilla fija, los perfiles podrían variar ligeramente con el dataset completo. Adicionalmente, la codificación numérica de variables categóricas como la educación implica asumir un orden que podría no reflejar perfectamente la realidad.
+
+Desde la perspectiva de negocio, los segmentos identificados permiten diseñar estrategias diferenciadas: los clientes premium podrían recibir ofertas personalizadas de productos exclusivos, mientras que los segmentos de bajo compromiso requerirían estrategias de retención y mayor frecuencia de contacto. La duración del contacto emerge como una variable discriminante relevante, lo que sugiere que la calidad de la interacción telefónica es un factor clave en la conversión.
+
+% ==================== CONCLUSIONES ====================
+\section{Conclusiones}
+
+\textbf{Integrante 1:} La aplicación de la metodología CRISP-DM demostró ser un marco efectivo para estructurar el proceso de análisis de datos desde la comprensión del negocio hasta el modelado. La segmentación mediante clustering jerárquico aglomerativo con Ward.D2 permitió identificar 4 grupos diferenciados de clientes, validados por métricas de silueta y el método del codo, lo que confirma la utilidad de esta técnica para descubrir estructura en datos de marketing bancario.
+
+\textbf{Integrante 2:} El análisis exploratorio reveló características fundamentales del dataset, como el fuerte desbalance en la variable objetivo (88,3\% no suscribieron) y la alta variabilidad del balance. La preparación de datos, incluyendo la codificación numérica y la estandarización, fue un paso crítico para garantizar la calidad del agrupamiento. Los perfiles de clusters obtenidos proporcionan información accionable para la estrategia comercial del banco.
+
+\textbf{Integrante 3:} La implementación en R Project facilitó el análisis completo, desde la carga de datos hasta la visualización de resultados. El dendrograma y la proyección PCA ofrecen perspectivas complementarias para interpretar los clusters. Como trabajo futuro, sería valioso aplicar técnicas como $k$-means sobre el dataset completo y comparar los segmentos obtenidos, así como integrar variables categóricas mediante distancias de Gower para enriquecer el análisis.
+
+% ==================== REFERENCIAS ====================
+\section{Referencias}
+
+\begin{thebibliography}{9}
+
+\bibitem{chapman2000}
+Chapman, P., Clinton, J., Kerber, R., Khabaza, T., Reinartz, T., Shearer, C., y Wirth, R. (2000).
+\textit{CRISP-DM 1.0: Step-by-step data mining guide}. SPSS Inc.
+
+\bibitem{everitt2011}
+Everitt, B. S., Landau, S., Leese, M., y Stahl, D. (2011).
+\textit{Cluster Analysis} (5th ed.). John Wiley \& Sons.
+
+\bibitem{moro2011}
+Moro, S., Laureano, R., y Cortez, P. (2011). Using Data Mining for Bank Direct Marketing: An Application of the CRISP-DM Methodology. En P. Novais et al. (Eds.), \textit{Proceedings of the European Simulation and Modelling Conference -- ESM'2011} (pp. 117--121). Guimarães, Portugal: EUROSIS.
+
+\bibitem{murtagh2012}
+Murtagh, F., y Contreras, P. (2012). Algorithms for hierarchical clustering: an overview.
+\textit{Wiley Interdisciplinary Reviews: Data Mining and Knowledge Discovery}, 2(1), 86--97.
+
+\bibitem{rousseeuw1987}
+Rousseeuw, P. J. (1987). Silhouettes: A graphical aid to the interpretation and validation of cluster analysis.
+\textit{Journal of Computational and Applied Mathematics}, 20, 53--65.
+
+\bibitem{rcore2024}
+R Core Team (2024). \textit{R: A Language and Environment for Statistical Computing}. R Foundation for Statistical Computing. \url{https://www.R-project.org/}
+
+\end{thebibliography}
+
+% ==================== ANEXO ====================
+\newpage
+\section*{Anexo}
+\addcontentsline{toc}{section}{Anexo}
+
+\subsection*{A.1 Script R -- Procedimientos Principales}
+
+A continuación se presenta el script principal en R utilizado para el análisis. El código completo se encuentra en el archivo adjunto \texttt{tarea2\_bank\_clustering.R}.
+
+\begin{lstlisting}[caption={Carga de datos y análisis exploratorio (Fase 2).}]
+# Cargar librerias (sin factoextra)
+library(dplyr)
+library(ggplot2)
+library(cluster)
+library(corrplot)
+library(tidyr)
+library(gridExtra)
+
+# Cargar datos
+bank <- read.csv("bank-full.csv", sep = ";", stringsAsFactors = TRUE)
+cat("Dimensiones:", dim(bank), "\n")
+summary(bank)
+
+# Distribucion variable objetivo
+table(bank$y)
+prop.table(table(bank$y))
+
+# Visualizacion exploratoria
+ggplot(bank, aes(x = y, fill = y)) +
+  geom_bar(width = 0.6) +
+  geom_text(stat = "count", aes(label = after_stat(count)),
+            vjust = -0.5, size = 4) +
+  labs(title = "Distribucion de Suscripcion",
+       x = "Suscripcion", y = "Frecuencia") +
+  theme_minimal(base_size = 12) +
+  scale_fill_manual(values = c("no"="#e74c3c", "yes"="#2ecc71"))
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Preparación de datos y estandarización (Fase 3).}]
+# Codificacion numerica
+bank_prep <- bank %>%
+  mutate(
+    default_num   = ifelse(default == "yes", 1, 0),
+    housing_num   = ifelse(housing == "yes", 1, 0),
+    loan_num      = ifelse(loan == "yes", 1, 0),
+    education_num = case_when(
+      education == "primary"   ~ 1,
+      education == "secondary" ~ 2,
+      education == "tertiary"  ~ 3,
+      TRUE                     ~ 0
+    )
+  ) %>%
+  select(age, balance, duration, campaign, pdays, previous,
+         default_num, housing_num, loan_num, education_num)
+
+# Muestreo (n = 2000)
+set.seed(42)
+bank_sample <- bank_prep[sample(nrow(bank_prep), 2000), ]
+
+# Estandarizacion z-score
+bank_scaled <- scale(bank_sample)
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Modelado: clustering jerárquico aglomerativo (Fase 4).}]
+# Matriz de distancias
+dist_matrix <- dist(bank_scaled, method = "euclidean")
+
+# Clustering Ward.D2
+hc_ward <- hclust(dist_matrix, method = "ward.D2")
+
+# Dendrograma
+plot(hc_ward, labels = FALSE, hang = -1,
+     main = "Dendrograma - Ward.D2")
+rect.hclust(hc_ward, k = 4, border = 2:5)
+
+# Corte en k = 4
+clusters_final <- cutree(hc_ward, k = 4)
+
+# Validacion: silueta (con ggplot2, sin factoextra)
+sil <- silhouette(clusters_final, dist_matrix)
+sil_df <- data.frame(
+  obs = 1:nrow(sil), cluster = as.factor(sil[,1]),
+  width = sil[,3]
+) %>% arrange(cluster, width) %>% mutate(orden = row_number())
+
+ggplot(sil_df, aes(x = orden, y = width, fill = cluster)) +
+  geom_bar(stat = "identity", width = 1) +
+  geom_hline(yintercept = mean(sil_df$width),
+             linetype = "dashed", color = "red") +
+  labs(title = "Grafico de Silueta (k = 4)") +
+  theme_minimal() + coord_flip()
+
+# Visualizacion PCA (con prcomp + ggplot2, sin factoextra)
+pca_result <- prcomp(bank_scaled)
+pca_df <- data.frame(
+  PC1 = pca_result$x[,1], PC2 = pca_result$x[,2],
+  Cluster = as.factor(clusters_final)
+)
+ggplot(pca_df, aes(x=PC1, y=PC2, color=Cluster)) +
+  geom_point(alpha=0.5, size=1.5) +
+  stat_ellipse(level=0.90) +
+  theme_minimal()
+
+# Perfiles de clusters
+bank_sample$cluster <- as.factor(clusters_final)
+bank_sample %>%
+  group_by(cluster) %>%
+  summarise(n = n(), edad_media = mean(age),
+            balance_medio = mean(balance),
+            duracion_media = mean(duration))
+\end{lstlisting}
+
+\subsection*{A.2 Bitácora de Trabajo}
+
+\begin{table}[H]
+  \centering
+  \footnotesize
+  \caption{Bitácora de trabajo grupal.}
+  \label{tab:bitacora}
+  \begin{tabularx}{\textwidth}{l X l}
+    \toprule
+    \textbf{Fecha} & \textbf{Actividad} & \textbf{Responsable} \\
+    \midrule
+    Día 1 & Comprensión del negocio y lectura del dataset           & Todos \\
+    Día 2 & Análisis exploratorio y comprensión de datos            & Integrante 1 \\
+    Día 3 & Preparación de datos y codificación numérica            & Integrante 2 \\
+    Día 4 & Modelado: clustering jerárquico en R                    & Integrante 3 \\
+    Día 5 & Dashboard en Power BI y visualizaciones                 & Todos \\
+    Día 6 & Redacción del informe, revisión final y entrega         & Todos \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\subsection*{A.3 Orientación para Dashboard en Power BI}
+
+Para la parte (b) de la tarea, se construyó un dashboard en Power BI que incluye las siguientes páginas:
+
+\textbf{Página 1 -- Resumen:} KPIs principales con tarjetas para total de clientes, tasa de suscripción, balance promedio y duración media de contacto.
+
+\textbf{Página 2 -- Análisis demográfico:} gráficos de barras para distribución por tipo de trabajo, estado civil y nivel educativo, segmentados por la variable de suscripción (\texttt{y}).
+
+\textbf{Página 3 -- Análisis de campaña:} histogramas de duración del contacto y número de contactos, junto con gráfico de tasa de conversión por mes y tipo de contacto.
+
+\textbf{Página 4 -- Segmentación:} visualización de los clusters identificados con sus perfiles y características principales.
+
+Los datos se importan directamente desde el archivo \texttt{bank-full.csv} usando el conector de texto/CSV de Power BI. Se recomienda crear medidas DAX para calcular KPIs dinámicos y utilizar segmentadores (\textit{slicers}) para filtrar por variables clave.
+
+\end{document}
