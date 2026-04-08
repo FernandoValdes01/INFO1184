@@ -33,7 +33,7 @@ library(gridExtra)
 # ============================================================
 
 # Cargar datos
-bank <- read.csv("bank-full.csv", sep = ";", stringsAsFactors = TRUE)
+bank <- read.csv("data/bank-full.csv", sep = ";", stringsAsFactors = TRUE)
 
 cat("Dimensiones del dataset:", dim(bank), "\n")
 cat("Estructura:\n")
@@ -47,13 +47,14 @@ print(table(bank$y))
 print(prop.table(table(bank$y)))
 
 # --- Fig 1: Distribución variable objetivo ---
-png("fig_01_distribucion_y.png", width = 600, height = 400, res = 100)
+png("fig_01_distribucion_y.png", width = 600, height = 450, res = 100)
 ggplot(bank, aes(x = y, fill = y)) +
   geom_bar(width = 0.6) +
   geom_text(stat = "count", aes(label = after_stat(count)), vjust = -0.5, size = 4) +
   labs(title = "Distribución de Suscripción a Depósito a Plazo",
        x = "Suscripción", y = "Frecuencia") +
   theme_minimal(base_size = 12) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.1))) +
   scale_fill_manual(values = c("no" = "#e74c3c", "yes" = "#2ecc71")) +
   theme(legend.position = "none")
 dev.off()
