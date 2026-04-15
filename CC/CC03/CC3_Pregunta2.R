@@ -22,7 +22,7 @@ cat("=== Datos ===\n")
 print(datos)
 
 # --- a) Grafico de dispersion ---
-png("dispersion.png", width = 700, height = 600, res = 120)
+pdf("dispersion.pdf", width = 7, height = 6)
 plot(datos$X1, datos$X2,
      main = "Dispersion de los datos X",
      xlab = expression(X[1]), ylab = expression(X[2]),
@@ -31,7 +31,7 @@ text(datos$X1, datos$X2, labels = rownames(datos),
      pos = 4, cex = 0.8, offset = 0.5)
 grid()
 dev.off()
-cat("\n[OK] dispersion.png generado\n")
+cat("\n[OK] dispersion.pdf generado\n")
 
 # --- b) K-medias con k=2 ---
 set.seed(42)
@@ -43,7 +43,7 @@ print(km2$centers)
 
 # Grafico k=2
 colores_k2 <- c("red", "blue")
-png("kmeans_k2.png", width = 700, height = 600, res = 120)
+pdf("kmeans_k2.pdf", width = 7, height = 6)
 plot(datos$X1, datos$X2,
      main = "K-Medias con k=2",
      xlab = expression(X[1]), ylab = expression(X[2]),
@@ -61,7 +61,7 @@ legend("topleft",
        col = colores_k2, pch = 19, cex = 0.7)
 grid()
 dev.off()
-cat("[OK] kmeans_k2.png generado\n")
+cat("[OK] kmeans_k2.pdf generado\n")
 
 # --- b) K-medias con k=3 ---
 set.seed(42)
@@ -73,7 +73,7 @@ print(km3$centers)
 
 # Grafico k=3
 colores_k3 <- c("red", "blue", "darkgreen")
-png("kmeans_k3.png", width = 700, height = 600, res = 120)
+pdf("kmeans_k3.pdf", width = 7, height = 6)
 plot(datos$X1, datos$X2,
      main = "K-Medias con k=3",
      xlab = expression(X[1]), ylab = expression(X[2]),
@@ -92,7 +92,7 @@ legend("topleft",
        col = colores_k3, pch = 19, cex = 0.7)
 grid()
 dev.off()
-cat("[OK] kmeans_k3.png generado\n")
+cat("[OK] kmeans_k3.pdf generado\n")
 
 # --- c) Imprimir centros ---
 cat("\n========================================\n")
