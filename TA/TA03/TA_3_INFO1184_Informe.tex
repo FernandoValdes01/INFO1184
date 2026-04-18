@@ -1,0 +1,403 @@
+\documentclass[10pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage[top=1.5cm, bottom=2cm, left=1.5cm, right=1.5cm]{geometry}
+\usepackage{setspace}
+\singlespacing
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{amsmath}
+\usepackage{caption}
+\usepackage{listings}
+\usepackage{parskip}
+\usepackage[numbers]{natbib}
+\usepackage{fancyhdr}
+
+\definecolor{codebackground}{HTML}{F5F5F5}
+\definecolor{codecomment}{HTML}{6A9955}
+\definecolor{codestring}{HTML}{CE9178}
+\definecolor{codekeyword}{HTML}{569CD6}
+\definecolor{headerdark}{HTML}{2C3E50}
+
+\lstset{
+  language=R,
+  backgroundcolor=\color{codebackground},
+  basicstyle=\ttfamily\footnotesize,
+  breaklines=true,
+  frame=single,
+  rulecolor=\color{gray!40},
+  commentstyle=\color{codecomment},
+  stringstyle=\color{codestring},
+  keywordstyle=\color{codekeyword}\bfseries,
+  numbers=left,
+  numberstyle=\tiny\color{gray},
+  numbersep=5pt,
+  tabsize=2,
+  showstringspaces=false,
+  captionpos=b
+}
+
+\hypersetup{
+  colorlinks=true,
+  linkcolor=headerdark,
+  citecolor=headerdark,
+  urlcolor=blue!70!black
+}
+
+\captionsetup{font=small, labelfont=bf}
+
+\begin{document}
+
+\begin{center}
+  {\LARGE \textbf{Análisis de Agrupamiento por K-Medias}} \\[4pt]
+  {\LARGE \textbf{Dataset Paddy -- Metodología CRISP-DM}} \\[10pt]
+  {\normalsize Juan Muñoz, Vicente Rivera, Fernando Valdés} \\[2pt]
+  {\small juan.munozveloso2023@alu.uct.cl, vrivera2023@alu.uct.cl, fvaldes2023@alu.uct.cl} \\[2pt]
+  {\small Tarea 3, INFO1184, Semestre I-2026}
+\end{center}
+
+\section*{Resumen}
+
+El presente informe aborda el análisis de segmentación de parcelas de cultivo de arroz (\textit{paddy}) mediante la técnica de agrupamiento por k-medias, siguiendo la metodología CRISP-DM en sus fases de comprensión empresarial, comprensión de los datos, preparación de los datos y modelamiento. El dataset contiene 2.789 registros con 45 variables que describen condiciones agrícolas, climáticas y de rendimiento de parcelas ubicadas en seis bloques agrícolas de la India. Se realizó un análisis exploratorio, preparación de datos con selección de 20 variables numéricas y estandarización \textit{z-score}, y posterior modelamiento con k-medias. Mediante el método del codo y el coeficiente de silueta se determinó $k = 9$ como número óptimo de clusters, obteniendo una silueta promedio de 0,4915 y una razón BSS/TSS de 87,18\%. Los resultados revelan perfiles productivos diferenciados por escala de cultivo, condiciones climáticas regionales y niveles de rendimiento, proporcionando información valiosa para la optimización de prácticas agrícolas. El desarrollo se implementó en el ambiente R Project.
+
+\textbf{Palabras clave:} k-medias, CRISP-DM, cultivo de arroz, agrupamiento, segmentación agrícola, R Project.
+
+\section{Introducción}
+
+En el contexto de la inteligencia de negocios aplicada al sector agrícola, la segmentación de parcelas de cultivo constituye una herramienta fundamental para la toma de decisiones sobre siembra, fertilización y riego. La producción de arroz (\textit{paddy}) es un pilar de la seguridad alimentaria global, y la identificación de perfiles productivos permite optimizar recursos, mejorar rendimientos y adaptar estrategias a las condiciones específicas de cada zona.
+
+El presente trabajo utiliza el Paddy Dataset, que contiene registros de parcelas de arroz en seis bloques agrícolas de la India (Cuddalore, Kurinjipadi, Panruti, Kallakurichi, Sankarapuram y Chinnasalem), con información sobre hectáreas, variedades, tipos de suelo, fertilización, condiciones climáticas y rendimiento. El objetivo es aplicar la técnica de agrupamiento por k-medias para descubrir segmentos naturales dentro de las parcelas, siguiendo las primeras cuatro fases de la metodología CRISP-DM \citep{chapman2000}.
+
+Las preguntas que guían este análisis son: (1) ¿Existen grupos naturales diferenciados entre las parcelas de cultivo? (2) ¿Qué características agrícolas y climáticas definen cada segmento? (3) ¿Cómo pueden estos segmentos informar la planificación agrícola y la asignación de insumos?
+
+\section{Fundamentos de Teoría}
+
+\subsection{Metodología CRISP-DM}
+
+CRISP-DM (\textit{Cross-Industry Standard Process for Data Mining}) es la metodología estándar de la industria para proyectos de minería de datos \citep{chapman2000}. Se estructura en seis fases iterativas: (1)~Comprensión empresarial, (2)~Comprensión de los datos, (3)~Preparación de los datos, (4)~Modelamiento, (5)~Evaluación y (6)~Despliegue. En este trabajo se abordan las fases 1 a 4.
+
+\subsection{Agrupamiento por K-Medias}
+
+El algoritmo k-medias es una técnica de aprendizaje no supervisado que particiona un conjunto de $n$ observaciones en $k$ clusters, minimizando la varianza intra-cluster \citep{macqueen1967}. Formalmente, dado un conjunto $\{x_1, x_2, \ldots, x_n\}$, el objetivo es encontrar la partición $S = \{S_1, S_2, \ldots, S_k\}$ que minimice la suma de cuadrados intra-cluster (WSS):
+
+\begin{equation}
+  \text{WSS} = \sum_{i=1}^{k} \sum_{x \in S_i} \|x - \mu_i\|^2
+\end{equation}
+
+donde $\mu_i$ es el centroide del cluster $S_i$. El algoritmo opera iterativamente: (1)~se inicializan $k$ centroides, (2)~se asigna cada observación al centroide más cercano según la distancia euclidiana, (3)~se recalculan los centroides como la media de las observaciones asignadas, y se repiten los pasos 2--3 hasta convergencia \citep{hastie2009}.
+
+La distancia euclidiana entre dos puntos $\mathbf{x}$ e $\mathbf{y}$ en $\mathbb{R}^p$ se define como:
+
+\begin{equation}
+  d(\mathbf{x}, \mathbf{y}) = \sqrt{\sum_{j=1}^{p}(x_j - y_j)^2}
+\end{equation}
+
+\subsection{Validación de Clusters}
+
+Para determinar el número óptimo de clusters se emplean el método del codo, que busca el punto de inflexión en la curva WSS, y el coeficiente de silueta \citep{rousseeuw1987}. El coeficiente de silueta para una observación $i$ se define como:
+
+\begin{equation}
+  s(i) = \frac{b(i) - a(i)}{\max\{a(i), b(i)\}}
+\end{equation}
+
+donde $a(i)$ es la distancia media intra-cluster y $b(i)$ la distancia media mínima al cluster más cercano. Un valor cercano a 1 indica buena asignación. La razón BSS/TSS (\textit{Between Sum of Squares} / \textit{Total Sum of Squares}) indica qué proporción de la varianza total es explicada por la separación entre clusters.
+
+\section{Desarrollo del Trabajo}
+
+\subsection{Fase 1: Comprensión Empresarial}
+
+El problema de negocio consiste en optimizar la producción de arroz mediante la identificación de perfiles de parcelas que comparten condiciones agrícolas y climáticas similares. Los productores enfrentan el desafío de asignar insumos (fertilizantes, pesticidas, semillas) de manera eficiente, considerando la variabilidad entre regiones, tipos de suelo y variedades de arroz. Se busca segmentar las parcelas para definir estrategias diferenciadas de gestión agrícola.
+
+El objetivo de minería de datos es descubrir grupos homogéneos de parcelas mediante k-medias, caracterizando cada segmento según variables de escala productiva, fertilización, condiciones climáticas y rendimiento. El criterio de éxito es obtener clusters con perfiles interpretables y agronómicamente diferenciados.
+
+\subsection{Fase 2: Comprensión de los Datos}
+
+El dataset \texttt{paddydataset.csv} contiene 2.789 registros y 45 atributos. Las variables se clasifican en: escala de cultivo (\texttt{Hectares}, \texttt{Seedrate}, \texttt{Nursery area}), fertilización (\texttt{DAP}, \texttt{Urea}, \texttt{Potassh}, \texttt{Micronutrients}, \texttt{Pest}), condiciones climáticas (precipitación, temperatura, humedad relativa, viento) y rendimiento (\texttt{Paddy yield}). Las variables categóricas incluyen bloque agrícola (6 niveles), variedad (CO\_43, delux ponni, ponmani), tipo de suelo (aluvial, arcilloso) y tipo de vivero (seco, húmedo).
+
+No se detectaron valores faltantes en ninguna variable. El rendimiento medio es de 22.518~Kg (DE~=~9.974~Kg), con un rango de 5.410 a 38.814~Kg, lo que evidencia alta variabilidad productiva. Las hectáreas varían de 1 a 6, y la distribución de variedades es relativamente equilibrada. Del análisis exploratorio (Fig.~\ref{fig:eda_1} y Fig.~\ref{fig:eda_2}) se observa que la variedad \textit{delux ponni} presenta los rendimientos más altos, y que existe una fuerte correlación entre las variables de escala (hectáreas, tasa de siembra, fertilizantes).
+
+\begin{figure}[H]
+  \centering
+  \begin{minipage}{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{fig_01_distribucion_yield.png}
+  \end{minipage}
+  \hfill
+  \begin{minipage}{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{fig_02_yield_variedad_suelo.png}
+  \end{minipage}
+  \caption{Izquierda: distribución del rendimiento de arroz. Derecha: rendimiento por variedad y tipo de suelo.}
+  \label{fig:eda_1}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+  \begin{minipage}{0.52\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{fig_03_yield_agriblock.png}
+  \end{minipage}
+  \hfill
+  \begin{minipage}{0.44\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{fig_04_correlaciones.png}
+  \end{minipage}
+  \caption{Izquierda: rendimiento por bloque agrícola. Derecha: matriz de correlaciones entre variables numéricas.}
+  \label{fig:eda_2}
+\end{figure}
+
+\subsection{Fase 3: Preparación de los Datos}
+
+Para la aplicación de k-medias se realizaron las siguientes transformaciones:
+
+\textbf{Selección de variables:} se eligieron 20 variables numéricas que capturan la escala productiva (hectáreas, tasa de siembra, fertilizante del campo principal), fertilización (DAP, urea, potasio, micronutrientes, pesticida), condiciones climáticas (precipitación e irrigación en cuatro períodos, temperatura mínima y máxima del primer mes, humedad relativa de los dos primeros períodos), residuos (\textit{trash}) y rendimiento final.
+
+\textbf{Estandarización:} se aplicó escalado \textit{z-score} a todas las variables para evitar que aquellas con mayor rango dominen el cálculo de distancias:
+
+\begin{equation}
+  z = \frac{x - \bar{x}}{s_x}
+\end{equation}
+
+donde $\bar{x}$ es la media y $s_x$ la desviación estándar. Se verificó que las medias resultantes fueran $\approx 0$ y las desviaciones estándar $\approx 1$.
+
+\subsection{Fase 4: Modelamiento}
+
+Se aplicó el algoritmo k-medias con 25 inicializaciones aleatorias (\texttt{nstart~=~25}) y semilla fija (42) para reproducibilidad. Se evaluaron valores de $k$ desde 2 hasta 10. El método del codo mostró una disminución gradual del WSS con inflexiones en $k = 4$ y $k = 7$. El coeficiente de silueta promedio alcanzó su máximo en $k = 9$ (0,4915), seguido por $k = 8$ (0,4778) y $k = 7$ (0,4561). Se seleccionó $k = 9$ por maximizar la silueta y ofrecer la mayor separación entre grupos (Fig.~\ref{fig:elbow_sil}).
+
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.85\textwidth]{fig_05_elbow_silhouette.png}
+  \caption{Método del codo (izquierda) y coeficiente de silueta promedio (derecha) para $k = 2$ a $10$.}
+  \label{fig:elbow_sil}
+\end{figure}
+
+El modelo final con $k = 9$ obtuvo un WSS total de 7.146,7 y una razón BSS/TSS de 87,18\%, indicando que los clusters explican el 87\% de la varianza total de los datos. La visualización en los dos primeros componentes principales (PCA) muestra una separación clara entre los grupos (Fig.~\ref{fig:clusters_pca}).
+
+\begin{figure}[H]
+  \centering
+  \begin{minipage}{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{fig_06_clusters_pca.png}
+  \end{minipage}
+  \hfill
+  \begin{minipage}{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{fig_08_silueta_final.png}
+  \end{minipage}
+  \caption{Izquierda: clusters proyectados en PCA. Derecha: gráfico de silueta ($k = 9$, promedio = 0,4915).}
+  \label{fig:clusters_pca}
+\end{figure}
+
+Los perfiles revelan que los clusters se diferencian principalmente por la escala de cultivo (hectáreas entre 1,4 y 5,2), las condiciones climáticas regionales (temperatura, humedad, precipitación) y el rendimiento resultante (desde 8.138 hasta 31.981~Kg). La Tabla~\ref{tab:perfiles} resume las características de cada cluster.
+
+\begin{table}[H]
+  \centering
+  \caption{Perfiles de los clusters identificados mediante k-medias ($k = 9$).}
+  \label{tab:perfiles}
+  \footnotesize
+  \begin{tabularx}{\textwidth}{c c c c c c X}
+    \toprule
+    \textbf{Cl.} & \textbf{n} & \textbf{Ha} & \textbf{Yield (Kg)} & \textbf{Urea} & \textbf{Hum. \%} & \textbf{Perfil} \\
+    \midrule
+    1 & 368 & 4,8 & 29.364 & 129,0 & 72,7 & Escala alta, humedad baja, rendimiento alto \\
+    2 & 325 & 3,5 & 21.219 & 96,2  & 86,7 & Escala media, humedad alta, rendimiento medio \\
+    3 & 284 & 1,4 & 8.138  & 38,4  & 83,5 & Escala baja, humedad alta, rendimiento bajo \\
+    4 & 240 & 4,8 & 29.299 & 129,1 & 78,6 & Escala alta, humedad moderada, rendimiento alto \\
+    5 & 365 & 3,6 & 21.246 & 96,3  & 68,1 & Escala media, humedad baja, rendimiento medio \\
+    6 & 218 & 1,6 & 9.300  & 43,8  & 68,2 & Escala baja, humedad baja, rendimiento bajo \\
+    7 & 325 & 2,5 & 14.634 & 69,1  & 75,1 & Escala media-baja, humedad moderada \\
+    8 & 353 & 5,2 & 31.935 & 140,8 & 68,1 & Escala máxima, humedad baja, mayor rendimiento \\
+    9 & 311 & 5,2 & 31.981 & 140,8 & 86,7 & Escala máxima, humedad alta, mayor rendimiento \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\begin{figure}[H]
+  \centering
+  \begin{minipage}{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{fig_07_perfiles_clusters.png}
+  \end{minipage}
+  \hfill
+  \begin{minipage}{0.48\textwidth}
+    \centering
+    \includegraphics[width=\textwidth]{fig_09_yield_por_cluster.png}
+  \end{minipage}
+  \caption{Izquierda: comparación de variables por cluster. Derecha: rendimiento de arroz por cluster.}
+  \label{fig:perfiles}
+\end{figure}
+
+\section{Discusión y Reflexión}
+
+La metodología CRISP-DM proporcionó un marco estructurado para abordar el análisis de segmentación de parcelas arroceras. Los resultados del k-medias con $k = 9$ evidencian que la variabilidad en el dataset se explica principalmente por dos factores: la escala productiva (hectáreas y las variables de insumos que escalan proporcionalmente) y las condiciones climáticas regionales (humedad relativa y temperatura), que corresponden a los diferentes bloques agrícolas.
+
+La silueta promedio de 0,4915 indica una calidad de agrupamiento moderada-buena, y la razón BSS/TSS de 87,18\% confirma que los clusters capturan la mayor parte de la estructura de los datos. La fuerte correlación entre hectáreas, tasa de siembra y cantidades de fertilizante sugiere que estas variables representan un único factor latente (escala de producción), lo cual explica la claridad de la separación.
+
+Desde la perspectiva agronómica, los clusters de rendimiento alto (8, 9, 1, 4) corresponden a parcelas de mayor escala (4,8--5,2~Ha) con fertilización proporcional, independientemente de las condiciones de humedad. Los clusters de rendimiento bajo (3, 6) corresponden a parcelas pequeñas (1,4--1,6~Ha). El cluster~7 representa un perfil intermedio. Esto sugiere que la escala de producción es el principal determinante del rendimiento absoluto.
+
+Una limitación del análisis es la alta multicolinealidad entre variables de insumos y hectáreas, que podría haberse abordado con reducción de dimensionalidad previa (PCA) o selección más estricta de variables. Como trabajo futuro, se recomienda analizar el rendimiento por hectárea para controlar el efecto de escala.
+
+\section{Conclusiones}
+
+\textbf{Juan Muñoz:} La aplicación del k-medias con CRISP-DM demostró ser eficaz para identificar 9 segmentos diferenciados en el dataset Paddy, con una silueta de 0,4915 y BSS/TSS del 87,18\%. Los clusters revelan que la escala productiva y las condiciones climáticas regionales son los principales factores de diferenciación entre parcelas, información útil para la planificación agrícola diferenciada.
+
+\textbf{Vicente Rivera:} El análisis exploratorio reveló la ausencia de datos faltantes y una alta variabilidad en el rendimiento (5.410 a 38.814~Kg), fuertemente correlacionada con la escala de cultivo. La estandarización \textit{z-score} fue fundamental para que las variables climáticas, con rangos menores, pudieran contribuir al agrupamiento junto a las variables de producción.
+
+\textbf{Fernando Valdés:} La implementación en R permitió un flujo completo desde la exploración hasta la validación. La visualización PCA y el gráfico de silueta confirman la calidad del agrupamiento. Como mejora futura, sería valioso normalizar los insumos y rendimiento por hectárea para detectar eficiencias intrínsecas, así como incorporar las variables categóricas mediante codificación \textit{one-hot} o distancia de Gower.
+
+\section{Referencias}
+\small
+\begin{thebibliography}{9}
+
+\bibitem{chapman2000}
+Chapman, P., Clinton, J., Kerber, R., Khabaza, T., Reinartz, T., Shearer, C., y Wirth, R. (2000).
+\textit{CRISP-DM 1.0: Step-by-step data mining guide}. SPSS Inc.
+
+\bibitem{hastie2009}
+Hastie, T., Tibshirani, R., y Friedman, J. (2009).
+\textit{The Elements of Statistical Learning} (2nd ed.). Springer.
+
+\bibitem{macqueen1967}
+MacQueen, J. (1967). Some methods for classification and analysis of multivariate observations. En \textit{Proceedings of the Fifth Berkeley Symposium on Mathematical Statistics and Probability}, Vol. 1 (pp. 281--297). University of California Press.
+
+\bibitem{rousseeuw1987}
+Rousseeuw, P. J. (1987). Silhouettes: A graphical aid to the interpretation and validation of cluster analysis.
+\textit{Journal of Computational and Applied Mathematics}, 20, 53--65.
+
+\bibitem{rcore2024}
+R Core Team (2024). \textit{R: A Language and Environment for Statistical Computing}. R Foundation for Statistical Computing. \url{https://www.R-project.org/}
+
+\bibitem{jain2010}
+Jain, A. K. (2010). Data clustering: 50 years beyond K-means.
+\textit{Pattern Recognition Letters}, 31(8), 651--666.
+
+\end{thebibliography}
+
+\newpage
+\section*{Anexo}
+\addcontentsline{toc}{section}{Anexo}
+
+\subsection*{A.1 Script R -- Procedimientos Principales}
+
+A continuación se presenta el script principal en R utilizado para el análisis. El código completo se encuentra en el archivo adjunto \texttt{tarea3\_paddy\_kmeans.R}.
+
+\begin{lstlisting}[caption={Carga de datos y análisis exploratorio (Fase 2).}]
+# Cargar librerias
+library(dplyr)
+library(ggplot2)
+library(cluster)
+library(corrplot)
+library(tidyr)
+library(gridExtra)
+
+# Cargar datos
+paddy <- read.csv("dataset/paddydataset.csv",
+                   stringsAsFactors = TRUE)
+cat("Dimensiones:", dim(paddy), "\n")
+summary(paddy)
+
+# Distribucion de rendimiento
+ggplot(paddy, aes(x = Paddy.yield.in.Kg.)) +
+  geom_histogram(bins = 30, fill = "#2ecc71") +
+  labs(title = "Distribucion del Rendimiento",
+       x = "Rendimiento (Kg)", y = "Frecuencia") +
+  theme_minimal()
+
+# Rendimiento por variedad y suelo
+ggplot(paddy, aes(x = Variety, y = Paddy.yield.in.Kg.,
+                  fill = Soil.Types)) +
+  geom_boxplot() +
+  labs(title = "Rendimiento por Variedad y Suelo") +
+  theme_minimal()
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Preparación de datos y estandarización (Fase 3).}]
+# Seleccion de 20 variables numericas
+paddy_prep <- paddy %>%
+  select(Hectares, Seedrate.in.Kg.,
+    LP_Mainfield.in.Tonnes., DAP_20days,
+    Urea_40Days, Potassh_50Days,
+    Micronutrients_70Days, Pest_60Day.in.ml.,
+    X30DRain..in.mm., X30DAI.in.mm.,
+    X30_50DRain..in.mm., X30_50DAI.in.mm.,
+    X51_70DRain.in.mm., X51_70AI.in.mm.,
+    Min.temp_D1_D30, Max.temp_D1_D30,
+    Relative.Humidity_D1_D30,
+    Relative.Humidity_D31_D60,
+    Trash.in.bundles., Paddy.yield.in.Kg.)
+
+# Estandarizacion z-score
+paddy_scaled <- scale(paddy_prep)
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Modelado: K-medias y validación (Fase 4).}]
+# Metodo del codo y silueta para k = 2..10
+set.seed(42)
+wss <- sapply(2:10, function(k) {
+  km <- kmeans(paddy_scaled, centers = k,
+               nstart = 25, iter.max = 100)
+  km$tot.withinss
+})
+avg_sil <- sapply(2:10, function(k) {
+  set.seed(42)
+  km <- kmeans(paddy_scaled, centers = k,
+               nstart = 25, iter.max = 100)
+  mean(silhouette(km$cluster,
+       dist(paddy_scaled))[, 3])
+})
+
+# K-Medias final con k optimo
+k_opt <- which.max(avg_sil) + 1  # k = 9
+km_final <- kmeans(paddy_scaled, centers = k_opt,
+                   nstart = 25, iter.max = 100)
+cat("BSS/TSS:", km_final$betweenss /
+    km_final$totss * 100, "%\n")
+
+# Visualizacion PCA
+pca_result <- prcomp(paddy_scaled)
+pca_df <- data.frame(PC1 = pca_result$x[,1],
+  PC2 = pca_result$x[,2],
+  Cluster = as.factor(km_final$cluster))
+ggplot(pca_df, aes(x=PC1, y=PC2, color=Cluster)) +
+  geom_point(alpha=0.5) +
+  stat_ellipse(level=0.90) +
+  theme_minimal()
+
+# Silueta final
+sil <- silhouette(km_final$cluster,
+                  dist(paddy_scaled))
+cat("Silueta promedio:", mean(sil[,3]), "\n")
+\end{lstlisting}
+
+\subsection*{A.2 Parte b) -- Dashboard en Power BI}
+
+Para la parte b) de la tarea, se utilizó Power BI Desktop para generar un dashboard interactivo con la visualización de los datos del dataset Paddy. Se importó el archivo \texttt{paddydataset.csv} y se crearon las siguientes visualizaciones: (1) tarjetas KPI con rendimiento promedio, hectáreas totales y número de parcelas; (2) gráfico de barras del rendimiento promedio por bloque agrícola; (3) gráfico circular de distribución por variedad de arroz; (4) mapa de calor de rendimiento por variedad y tipo de suelo; (5) gráfico de líneas de la relación entre fertilizantes y rendimiento; y (6) segmentadores interactivos por bloque agrícola, variedad y tipo de suelo. El archivo \texttt{.pbix} se adjunta como evidencia del dashboard.
+
+\subsection*{A.3 Bitácora de Trabajo}
+
+\begin{table}[H]
+  \centering
+  \footnotesize
+  \caption{Bitácora de trabajo grupal.}
+  \label{tab:bitacora}
+  \begin{tabularx}{\textwidth}{l X l}
+    \toprule
+    \textbf{Fecha} & \textbf{Actividad} & \textbf{Responsable} \\
+    \midrule
+    Día 1 & Comprensión del negocio y lectura del dataset           & Todos \\
+    Día 2 & Análisis exploratorio y comprensión de datos            & Integrante 1 \\
+    Día 3 & Preparación de datos y estandarización                  & Integrante 2 \\
+    Día 4 & Modelado: k-medias en R y validación                    & Integrante 3 \\
+    Día 5 & Dashboard en Power BI y visualizaciones                 & Todos \\
+    Día 6 & Redacción del informe, revisión final y entrega         & Todos \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\end{document}
