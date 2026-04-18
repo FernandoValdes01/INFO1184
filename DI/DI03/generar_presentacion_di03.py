@@ -1174,7 +1174,7 @@ def build_conclusion_slide(prs: Presentation) -> None:
     slide = prs.slides.add_slide(prs.slide_layouts[6])
     add_slide_base(slide, 8, "Cierre", "Conclusiones", "DBSCAN es fuerte cuando el ruido y la forma real de los datos no pueden simplificarse")
 
-    add_rect(slide, Inches(0.62), Inches(1.74), Inches(12.08), Inches(1.24), THEME["navy"], rounded=True)
+    add_rect(slide, Inches(0.62), Inches(1.74), Inches(12.08), Inches(1.44), THEME["navy"], rounded=True)
     add_text(
         slide,
         "Conclusion central",
@@ -1190,13 +1190,13 @@ def build_conclusion_slide(prs: Presentation) -> None:
     )
     add_text(
         slide,
-        "DBSCAN permite descubrir estructuras densas reales sin fijar k y convierte el ruido en informacion util para el analisis.",
+        "En dashboards de Inteligencia de Negocios, DBSCAN ayuda a revelar zonas densas, patrones y anomalias que no siempre son evidentes. Esto permite detectar oportunidades, anticipar riesgos y enfocar decisiones sobre los comportamientos que realmente importan.",
         Inches(0.98),
         Inches(2.28),
         Inches(10.78),
-        Inches(0.28),
+        Inches(0.64),
         font_name="Aptos Display",
-        size=20,
+        size=16,
         color=THEME["white"],
         bold=True,
         margin=0,
