@@ -1,7 +1,8 @@
 \documentclass[10pt,a4paper]{article}
 
 \usepackage[utf8]{inputenc}
-\usepackage[spanish]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,es-nodecimaldot]{babel}
 \usepackage[top=1.5cm, bottom=2cm, left=1.5cm, right=1.5cm]{geometry}
 \usepackage{setspace}
 \singlespacing
@@ -13,11 +14,16 @@
 \usepackage{hyperref}
 \usepackage{xcolor}
 \usepackage{amsmath}
+\usepackage{amssymb}
 \usepackage{caption}
+\usepackage{subcaption}
 \usepackage{listings}
 \usepackage{parskip}
-\usepackage[numbers]{natbib}
+\usepackage{csquotes}
+\usepackage[backend=biber,style=authoryear,sorting=nyt,maxcitenames=2,maxbibnames=99]{biblatex}
 \usepackage{fancyhdr}
+
+\addbibresource{referencias.bib}
 
 \definecolor{codebackground}{HTML}{F5F5F5}
 \definecolor{codecomment}{HTML}{6A9955}
@@ -47,7 +53,9 @@
   colorlinks=true,
   linkcolor=headerdark,
   citecolor=headerdark,
-  urlcolor=blue!70!black
+  urlcolor=blue!70!black,
+  pdftitle={Análisis de Agrupamiento por K-Medias},
+  pdfauthor={Juan Muñoz, Vicente Rivera, Fernando Valdés}
 }
 
 \captionsetup{font=small, labelfont=bf}
@@ -64,7 +72,7 @@
 
 \section*{Resumen}
 
-El presente informe aborda el análisis de segmentación de parcelas de cultivo de arroz (\textit{paddy}) mediante la técnica de agrupamiento por k-medias, siguiendo la metodología CRISP-DM en sus fases de comprensión empresarial, comprensión de los datos, preparación de los datos y modelamiento. El dataset contiene 2.789 registros con 45 variables que describen condiciones agrícolas, climáticas y de rendimiento de parcelas ubicadas en seis bloques agrícolas de la India. Se realizó un análisis exploratorio, preparación de datos con selección de 20 variables numéricas y estandarización \textit{z-score}, y posterior modelamiento con k-medias. Mediante el método del codo y el coeficiente de silueta se determinó $k = 9$ como número óptimo de clusters, obteniendo una silueta promedio de 0,4915 y una razón BSS/TSS de 87,18\%. Los resultados revelan perfiles productivos diferenciados por escala de cultivo, condiciones climáticas regionales y niveles de rendimiento, proporcionando información valiosa para la optimización de prácticas agrícolas. El desarrollo se implementó en el ambiente R Project.
+El presente informe aborda el análisis de segmentación de parcelas de cultivo de arroz (\textit{paddy}) mediante la técnica de agrupamiento por k-medias, siguiendo la metodología CRISP-DM en sus fases de comprensión empresarial, comprensión de los datos, preparación de los datos y modelamiento. El dataset contiene 2.789 registros con 45 variables que describen condiciones agrícolas, climáticas y de rendimiento de parcelas ubicadas en seis bloques agrícolas de la India. Se realizó un análisis exploratorio, preparación de datos con selección de 20 variables numéricas y estandarización \textit{z-score}, y posterior modelamiento con k-medias. Mediante el método del codo y el coeficiente de silueta se determinó $k = 9$ como número óptimo de clusters, obteniendo una silueta promedio de 0,4915 y una razón BSS/TSS de 87,18\%. Los resultados revelan perfiles productivos diferenciados por escala de cultivo, condiciones climáticas regionales y niveles de rendimiento, proporcionando información valiosa para la optimización de prácticas agrícolas. El desarrollo se implementó en el ambiente R Project \parencite{rcore2024}.
 
 \textbf{Palabras clave:} k-medias, CRISP-DM, cultivo de arroz, agrupamiento, segmentación agrícola, R Project.
 
@@ -72,7 +80,7 @@ El presente informe aborda el análisis de segmentación de parcelas de cultivo 
 
 En el contexto de la inteligencia de negocios aplicada al sector agrícola, la segmentación de parcelas de cultivo constituye una herramienta fundamental para la toma de decisiones sobre siembra, fertilización y riego. La producción de arroz (\textit{paddy}) es un pilar de la seguridad alimentaria global, y la identificación de perfiles productivos permite optimizar recursos, mejorar rendimientos y adaptar estrategias a las condiciones específicas de cada zona.
 
-El presente trabajo utiliza el Paddy Dataset, que contiene registros de parcelas de arroz en seis bloques agrícolas de la India (Cuddalore, Kurinjipadi, Panruti, Kallakurichi, Sankarapuram y Chinnasalem), con información sobre hectáreas, variedades, tipos de suelo, fertilización, condiciones climáticas y rendimiento. El objetivo es aplicar la técnica de agrupamiento por k-medias para descubrir segmentos naturales dentro de las parcelas, siguiendo las primeras cuatro fases de la metodología CRISP-DM \citep{chapman2000}.
+El presente trabajo utiliza el Paddy Dataset, que contiene registros de parcelas de arroz en seis bloques agrícolas de la India (Cuddalore, Kurinjipadi, Panruti, Kallakurichi, Sankarapuram y Chinnasalem), con información sobre hectáreas, variedades, tipos de suelo, fertilización, condiciones climáticas y rendimiento. El objetivo es aplicar la técnica de agrupamiento por k-medias para descubrir segmentos naturales dentro de las parcelas, siguiendo las primeras cuatro fases de la metodología CRISP-DM \parencite{chapman2000}.
 
 Las preguntas que guían este análisis son: (1) ¿Existen grupos naturales diferenciados entre las parcelas de cultivo? (2) ¿Qué características agrícolas y climáticas definen cada segmento? (3) ¿Cómo pueden estos segmentos informar la planificación agrícola y la asignación de insumos?
 
@@ -80,17 +88,17 @@ Las preguntas que guían este análisis son: (1) ¿Existen grupos naturales dife
 
 \subsection{Metodología CRISP-DM}
 
-CRISP-DM (\textit{Cross-Industry Standard Process for Data Mining}) es la metodología estándar de la industria para proyectos de minería de datos \citep{chapman2000}. Se estructura en seis fases iterativas: (1)~Comprensión empresarial, (2)~Comprensión de los datos, (3)~Preparación de los datos, (4)~Modelamiento, (5)~Evaluación y (6)~Despliegue. En este trabajo se abordan las fases 1 a 4.
+CRISP-DM (\textit{Cross-Industry Standard Process for Data Mining}) es una metodología ampliamente utilizada para estructurar proyectos de minería de datos y analítica \parencite{chapman2000}. Se estructura en seis fases iterativas: (1)~Comprensión empresarial, (2)~Comprensión de los datos, (3)~Preparación de los datos, (4)~Modelamiento, (5)~Evaluación y (6)~Despliegue. Cada fase produce resultados que alimentan a las siguientes, y el proceso permite retroceder a fases previas cuando es necesario, lo que facilita el desarrollo iterativo. En este trabajo se abordan las fases 1 a 4.
 
 \subsection{Agrupamiento por K-Medias}
 
-El algoritmo k-medias es una técnica de aprendizaje no supervisado que particiona un conjunto de $n$ observaciones en $k$ clusters, minimizando la varianza intra-cluster \citep{macqueen1967}. Formalmente, dado un conjunto $\{x_1, x_2, \ldots, x_n\}$, el objetivo es encontrar la partición $S = \{S_1, S_2, \ldots, S_k\}$ que minimice la suma de cuadrados intra-cluster (WSS):
+El algoritmo k-medias es una técnica de aprendizaje no supervisado que particiona un conjunto de $n$ observaciones en $k$ clusters, minimizando la varianza intra-cluster \parencite{macqueen1967,jain2010}. Formalmente, dado un conjunto $\{x_1, x_2, \ldots, x_n\}$, el objetivo es encontrar la partición $S = \{S_1, S_2, \ldots, S_k\}$ que minimice la suma de cuadrados intra-cluster (WSS):
 
 \begin{equation}
   \text{WSS} = \sum_{i=1}^{k} \sum_{x \in S_i} \|x - \mu_i\|^2
 \end{equation}
 
-donde $\mu_i$ es el centroide del cluster $S_i$. El algoritmo opera iterativamente: (1)~se inicializan $k$ centroides, (2)~se asigna cada observación al centroide más cercano según la distancia euclidiana, (3)~se recalculan los centroides como la media de las observaciones asignadas, y se repiten los pasos 2--3 hasta convergencia \citep{hastie2009}.
+donde $\mu_i$ es el centroide del cluster $S_i$. El algoritmo opera iterativamente: (1)~se inicializan $k$ centroides, (2)~se asigna cada observación al centroide más cercano según la distancia euclidiana, (3)~se recalculan los centroides como la media de las observaciones asignadas, y se repiten los pasos 2--3 hasta convergencia \parencite{hastie2009}.
 
 La distancia euclidiana entre dos puntos $\mathbf{x}$ e $\mathbf{y}$ en $\mathbb{R}^p$ se define como:
 
@@ -100,7 +108,7 @@ La distancia euclidiana entre dos puntos $\mathbf{x}$ e $\mathbf{y}$ en $\mathbb
 
 \subsection{Validación de Clusters}
 
-Para determinar el número óptimo de clusters se emplean el método del codo, que busca el punto de inflexión en la curva WSS, y el coeficiente de silueta \citep{rousseeuw1987}. El coeficiente de silueta para una observación $i$ se define como:
+Para determinar el número óptimo de clusters se emplean el método del codo, que busca el punto de inflexión en la curva WSS, y el coeficiente de silueta \parencite{rousseeuw1987}. El coeficiente de silueta para una observación $i$ se define como:
 
 \begin{equation}
   s(i) = \frac{b(i) - a(i)}{\max\{a(i), b(i)\}}
@@ -109,50 +117,42 @@ Para determinar el número óptimo de clusters se emplean el método del codo, q
 donde $a(i)$ es la distancia media intra-cluster y $b(i)$ la distancia media mínima al cluster más cercano. Un valor cercano a 1 indica buena asignación. La razón BSS/TSS (\textit{Between Sum of Squares} / \textit{Total Sum of Squares}) indica qué proporción de la varianza total es explicada por la separación entre clusters.
 
 \section{Desarrollo del Trabajo}
+\subsection{Parte A: Desarrollo con la Metodología CRISP-DM}
+\subsubsection{Fase 1: Comprensión Empresarial}
 
-\subsection{Fase 1: Comprensión Empresarial}
+El problema de negocio consiste en optimizar la producción de arroz mediante la identificación de perfiles de parcelas que comparten condiciones agrícolas y climáticas similares. Los productores enfrentan el desafío de asignar insumos (fertilizantes, pesticidas, semillas) de manera eficiente, considerando la variabilidad entre regiones, tipos de suelo y variedades de arroz. Actualmente, las decisiones de gestión agrícola se aplican de forma generalizada sin considerar las particularidades de cada zona productiva, lo que genera ineficiencias en el uso de recursos. Se busca segmentar las parcelas para definir estrategias diferenciadas de gestión agrícola.
 
-El problema de negocio consiste en optimizar la producción de arroz mediante la identificación de perfiles de parcelas que comparten condiciones agrícolas y climáticas similares. Los productores enfrentan el desafío de asignar insumos (fertilizantes, pesticidas, semillas) de manera eficiente, considerando la variabilidad entre regiones, tipos de suelo y variedades de arroz. Se busca segmentar las parcelas para definir estrategias diferenciadas de gestión agrícola.
+El objetivo de minería de datos es descubrir grupos homogéneos de parcelas mediante k-medias, caracterizando cada segmento según variables de escala productiva, fertilización, condiciones climáticas y rendimiento. Siguiendo la terminología CRISP-DM, el criterio de éxito del negocio es mejorar la eficiencia en la asignación de insumos por zona productiva, y el criterio de éxito de minería de datos es obtener clusters con perfiles interpretables y agronómicamente diferenciados \parencite{chapman2000}.
 
-El objetivo de minería de datos es descubrir grupos homogéneos de parcelas mediante k-medias, caracterizando cada segmento según variables de escala productiva, fertilización, condiciones climáticas y rendimiento. El criterio de éxito es obtener clusters con perfiles interpretables y agronómicamente diferenciados.
+\subsubsection{Fase 2: Comprensión de los Datos}
 
-\subsection{Fase 2: Comprensión de los Datos}
+El dataset \texttt{paddydataset.csv} contiene 2.789 registros y 45 atributos. Las variables se clasifican en: escala de cultivo (\texttt{Hectares}, \texttt{Seedrate}, \texttt{Nursery area}), fertilización (\texttt{DAP}, \texttt{Urea}, \texttt{Potassh}, \texttt{Micronutrients}, \texttt{Pest}), condiciones climáticas (precipitación, temperatura, humedad relativa, viento) y rendimiento (\texttt{Paddy yield}). Las variables categóricas incluyen bloque agrícola (6 niveles), variedad (CO\_43, delux ponni, ponmani), tipo de suelo (aluvial, arcilloso) y tipo de vivero (seco, húmedo). La Tabla~\ref{tab:variables} presenta las variables principales utilizadas en el análisis.
 
-El dataset \texttt{paddydataset.csv} contiene 2.789 registros y 45 atributos. Las variables se clasifican en: escala de cultivo (\texttt{Hectares}, \texttt{Seedrate}, \texttt{Nursery area}), fertilización (\texttt{DAP}, \texttt{Urea}, \texttt{Potassh}, \texttt{Micronutrients}, \texttt{Pest}), condiciones climáticas (precipitación, temperatura, humedad relativa, viento) y rendimiento (\texttt{Paddy yield}). Las variables categóricas incluyen bloque agrícola (6 niveles), variedad (CO\_43, delux ponni, ponmani), tipo de suelo (aluvial, arcilloso) y tipo de vivero (seco, húmedo).
-
-No se detectaron valores faltantes en ninguna variable. El rendimiento medio es de 22.518~Kg (DE~=~9.974~Kg), con un rango de 5.410 a 38.814~Kg, lo que evidencia alta variabilidad productiva. Las hectáreas varían de 1 a 6, y la distribución de variedades es relativamente equilibrada. Del análisis exploratorio (Fig.~\ref{fig:eda_1} y Fig.~\ref{fig:eda_2}) se observa que la variedad \textit{delux ponni} presenta los rendimientos más altos, y que existe una fuerte correlación entre las variables de escala (hectáreas, tasa de siembra, fertilizantes).
-
-\begin{figure}[H]
+\begin{table}[H]
   \centering
-  \begin{minipage}{0.48\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{fig_01_distribucion_yield.png}
-  \end{minipage}
-  \hfill
-  \begin{minipage}{0.48\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{fig_02_yield_variedad_suelo.png}
-  \end{minipage}
-  \caption{Izquierda: distribución del rendimiento de arroz. Derecha: rendimiento por variedad y tipo de suelo.}
-  \label{fig:eda_1}
-\end{figure}
+  \caption{Variables principales del dataset Paddy.}
+  \label{tab:variables}
+  \footnotesize
+  \renewcommand{\arraystretch}{1.2}
+  \begin{tabularx}{\textwidth}{>{\centering\arraybackslash}p{2.5cm} >{\centering\arraybackslash}p{2cm} >{\centering\arraybackslash}p{3cm} >{\centering\arraybackslash}X}
+    \toprule
+    \textbf{Variable} & \textbf{Tipo} & \textbf{Rango} & \textbf{Descripción} \\
+    \midrule
+    Hectares      & Numérica   & 1--6              & Superficie cultivada (Ha) \\
+    Paddy yield   & Numérica   & 5.410--38.814     & Rendimiento del cultivo (Kg) \\
+    Urea          & Numérica   & 13,6--187,5       & Fertilizante urea a los 40 días (Kg) \\
+    DAP           & Numérica   & 6,8--93,8         & Fertilizante DAP a los 20 días (Kg) \\
+    Rel. Humidity & Numérica   & 63,3--89,8        & Humedad relativa promedio (\%) \\
+    Variety       & Categórica & 3 niveles         & Variedad de arroz cultivada \\
+    Soil Types    & Categórica & 2 niveles         & Tipo de suelo (aluvial, arcilloso) \\
+    Agri Block    & Categórica & 6 niveles         & Bloque agrícola de ubicación \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
 
-\begin{figure}[H]
-  \centering
-  \begin{minipage}{0.52\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{fig_03_yield_agriblock.png}
-  \end{minipage}
-  \hfill
-  \begin{minipage}{0.44\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{fig_04_correlaciones.png}
-  \end{minipage}
-  \caption{Izquierda: rendimiento por bloque agrícola. Derecha: matriz de correlaciones entre variables numéricas.}
-  \label{fig:eda_2}
-\end{figure}
+No se detectaron valores faltantes en ninguna variable. El rendimiento medio es de 22.518~Kg (DE~=~9.974~Kg), con un rango de 5.410 a 38.814~Kg, lo que evidencia alta variabilidad productiva. Las hectáreas varían de 1 a 6, y la distribución de variedades es relativamente equilibrada. Las visualizaciones de apoyo para esta fase se presentan en el Anexo (Figuras~\ref{fig:eda_1} a \ref{fig:eda_2}). Del análisis exploratorio se observa que la variedad \textit{delux ponni} presenta los rendimientos más altos, y que existe una fuerte correlación entre las variables de escala (hectáreas, tasa de siembra, fertilizantes). Adicionalmente, la distribución del rendimiento (Figura~\ref{fig:eda_1_dist}) presenta una forma multimodal, lo que sugiere la existencia de subgrupos naturales en los datos, reforzando la pertinencia de aplicar técnicas de agrupamiento.
 
-\subsection{Fase 3: Preparación de los Datos}
+\subsubsection{Fase 3: Preparación de los Datos}
 
 Para la aplicación de k-medias se realizaron las siguientes transformaciones:
 
@@ -166,35 +166,13 @@ Para la aplicación de k-medias se realizaron las siguientes transformaciones:
 
 donde $\bar{x}$ es la media y $s_x$ la desviación estándar. Se verificó que las medias resultantes fueran $\approx 0$ y las desviaciones estándar $\approx 1$.
 
-\subsection{Fase 4: Modelamiento}
+\subsubsection{Fase 4: Modelamiento}
 
 Se aplicó el algoritmo k-medias con 25 inicializaciones aleatorias (\texttt{nstart~=~25}) y semilla fija (42) para reproducibilidad. Se evaluaron valores de $k$ desde 2 hasta 10. El método del codo mostró una disminución gradual del WSS con inflexiones en $k = 4$ y $k = 7$. El coeficiente de silueta promedio alcanzó su máximo en $k = 9$ (0,4915), seguido por $k = 8$ (0,4778) y $k = 7$ (0,4561). Se seleccionó $k = 9$ por maximizar la silueta y ofrecer la mayor separación entre grupos (Fig.~\ref{fig:elbow_sil}).
 
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.85\textwidth]{fig_05_elbow_silhouette.png}
-  \caption{Método del codo (izquierda) y coeficiente de silueta promedio (derecha) para $k = 2$ a $10$.}
-  \label{fig:elbow_sil}
-\end{figure}
+El modelo final con $k = 9$ obtuvo un WSS total de 7.146,7 y una razón BSS/TSS de 87,18\%, indicando que los clusters explican el 87\% de la varianza total de los datos. La visualización en los dos primeros componentes principales (PCA) muestra una separación clara entre los grupos (Fig.~\ref{fig:clusters_pca}). La evaluación de la asignación final mediante gráfico de silueta se presenta en el Anexo (Figura~\ref{fig:clusters_pca}), donde se aprecia una calidad moderada-buena del agrupamiento.
 
-El modelo final con $k = 9$ obtuvo un WSS total de 7.146,7 y una razón BSS/TSS de 87,18\%, indicando que los clusters explican el 87\% de la varianza total de los datos. La visualización en los dos primeros componentes principales (PCA) muestra una separación clara entre los grupos (Fig.~\ref{fig:clusters_pca}).
-
-\begin{figure}[H]
-  \centering
-  \begin{minipage}{0.48\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{fig_06_clusters_pca.png}
-  \end{minipage}
-  \hfill
-  \begin{minipage}{0.48\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{fig_08_silueta_final.png}
-  \end{minipage}
-  \caption{Izquierda: clusters proyectados en PCA. Derecha: gráfico de silueta ($k = 9$, promedio = 0,4915).}
-  \label{fig:clusters_pca}
-\end{figure}
-
-Los perfiles revelan que los clusters se diferencian principalmente por la escala de cultivo (hectáreas entre 1,4 y 5,2), las condiciones climáticas regionales (temperatura, humedad, precipitación) y el rendimiento resultante (desde 8.138 hasta 31.981~Kg). La Tabla~\ref{tab:perfiles} resume las características de cada cluster.
+Los perfiles revelan que los clusters se diferencian principalmente por la escala de cultivo (hectáreas entre 1,4 y 5,2), las condiciones climáticas regionales (temperatura, humedad, precipitación) y el rendimiento resultante (desde 8.138 hasta 31.981~Kg). La Tabla~\ref{tab:perfiles} resume las características de cada cluster. La comparación gráfica de los perfiles por cluster se muestra en la Figura~\ref{fig:perfiles}.
 
 \begin{table}[H]
   \centering
@@ -218,20 +196,23 @@ Los perfiles revelan que los clusters se diferencian principalmente por la escal
   \end{tabularx}
 \end{table}
 
-\begin{figure}[H]
-  \centering
-  \begin{minipage}{0.48\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{fig_07_perfiles_clusters.png}
-  \end{minipage}
-  \hfill
-  \begin{minipage}{0.48\textwidth}
-    \centering
-    \includegraphics[width=\textwidth]{fig_09_yield_por_cluster.png}
-  \end{minipage}
-  \caption{Izquierda: comparación de variables por cluster. Derecha: rendimiento de arroz por cluster.}
-  \label{fig:perfiles}
-\end{figure}
+\subsubsection{Análisis de Resultados}
+
+El análisis exploratorio permitió identificar alta variabilidad en el rendimiento (5.410 a 38.814~Kg), fuertemente correlacionada con la escala de cultivo. Las variables presentan alta colinealidad entre insumos y hectáreas, lo que justifica la clara separación obtenida por k-medias. Mediante el coeficiente de silueta y el método del codo se seleccionó $k = 9$, obteniendo una silueta promedio de 0,4915 y una razón BSS/TSS de 87,18\%.
+
+La visualización PCA (Fig.~\ref{fig:clusters_pca}) muestra separación clara entre clusters, con los dos primeros componentes principales capturando la mayor parte de la varianza explicada. Los perfiles revelan diferencias relevantes en escala productiva, condiciones climáticas y rendimiento (Tabla~\ref{tab:perfiles} y Fig.~\ref{fig:perfiles}), permitiendo definir segmentos agronómicamente diferenciados. Se observa que los clusters de mayor rendimiento (8 y 9, con $\approx$32.000~Kg) corresponden a parcelas de escala máxima (5,2~Ha), mientras que los de menor rendimiento (3 y 6, con $\approx$8.000--9.000~Kg) corresponden a parcelas pequeñas (1,4--1,6~Ha). La humedad relativa actúa como segundo factor diferenciador, separando clusters de escala similar en función de las condiciones climáticas regionales del bloque agrícola (Fig.~\ref{fig:yield_cluster}).
+
+\subsection{Parte B: Análisis Exploratorio de Datos con Power BI}
+
+A continuación, se presenta de forma complementaria el dashboard generado en Power BI (Figura~\ref{fig:dashboard}), el cual permite visualizar de manera integrada las principales variables del dataset y su relación con el rendimiento de arroz.
+
+A partir del análisis visual del dashboard, se observa que el conjunto de datos está compuesto por 2.789 parcelas distribuidas en seis bloques agrícolas, con un rendimiento promedio de 22.518~Kg. La distribución por variedad es relativamente equilibrada entre CO\_43, delux ponni y ponmani.
+
+En la relación entre hectáreas y rendimiento, se aprecia una tendencia positiva clara: las parcelas de mayor escala presentan mayores rendimientos absolutos, lo cual es consistente con los perfiles de clusters identificados en el análisis por k-medias.
+
+Respecto a los bloques agrícolas, se observan diferencias en el rendimiento promedio entre regiones, lo que sugiere la influencia de las condiciones climáticas locales (humedad, temperatura, precipitación) en la productividad.
+
+En conjunto, estos hallazgos complementan los resultados del clustering al confirmar visualmente que la escala productiva y la ubicación geográfica son factores determinantes del rendimiento, facilitando la comunicación de resultados a actores no técnicos del sector agrícola.
 
 \section{Discusión y Reflexión}
 
@@ -241,7 +222,9 @@ La silueta promedio de 0,4915 indica una calidad de agrupamiento moderada-buena,
 
 Desde la perspectiva agronómica, los clusters de rendimiento alto (8, 9, 1, 4) corresponden a parcelas de mayor escala (4,8--5,2~Ha) con fertilización proporcional, independientemente de las condiciones de humedad. Los clusters de rendimiento bajo (3, 6) corresponden a parcelas pequeñas (1,4--1,6~Ha). El cluster~7 representa un perfil intermedio. Esto sugiere que la escala de producción es el principal determinante del rendimiento absoluto.
 
-Una limitación del análisis es la alta multicolinealidad entre variables de insumos y hectáreas, que podría haberse abordado con reducción de dimensionalidad previa (PCA) o selección más estricta de variables. Como trabajo futuro, se recomienda analizar el rendimiento por hectárea para controlar el efecto de escala.
+Una limitación del análisis es la alta multicolinealidad entre variables de insumos y hectáreas, que podría haberse abordado con reducción de dimensionalidad previa (PCA) o selección más estricta de variables. Como trabajo futuro, se recomienda analizar el rendimiento por hectárea para controlar el efecto de escala, así como incorporar las variables categóricas mediante distancias de Gower.
+
+El dashboard de Power BI reforzó estas conclusiones al evidenciar visualmente las diferencias de rendimiento entre bloques agrícolas y la relación positiva entre escala productiva y rendimiento, facilitando la comunicación de resultados a actores no técnicos del sector agrícola.
 
 \section{Conclusiones}
 
@@ -249,41 +232,80 @@ Una limitación del análisis es la alta multicolinealidad entre variables de in
 
 \textbf{Vicente Rivera:} El análisis exploratorio reveló la ausencia de datos faltantes y una alta variabilidad en el rendimiento (5.410 a 38.814~Kg), fuertemente correlacionada con la escala de cultivo. La estandarización \textit{z-score} fue fundamental para que las variables climáticas, con rangos menores, pudieran contribuir al agrupamiento junto a las variables de producción.
 
-\textbf{Fernando Valdés:} La implementación en R permitió un flujo completo desde la exploración hasta la validación. La visualización PCA y el gráfico de silueta confirman la calidad del agrupamiento. Como mejora futura, sería valioso normalizar los insumos y rendimiento por hectárea para detectar eficiencias intrínsecas, así como incorporar las variables categóricas mediante codificación \textit{one-hot} o distancia de Gower.
+\textbf{Fernando Valdés:} La implementación en R \parencite{rcore2024} permitió un flujo completo desde la exploración hasta la validación. La visualización PCA y el gráfico de silueta confirman la calidad del agrupamiento. Como mejora futura, sería valioso normalizar los insumos y rendimiento por hectárea para detectar eficiencias intrínsecas, lo que permitiría identificar parcelas con alta eficiencia productiva independientemente de su escala.
 
-\section{Referencias}
-\small
-\begin{thebibliography}{9}
-
-\bibitem{chapman2000}
-Chapman, P., Clinton, J., Kerber, R., Khabaza, T., Reinartz, T., Shearer, C., y Wirth, R. (2000).
-\textit{CRISP-DM 1.0: Step-by-step data mining guide}. SPSS Inc.
-
-\bibitem{hastie2009}
-Hastie, T., Tibshirani, R., y Friedman, J. (2009).
-\textit{The Elements of Statistical Learning} (2nd ed.). Springer.
-
-\bibitem{macqueen1967}
-MacQueen, J. (1967). Some methods for classification and analysis of multivariate observations. En \textit{Proceedings of the Fifth Berkeley Symposium on Mathematical Statistics and Probability}, Vol. 1 (pp. 281--297). University of California Press.
-
-\bibitem{rousseeuw1987}
-Rousseeuw, P. J. (1987). Silhouettes: A graphical aid to the interpretation and validation of cluster analysis.
-\textit{Journal of Computational and Applied Mathematics}, 20, 53--65.
-
-\bibitem{rcore2024}
-R Core Team (2024). \textit{R: A Language and Environment for Statistical Computing}. R Foundation for Statistical Computing. \url{https://www.R-project.org/}
-
-\bibitem{jain2010}
-Jain, A. K. (2010). Data clustering: 50 years beyond K-means.
-\textit{Pattern Recognition Letters}, 31(8), 651--666.
-
-\end{thebibliography}
+\printbibliography
 
 \newpage
 \section*{Anexo}
 \addcontentsline{toc}{section}{Anexo}
 
-\subsection*{A.1 Script R -- Procedimientos Principales}
+\subsection*{A.1 Visualizaciones del Análisis}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{fig_01_distribucion_yield.pdf}
+\caption{Distribución del rendimiento de arroz (Paddy yield).}
+\label{fig:eda_1_dist}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{fig_02_yield_variedad_suelo.pdf}
+\caption{Rendimiento por variedad y tipo de suelo.}
+\label{fig:eda_1}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{fig_03_yield_agriblock.pdf}
+\caption{Rendimiento por bloque agrícola.}
+\label{fig:eda_2_block}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.55\textwidth]{fig_04_correlaciones.pdf}
+\caption{Matriz de correlaciones entre variables numéricas.}
+\label{fig:eda_2}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{fig_05_elbow_silhouette.pdf}
+\caption{Método del codo (izquierda) y coeficiente de silueta promedio (derecha) para $k = 2$ a $10$.}
+\label{fig:elbow_sil}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{fig_06_clusters_pca.pdf}
+\caption{Clusters proyectados en los dos primeros componentes principales (PCA).}
+\label{fig:clusters_pca}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.55\textwidth]{fig_08_silueta_final.pdf}
+\caption{Gráfico de silueta para la asignación final con $k = 9$ clusters.}
+\label{fig:silueta}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{fig_07_perfiles_clusters.pdf}
+\caption{Comparación de perfiles por cluster: variables principales.}
+\label{fig:perfiles}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{fig_09_yield_por_cluster.pdf}
+\caption{Rendimiento de arroz por cluster.}
+\label{fig:yield_cluster}
+\end{figure}
+
+\subsection*{A.2 Script R -- Procedimientos Principales}
 
 A continuación se presenta el script principal en R utilizado para el análisis. El código completo se encuentra en el archivo adjunto \texttt{tarea3\_paddy\_kmeans.R}.
 
@@ -375,11 +397,19 @@ sil <- silhouette(km_final$cluster,
 cat("Silueta promedio:", mean(sil[,3]), "\n")
 \end{lstlisting}
 
-\subsection*{A.2 Parte b) -- Dashboard en Power BI}
+\subsection*{A.3 Parte b) -- Dashboard en Power BI}
 
 Para la parte b) de la tarea, se utilizó Power BI Desktop para generar un dashboard interactivo con la visualización de los datos del dataset Paddy. Se importó el archivo \texttt{paddydataset.csv} y se crearon las siguientes visualizaciones: (1) tarjetas KPI con rendimiento promedio, hectáreas totales y número de parcelas; (2) gráfico de barras del rendimiento promedio por bloque agrícola; (3) gráfico circular de distribución por variedad de arroz; (4) mapa de calor de rendimiento por variedad y tipo de suelo; (5) gráfico de líneas de la relación entre fertilizantes y rendimiento; y (6) segmentadores interactivos por bloque agrícola, variedad y tipo de suelo. El archivo \texttt{.pbix} se adjunta como evidencia del dashboard.
 
-\subsection*{A.3 Bitácora de Trabajo}
+% TODO: Reemplazar 'dashboard_powerbi.pdf' con el nombre real de la captura del dashboard
+\begin{figure}[H]
+\centering
+\includegraphics[width=1\textwidth]{dashboard_powerbi.pdf}
+\caption{Dashboard de Power BI utilizado para el análisis exploratorio del dataset Paddy.}
+\label{fig:dashboard}
+\end{figure}
+
+\subsection*{A.4 Bitácora de Trabajo}
 
 \begin{table}[H]
   \centering
@@ -390,12 +420,13 @@ Para la parte b) de la tarea, se utilizó Power BI Desktop para generar un dashb
     \toprule
     \textbf{Fecha} & \textbf{Actividad} & \textbf{Responsable} \\
     \midrule
-    Día 1 & Comprensión del negocio y lectura del dataset           & Todos \\
-    Día 2 & Análisis exploratorio y comprensión de datos            & Integrante 1 \\
-    Día 3 & Preparación de datos y estandarización                  & Integrante 2 \\
-    Día 4 & Modelado: k-medias en R y validación                    & Integrante 3 \\
-    Día 5 & Dashboard en Power BI y visualizaciones                 & Todos \\
-    Día 6 & Redacción del informe, revisión final y entrega         & Todos \\
+    11-04-2026 & Comprensión empresarial: definición del problema de segmentación de parcelas arroceras, identificación de objetivos de minería de datos y revisión bibliográfica sobre k-medias y CRISP-DM. Descarga y lectura inicial del dataset Paddy (2.789 registros, 45 variables). & Todos \\
+    11-04-2026 & Análisis exploratorio de datos (Fase~2): estadísticas descriptivas con \texttt{summary()}, distribución del rendimiento, visualización de relaciones entre rendimiento, variedad, tipo de suelo y bloque agrícola. Generación de la matriz de correlaciones entre variables numéricas. & Juan Muñoz \\
+    12-04-2026 & Preparación de datos (Fase~3): selección de 20 variables numéricas relevantes, verificación de ausencia de datos faltantes, estandarización \textit{z-score} con \texttt{scale()} y validación de medias $\approx 0$ y desviaciones estándar $\approx 1$. & Fernando Valdés \\
+    12-04-2026 & Modelamiento (Fase~4): implementación de k-medias con 25 inicializaciones (\texttt{nstart~=~25}), evaluación de $k = 2$ a $10$ mediante método del codo y coeficiente de silueta, selección de $k = 9$, visualización PCA y gráfico de silueta final. & Juan Muñoz \\
+    13-04-2026 & Construcción del dashboard interactivo en Power BI Desktop: importación del dataset, creación de tarjetas KPI, gráficos de barras por bloque agrícola, gráfico circular de variedades, mapa de calor rendimiento--variedad--suelo y segmentadores interactivos. & Vicente Rivera \\
+    13-04-2026 & Análisis e interpretación de resultados: caracterización de los 9 clusters, elaboración de la tabla de perfiles, análisis de la razón BSS/TSS (87,18\%) y discusión de las implicancias agronómicas de cada segmento. & Todos \\
+    14/15-04-2026 & Redacción del informe en \LaTeX{}, integración de figuras y tablas, redacción de fundamentos teóricos, discusión, reflexión y conclusiones individuales. Revisión cruzada del documento y entrega final. & Todos \\
     \bottomrule
   \end{tabularx}
 \end{table}
