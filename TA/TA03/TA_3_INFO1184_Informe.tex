@@ -170,7 +170,7 @@ donde $\bar{x}$ es la media y $s_x$ la desviación estándar. Se verificó que l
 
 Se aplicó el algoritmo k-medias con 25 inicializaciones aleatorias (\texttt{nstart~=~25}) y semilla fija (42) para reproducibilidad. Se evaluaron valores de $k$ desde 2 hasta 10. El método del codo mostró una disminución gradual del WSS con inflexiones en $k = 4$ y $k = 7$. El coeficiente de silueta promedio alcanzó su máximo en $k = 9$ (0,4915), seguido por $k = 8$ (0,4778) y $k = 7$ (0,4561). Se seleccionó $k = 9$ por maximizar la silueta y ofrecer la mayor separación entre grupos (Fig.~\ref{fig:elbow_sil}).
 
-El modelo final con $k = 9$ obtuvo un WSS total de 7.146,7 y una razón BSS/TSS de 87,18\%, indicando que los clusters explican el 87\% de la varianza total de los datos. La visualización en los dos primeros componentes principales (PCA) muestra una separación clara entre los grupos (Fig.~\ref{fig:clusters_pca}). La evaluación de la asignación final mediante gráfico de silueta se presenta en el Anexo (Figura~\ref{fig:clusters_pca}), donde se aprecia una calidad moderada-buena del agrupamiento.
+El modelo final con $k = 9$ obtuvo un WSS total de 7.146,7 y una razón BSS/TSS de 87,18\%, indicando que los clusters explican el 87\% de la varianza total de los datos. La visualización en los dos primeros componentes principales (PCA) muestra una separación clara entre los grupos (Fig.~\ref{fig:clusters_pca}). La evaluación de la asignación final mediante gráfico de silueta se presenta en el Anexo (Figura~\ref{fig:silueta}), donde se aprecia una calidad moderada-buena del agrupamiento.
 
 Los perfiles revelan que los clusters se diferencian principalmente por la escala de cultivo (hectáreas entre 1,4 y 5,2), las condiciones climáticas regionales (temperatura, humedad, precipitación) y el rendimiento resultante (desde 8.138 hasta 31.981~Kg). La Tabla~\ref{tab:perfiles} resume las características de cada cluster. La comparación gráfica de los perfiles por cluster se muestra en la Figura~\ref{fig:perfiles}.
 
@@ -204,15 +204,17 @@ La visualización PCA (Fig.~\ref{fig:clusters_pca}) muestra separación clara en
 
 \subsection{Parte B: Análisis Exploratorio de Datos con Power BI}
 
-A continuación, se presenta de forma complementaria el dashboard generado en Power BI (Figura~\ref{fig:dashboard}), el cual permite visualizar de manera integrada las principales variables del dataset y su relación con el rendimiento de arroz.
+Para la parte b) se desarrolló un dashboard en Power BI Desktop con el objetivo de complementar visualmente los hallazgos obtenidos en la metodología CRISP-DM y en el modelamiento con k-medias. El panel fue diseñado para resumir el comportamiento general del dataset y facilitar la interpretación de variables agrícolas, climáticas y de rendimiento en una interfaz orientada a la exploración visual (Figura~\ref{fig:dashboard}).
 
-A partir del análisis visual del dashboard, se observa que el conjunto de datos está compuesto por 2.789 parcelas distribuidas en seis bloques agrícolas, con un rendimiento promedio de 22.518~Kg. La distribución por variedad es relativamente equilibrada entre CO\_43, delux ponni y ponmani.
+En una primera etapa se importó el archivo \texttt{paddydataset.csv}. Como parte de la preparación para visualización, se normalizaron los nombres de las columnas, eliminando espacios, paréntesis y sufijos inconsistentes, y adoptando una nomenclatura homogénea orientada a facilitar el modelado, la selección de campos y la legibilidad de las visualizaciones. Posteriormente, se construyeron medidas KPI para rendimiento promedio, rendimiento máximo, rendimiento mínimo, hectáreas totales y tasa de siembra promedio. Estas tarjetas permiten entregar una lectura rápida del contexto general del conjunto de datos, destacando la amplitud del rendimiento observado y su alta variabilidad.
 
-En la relación entre hectáreas y rendimiento, se aprecia una tendencia positiva clara: las parcelas de mayor escala presentan mayores rendimientos absolutos, lo cual es consistente con los perfiles de clusters identificados en el análisis por k-medias.
+Como visual principal se utilizó un gráfico de dispersión que relaciona la tasa de siembra promedio con el rendimiento promedio por bloque agrícola, usando el tamaño del marcador para representar hectáreas y el color para diferenciar el tipo de suelo. Esta visualización fue priorizada porque permite observar de forma clara una relación positiva entre la intensidad de siembra y el rendimiento, además de mostrar diferencias entre bloques y aportar contexto sobre la escala productiva, lo cual es consistente con los resultados del análisis exploratorio y del clustering.
 
-Respecto a los bloques agrícolas, se observan diferencias en el rendimiento promedio entre regiones, lo que sugiere la influencia de las condiciones climáticas locales (humedad, temperatura, precipitación) en la productividad.
+Se incorporó además un histograma del rendimiento para analizar la distribución de la variable objetivo. Esta visualización resulta relevante porque evidencia concentración de observaciones en determinados rangos y refuerza la existencia de subgrupos en los datos, consistente con la pertinencia del análisis de agrupamiento. Como apoyo interpretativo se añadió una visualización resumida de precipitación por periodo y tipo de suelo, con el fin de incorporar una lectura climática del comportamiento del cultivo. Asimismo, se incluyó un gráfico de dispersión entre urea y rendimiento, utilizado como visual secundaria para explorar si la fertilización reproducía una relación tan marcada como la observada entre tasa de siembra y rendimiento.
 
-En conjunto, estos hallazgos complementan los resultados del clustering al confirmar visualmente que la escala productiva y la ubicación geográfica son factores determinantes del rendimiento, facilitando la comunicación de resultados a actores no técnicos del sector agrícola.
+Durante el diseño del dashboard se evaluaron otras alternativas gráficas, especialmente comparaciones directas de fertilizantes por bloque agrícola. Sin embargo, esas visualizaciones fueron descartadas como gráficas principales debido a que mostraban un comportamiento muy homogéneo entre bloques y aportaban poca diferenciación analítica. Por ello, se priorizaron gráficos que permitieran observar relaciones con el rendimiento o la forma de su distribución.
+
+En conjunto, el dashboard permitió confirmar visualmente que la tasa de siembra y la escala productiva se asocian de forma positiva con el rendimiento, mientras que las condiciones climáticas aportan contexto complementario para la interpretación de diferencias entre grupos. De esta manera, la Parte B funciona como apoyo exploratorio y comunicacional de los resultados obtenidos en la Parte A.
 
 \section{Discusión y Reflexión}
 
@@ -399,12 +401,11 @@ cat("Silueta promedio:", mean(sil[,3]), "\n")
 
 \subsection*{A.3 Parte b) -- Dashboard en Power BI}
 
-Para la parte b) de la tarea, se utilizó Power BI Desktop para generar un dashboard interactivo con la visualización de los datos del dataset Paddy. Se importó el archivo \texttt{paddydataset.csv} y se crearon las siguientes visualizaciones: (1) tarjetas KPI con rendimiento promedio, hectáreas totales y número de parcelas; (2) gráfico de barras del rendimiento promedio por bloque agrícola; (3) gráfico circular de distribución por variedad de arroz; (4) mapa de calor de rendimiento por variedad y tipo de suelo; (5) gráfico de líneas de la relación entre fertilizantes y rendimiento; y (6) segmentadores interactivos por bloque agrícola, variedad y tipo de suelo. El archivo \texttt{.pbix} se adjunta como evidencia del dashboard.
+El dashboard construido en Power BI Desktop incluye las siguientes visualizaciones: (1) tarjetas KPI con rendimiento promedio, rendimiento máximo, rendimiento mínimo, hectáreas totales y tasa de siembra promedio; (2) gráfico de dispersión principal de tasa de siembra vs.\ rendimiento por bloque agrícola, con tamaño por hectáreas y color por tipo de suelo; (3) histograma de la distribución del rendimiento; (4) gráfico de precipitación por periodo y tipo de suelo; y (5) gráfico de dispersión secundario de urea vs.\ rendimiento. El archivo \texttt{.pbix} se adjunta como evidencia del dashboard.
 
-% TODO: Reemplazar 'dashboard_powerbi.pdf' con el nombre real de la captura del dashboard
 \begin{figure}[H]
 \centering
-\includegraphics[width=1\textwidth]{dashboard_powerbi.pdf}
+\includegraphics[width=1\textwidth]{dashboard.pdf}
 \caption{Dashboard de Power BI utilizado para el análisis exploratorio del dataset Paddy.}
 \label{fig:dashboard}
 \end{figure}
@@ -424,7 +425,7 @@ Para la parte b) de la tarea, se utilizó Power BI Desktop para generar un dashb
     11-04-2026 & Análisis exploratorio de datos (Fase~2): estadísticas descriptivas con \texttt{summary()}, distribución del rendimiento, visualización de relaciones entre rendimiento, variedad, tipo de suelo y bloque agrícola. Generación de la matriz de correlaciones entre variables numéricas. & Juan Muñoz \\
     12-04-2026 & Preparación de datos (Fase~3): selección de 20 variables numéricas relevantes, verificación de ausencia de datos faltantes, estandarización \textit{z-score} con \texttt{scale()} y validación de medias $\approx 0$ y desviaciones estándar $\approx 1$. & Fernando Valdés \\
     12-04-2026 & Modelamiento (Fase~4): implementación de k-medias con 25 inicializaciones (\texttt{nstart~=~25}), evaluación de $k = 2$ a $10$ mediante método del codo y coeficiente de silueta, selección de $k = 9$, visualización PCA y gráfico de silueta final. & Juan Muñoz \\
-    13-04-2026 & Construcción del dashboard interactivo en Power BI Desktop: importación del dataset, creación de tarjetas KPI, gráficos de barras por bloque agrícola, gráfico circular de variedades, mapa de calor rendimiento--variedad--suelo y segmentadores interactivos. & Vicente Rivera \\
+    13-04-2026 & Construcción del dashboard en Power BI Desktop: importación del dataset, normalización de nombres de columnas, creación de tarjetas KPI, gráfico de dispersión tasa de siembra vs.\ rendimiento por bloque agrícola, histograma de rendimiento, gráfico de precipitación por periodo y tipo de suelo, y dispersión urea vs.\ rendimiento. & Vicente Rivera \\
     13-04-2026 & Análisis e interpretación de resultados: caracterización de los 9 clusters, elaboración de la tabla de perfiles, análisis de la razón BSS/TSS (87,18\%) y discusión de las implicancias agronómicas de cada segmento. & Todos \\
     14/15-04-2026 & Redacción del informe en \LaTeX{}, integración de figuras y tablas, redacción de fundamentos teóricos, discusión, reflexión y conclusiones individuales. Revisión cruzada del documento y entrega final. & Todos \\
     \bottomrule
