@@ -1,0 +1,2 @@
+"modelo","target","n_train","n_test","n_componentes_pca","varianza_pca_pct","rmse_crim","mae_crim","r2_crim_original","r2_log_crim","rmse_baseline","mejora_rmse_pct"
+"Regresion lineal con PCA","log1p(crim)",354,152,5,82.84,7.4102,1.9641,0.2189,0.8119,8.4066,11.85

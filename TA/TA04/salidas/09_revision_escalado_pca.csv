@@ -1,0 +1,15 @@
+"variable","media_escalada","sd_escalada"
+"crim",0,1
+"zn",0,1
+"indus",0,1
+"chas",0,1
+"nox",0,1
+"rm",0,1
+"age",0,1
+"dis",0,1
+"rad",0,1
+"tax",0,1
+"ptratio",0,1
+"black",0,1
+"lstat",0,1
+"medv",0,1
