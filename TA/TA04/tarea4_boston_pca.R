@@ -397,27 +397,43 @@ escala_flechas <- min(
 colores_medv <- colorRampPalette(c("#d9f0d3", "#00441b"))(100)
 grupos_color <- cut(scores_pca$medv, breaks = 100, include.lowest = TRUE, labels = FALSE)
 
-pdf(file.path(dir_figuras, "fig_08_pca_biplot.pdf"), width = 8, height = 6)
-plot(
-  scores_pca$PC1,
-  scores_pca$PC2,
-  pch = 19,
-  col = adjustcolor(colores_medv[grupos_color], alpha.f = 0.75),
-  xlab = paste0("PC1 (", pca_varianza$varianza_pct[1], "% varianza)"),
-  ylab = paste0("PC2 (", pca_varianza$varianza_pct[2], "% varianza)"),
-  main = "Biplot PCA - Boston"
-)
-abline(h = 0, v = 0, col = "gray70", lty = 2)
-for (i in seq_len(nrow(cargas_pca))) {
-  arrows(0, 0, cargas_pca[i, 1] * escala_flechas, cargas_pca[i, 2] * escala_flechas,
-         length = 0.08, col = "#b2182b", lwd = 1.2)
-  text(cargas_pca[i, 1] * escala_flechas * 1.12,
-       cargas_pca[i, 2] * escala_flechas * 1.12,
-       labels = rownames(cargas_pca), col = "#333333", cex = 0.75)
+dibujar_biplot_pca <- function(nombre_archivo, variables, titulo) {
+  pdf(file.path(dir_figuras, nombre_archivo), width = 8, height = 5.4)
+  par(mar = c(4.5, 4.8, 3, 1))
+  plot(
+    scores_pca$PC1,
+    scores_pca$PC2,
+    pch = 19,
+    col = adjustcolor(colores_medv[grupos_color], alpha.f = 0.72),
+    xlab = paste0("PC1 (", pca_varianza$varianza_pct[1], "% varianza)"),
+    ylab = paste0("PC2 (", pca_varianza$varianza_pct[2], "% varianza)"),
+    main = titulo
+  )
+  abline(h = 0, v = 0, col = "gray70", lty = 2)
+  for (variable in variables) {
+    arrows(0, 0, cargas_pca[variable, 1] * escala_flechas,
+           cargas_pca[variable, 2] * escala_flechas,
+           length = 0.08, col = "#b2182b", lwd = 1.2)
+    text(cargas_pca[variable, 1] * escala_flechas * 1.14,
+         cargas_pca[variable, 2] * escala_flechas * 1.14,
+         labels = variable, col = "#222222", cex = 0.78)
+  }
+  legend("topright", legend = c("MEDV bajo", "MEDV alto"),
+         col = c("#d9f0d3", "#00441b"), pch = 19, bty = "n")
+  dev.off()
 }
-legend("topright", legend = c("MEDV bajo", "MEDV alto"),
-       col = c("#d9f0d3", "#00441b"), pch = 19, bty = "n")
-dev.off()
+
+dibujar_biplot_pca(
+  "fig_08_pca_biplot_simple.pdf",
+  c("indus", "nox", "tax", "rad", "lstat", "medv", "rm", "chas"),
+  "Biplot PCA simplificado - Boston"
+)
+
+dibujar_biplot_pca(
+  "fig_08_pca_biplot.pdf",
+  rownames(cargas_pca),
+  "Biplot PCA completo - Boston"
+)
 
 cat("\nFase 4 completada: PCA generado.\n")
 

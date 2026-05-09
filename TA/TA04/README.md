@@ -14,7 +14,8 @@ Docente: Marcos Levano Humacto.
 
 - `Tarea 4 INFO1184.pdf`: enunciado original de la tarea.
 - `tarea4_boston_pca.R`: script R completo, simple y reproducible.
-- `TA_4_INFO1184_Informe.tex`: informe en LaTeX listo para compilar en latex.com/Overleaf.
+- `main.tex`: informe en LaTeX listo para compilar en latex.com/Overleaf.
+- `TA_4_INFO1184_Informe.tex`: archivo auxiliar que carga `main.tex`.
 - `figuras/`: graficos PDF generados por el script R.
 - `salidas/`: tablas CSV generadas por el script R.
 
@@ -35,16 +36,16 @@ Rscript tarea4_boston_pca.R
 
 Esto crea o actualiza:
 
-- `figuras/fig_01_matriz_correlaciones.pdf` a `figuras/fig_09_prediccion_crim.pdf`.
+- `figuras/fig_01_matriz_correlaciones.pdf` a `figuras/fig_09_prediccion_crim.pdf`, incluyendo el biplot simplificado `fig_08_pca_biplot_simple.pdf`.
 - `salidas/00_diccionario_variables.csv` a `salidas/15_respuestas_investigacion.csv`.
 
 ## Como compilar en latex.com / Overleaf
 
 1. Crear un proyecto nuevo en latex.com/Overleaf.
-2. Subir `TA_4_INFO1184_Informe.tex`.
+2. Subir `main.tex`.
 3. Subir la carpeta completa `figuras/` manteniendo el mismo nombre.
 4. Opcionalmente subir `tarea4_boston_pca.R`, `salidas/` y este `README.md` como evidencia.
-5. Seleccionar `TA_4_INFO1184_Informe.tex` como archivo principal.
+5. Seleccionar `main.tex` como archivo principal.
 6. Usar compilador `pdfLaTeX`.
 7. Compilar dos veces para actualizar referencias cruzadas de figuras y tablas.
 
