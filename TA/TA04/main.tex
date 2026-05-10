@@ -77,7 +77,7 @@
 
 \section*{Resumen}
 
-Este informe aplica Análisis de Componentes Principales (PCA) al dataset \texttt{Boston}, disponible en el paquete \texttt{MASS} de R, siguiendo las fases principales de CRISP-DM. El conjunto contiene 506 observaciones y 14 variables asociadas a criminalidad, uso de suelo, contaminación, accesibilidad, condición socioeconómica y valor mediano de viviendas. Se revisaron valores faltantes, outliers por regla IQR y relaciones entre precio, habitaciones, condición de limitar con el río Charles y estatus socioeconómico. El PCA permitió sintetizar la estructura multivariada: cinco componentes explicaron el 80,58\% de la varianza total. Los resultados directos muestran correlación positiva entre \texttt{rm} y \texttt{medv} (0,695), correlación negativa entre \texttt{lstat} y \texttt{medv} (-0,738), y una diferencia media de 6,346 miles de dólares a favor de sectores que limitan con el río Charles ($p = 0,00357$). Para criminalidad, una regresión lineal sobre componentes principales predijo \texttt{log1p(crim)} con $R^{2} = 0,8119$ y mejora de 11,85\% en RMSE frente al promedio base. El análisis es reproducible y exploratorio en R Project \citep{rcore2024}.
+Este informe aplica Análisis de Componentes Principales (PCA) al dataset \texttt{Boston}, disponible en el paquete \texttt{MASS} de R, siguiendo las fases principales de CRISP-DM. El conjunto contiene 506 observaciones y 14 variables asociadas a criminalidad, uso de suelo, contaminación, accesibilidad, condición socioeconómica y valor mediano de viviendas. Se revisaron valores faltantes, outliers por regla IQR y relaciones entre precio, habitaciones, condición de limitar con el río Charles y estatus socioeconómico. El PCA permitió sintetizar la estructura multivariada: cinco componentes explicaron el 80,58\% de la varianza total. Los resultados directos muestran correlación positiva entre \texttt{rm} y \texttt{medv} (0,695), correlación negativa entre \texttt{lstat} y \texttt{medv} (-0,738), y una diferencia media de 6,346 miles de dólares a favor de sectores que limitan con el río Charles ($p = 0,00357$). Para criminalidad, una regresión lineal sobre componentes principales predijo \texttt{log1p(crim)} con $R^{2} = 0,8119$; al volver a escala original obtuvo RMSE = 7,4102, mejorando 11,85\% frente al promedio base. El análisis es reproducible y exploratorio en R Project \citep{rcore2024}.
 
 \textbf{Palabras clave:} PCA, CRISP-DM, Boston, vivienda, criminalidad, R Project.
 
@@ -146,7 +146,7 @@ El dataset contiene 506 observaciones y 14 variables numéricas, sin valores fal
 
 \subsection{Fase 4: modelamiento PCA}
 
-El PCA exploratorio se aplicó sobre las 14 variables estandarizadas: \texttt{crim}, \texttt{zn}, \texttt{indus}, \texttt{chas}, \texttt{nox}, \texttt{rm}, \texttt{age}, \texttt{dis}, \texttt{rad}, \texttt{tax}, \texttt{ptratio}, \texttt{black}, \texttt{lstat} y \texttt{medv}. Los cinco primeros componentes explicaron 80,58\% de la varianza total (Tabla~\ref{tab:pca_varianza}).
+Se realizaron dos PCA con propósitos distintos: uno exploratorio con las 14 variables del dataset y otro predictivo que excluyó \texttt{crim} por tratarse de la variable objetivo. El PCA exploratorio se aplicó sobre las 14 variables estandarizadas: \texttt{crim}, \texttt{zn}, \texttt{indus}, \texttt{chas}, \texttt{nox}, \texttt{rm}, \texttt{age}, \texttt{dis}, \texttt{rad}, \texttt{tax}, \texttt{ptratio}, \texttt{black}, \texttt{lstat} y \texttt{medv}. Los cinco primeros componentes explicaron 80,58\% de la varianza total (Tabla~\ref{tab:pca_varianza}).
 
 \begin{table}[H]
   \centering
@@ -193,10 +193,42 @@ La Tabla~\ref{tab:resumen_preguntas} integra las seis preguntas con su evidencia
     P3 Tamaño y precio & La relación es positiva: correlación \texttt{rm}-\texttt{medv} = 0,695; la regresión estima 9,102 miles de dólares adicionales por habitación promedio ($p < 0,001$). & \texttt{rm} y \texttt{medv} cargan positivamente en PC2, reforzando la dirección residencial. \\
     P4 Río Charles & Sí, con cautela. La media de \texttt{medv} es 22,094 sin río y 28,440 con río; diferencia = 6,346 y $p = 0,00357$. \texttt{chas} es binaria y solo 35 de 506 observaciones limitan con el río. & \texttt{chas} carga positivamente en PC2 junto con \texttt{medv}, coherente con la diferencia media observada. \\
     P5 Estatus & El impacto es negativo: correlación \texttt{lstat}-\texttt{medv} = -0,738; cada punto adicional de \texttt{lstat} se asocia con -0,950 miles de dólares en \texttt{medv} ($p < 0,001$). & \texttt{lstat} y \texttt{medv} aparecen en direcciones opuestas en PC1 y PC2. \\
-    P6 Criminalidad & Sí, de forma exploratoria. Con 5 componentes se explicó 82,84\% de la varianza de predictores; en prueba se obtuvo $R^{2} = 0,8119$ sobre \texttt{log1p(crim)} y mejora RMSE = 11,85\%. & El PCA resume predictores urbanos y socioeconómicos sin incluir \texttt{crim}; el split 70/30 puede variar según semilla, por lo que un uso real requiere validación cruzada o evaluación adicional. \\
+    P6 Criminalidad & Sí, pero como modelo exploratorio. Con 5 componentes se explicó 82,84\% de la varianza de predictores; en prueba se obtuvo $R^{2} = 0,8119$ sobre \texttt{log1p(crim)} y mejora de RMSE frente al promedio base = 11,85\%. & El PCA resume predictores urbanos y socioeconómicos sin incluir \texttt{crim}; no se interpreta como modelo predictivo robusto sin validación cruzada o evaluación con múltiples particiones. \\
     \bottomrule
   \end{tabularx}
 \end{table}
+
+\subsection{Evaluación metodológica del modelo predictivo}
+
+Para responder la pregunta sobre criminalidad se separó \texttt{crim} como variable objetivo y se aplicó PCA únicamente sobre las variables predictoras restantes. Antes de dividir los datos se fijó una semilla reproducible, de modo que la partición 70\% entrenamiento y 30\% prueba pudiera auditarse bajo las mismas condiciones. Además, se modeló \texttt{log1p(crim)} en lugar de \texttt{crim} directamente, porque la criminalidad presenta una distribución muy asimétrica: su media es 3,614, su mediana es 0,257 y su máximo llega a 88,976. La transformación logarítmica reduce la influencia de valores extremos y permite evaluar mejor el patrón relativo entre suburbios.
+
+La Tabla~\ref{tab:evaluacion_crim} resume las métricas principales del modelo. El modelo usó cinco componentes principales, que acumularon 82,84\% de la varianza de las variables predictoras. En la escala original de criminalidad, el RMSE fue 7,4102 y el MAE fue 1,9641. Frente al promedio base del conjunto de entrenamiento, cuyo RMSE fue 8,4066, el modelo redujo el error en 11,85\%. En la escala transformada, el $R^{2}$ fue 0,8119; en la escala original, el $R^{2}$ bajó a 0,2189, lo que confirma que el desempeño es más claro al aproximar \texttt{log1p(crim)} que al interpretar directamente la criminalidad sin transformar.
+
+\begin{table}[H]
+  \centering
+  \footnotesize
+  \begin{tabular}{l r}
+    \toprule
+    \textbf{Métrica} & \textbf{Resultado} \\
+    \midrule
+    Variable modelada & \texttt{log1p(crim)} \\
+    Partición de datos & 70\% entrenamiento / 30\% prueba \\
+    Semilla de reproducibilidad & 1184 \\
+    Componentes principales usados & 5 \\
+    Varianza acumulada de predictores & 82,84\% \\
+    RMSE del modelo en escala original & 7,4102 \\
+    MAE del modelo en escala original & 1,9641 \\
+    RMSE del promedio base & 8,4066 \\
+    Mejora de RMSE frente al promedio base & 11,85\% \\
+    $R^{2}$ sobre \texttt{log1p(crim)} & 0,8119 \\
+    $R^{2}$ sobre \texttt{crim} original & 0,2189 \\
+    \bottomrule
+  \end{tabular}
+  \caption{Evaluación predictiva exploratoria para criminalidad.}
+  \label{tab:evaluacion_crim}
+\end{table}
+
+Por lo anterior, la respuesta más prudente es que sí es posible construir un modelo exploratorio para aproximar la criminalidad transformada mediante \texttt{log1p(crim)}, pero no debe interpretarse como un modelo predictivo robusto para uso operativo. Para elevar la confiabilidad se requeriría validación cruzada, evaluación con múltiples semillas y comparación con modelos no lineales. Esta cautela es importante porque el dataset es histórico, contiene variables sensibles y el objetivo de la tarea es analítico, no de despliegue productivo.
 
 \section{Discusión y Reflexión}
 
@@ -216,7 +248,7 @@ La principal precaución metodológica es que el análisis describe asociaciones
 
 \section*{Declaración de elaboración y apoyo}
 
-El informe, el análisis de datos y la interpretación de resultados fueron elaborados por el grupo. Posteriormente, se utilizó GPT como apoyo para revisar redacción, ortografía, consistencia formal y refinamiento del documento, manteniendo la responsabilidad académica del contenido en los autores del informe \citep{autores2026ta04,openai2026gpt}.
+El informe, el análisis de datos y la interpretación de resultados fueron elaborados por el grupo. Se utilizó GPT 5.5 como herramienta de apoyo editorial para revisar redacción, ortografía, consistencia formal y claridad del documento. El contenido, los resultados, el análisis y las conclusiones fueron revisados y validados por los autores del informe \citep{openai2026gpt}.
 
 \bibliographystyle{apalike}
 \bibliography{referencias}
@@ -363,6 +395,7 @@ cargas[order(-cargas$abs_PC1), ]
 
 \begin{lstlisting}[caption={Predicción de criminalidad con componentes principales.}]
 vars_predictoras_crim <- setdiff(vars_analisis, "crim")
+set.seed(1184)
 idx_train <- sample(seq_len(nrow(boston)), size = floor(0.70 * nrow(boston)))
 
 train <- boston[idx_train, c("crim", vars_predictoras_crim)]
@@ -384,6 +417,18 @@ test_pcs <- as.data.frame(
 
 modelo_crim <- lm(log_crim ~ ., data = train_pcs)
 pred_log_crim <- predict(modelo_crim, newdata = test_pcs)
+
+pred_crim <- pmax(0, expm1(pred_log_crim))
+real_crim <- test$crim
+real_log_crim <- log1p(real_crim)
+pred_baseline <- rep(mean(train$crim), length(real_crim))
+
+rmse_modelo <- sqrt(mean((real_crim - pred_crim)^2))
+mae_modelo <- mean(abs(real_crim - pred_crim))
+r2_log <- 1 - sum((real_log_crim - pred_log_crim)^2) /
+  sum((real_log_crim - mean(real_log_crim))^2)
+rmse_baseline <- sqrt(mean((real_crim - pred_baseline)^2))
+mejora_rmse_pct <- (1 - rmse_modelo / rmse_baseline) * 100
 \end{lstlisting}
 
 \subsection*{A.4 Bitácora de Trabajo}
