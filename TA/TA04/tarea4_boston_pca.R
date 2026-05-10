@@ -1,16 +1,16 @@
 # ============================================================
 # Tarea 4 - INFO1184 Inteligencia de Negocios
-# Analisis de datos y visualizacion
+# Análisis de datos y visualización
 # Dataset: Boston (paquete MASS)
-# Tecnica: Analisis de Componentes Principales (PCA)
-# Metodologia: CRISP-DM (Fases 1 a 5)
+# Técnica: Análisis de Componentes Principales (PCA)
+# Metodología: CRISP-DM (Fases 1 a 5)
 # ============================================================
 
-# Este script usa R base y MASS para que sea facil de ejecutar,
+# Este script usa R base y MASS para que sea fácil de ejecutar,
 # leer y explicar. Genera figuras PDF y tablas CSV en carpetas locales.
 
 # ============================================================
-# 0. Configuracion inicial
+# 0. Configuración inicial
 # ============================================================
 
 if (!requireNamespace("MASS", quietly = TRUE)) {
@@ -53,33 +53,33 @@ r2 <- function(real, predicho) {
 }
 
 cat("\n============================================================\n")
-cat("Tarea 4 - Analisis Boston con PCA\n")
+cat("Tarea 4 - Análisis Boston con PCA\n")
 cat("============================================================\n")
 
 # ============================================================
-# Fase 1: Comprension del negocio
+# Fase 1: Comprensión del negocio
 # ============================================================
 
 # Objetivo general:
 # Analizar el mercado habitacional de Boston para identificar patrones
 # asociados al precio de viviendas, entorno urbano y tasa de criminalidad.
-# La tecnica central es PCA, apoyada con estadistica descriptiva,
-# visualizaciones y regresion lineal simple.
+# La técnica central es PCA, apoyada con estadística descriptiva,
+# visualizaciones y regresión lineal simple.
 
 preguntas <- c(
-  "1. Hay valores atipicos en al menos dos variables?",
-  "2. Que suburbios tienen las casas mas baratas?",
-  "3. Como influye el tamano de la casa en su precio?",
-  "4. Afecta la condicion de limitar con el rio Charles (chas) al valor de las casas?",
-  "5. Cual es el impacto del estatus socioeconomico?",
-  "6. Es posible predecir la tasa de criminalidad?"
+  "1. ¿Hay valores atípicos en al menos dos variables?",
+  "2. ¿Qué suburbios tienen las casas más baratas?",
+  "3. ¿Cómo influye el tamaño de la casa en su precio?",
+  "4. ¿Afecta la condición de limitar con el río Charles (chas) al valor de las casas?",
+  "5. ¿Cuál es el impacto del estatus socioeconómico?",
+  "6. ¿Es posible predecir la tasa de criminalidad?"
 )
 
-cat("\nFase 1: preguntas de investigacion\n")
+cat("\nFase 1: preguntas de investigación\n")
 print(preguntas)
 
 # ============================================================
-# Fase 2: Comprension de los datos
+# Fase 2: Comprensión de los datos
 # ============================================================
 
 data("Boston", package = "MASS")
@@ -89,7 +89,7 @@ boston$id_suburbio <- seq_len(nrow(boston))
 boston$chas_factor <- factor(
   boston$chas,
   levels = c(0, 1),
-  labels = c("No limita con rio Charles", "Limita con rio Charles")
+  labels = c("No limita con río Charles", "Limita con río Charles")
 )
 
 vars_analisis <- c(
@@ -100,20 +100,20 @@ vars_analisis <- c(
 diccionario <- data.frame(
   variable = vars_analisis,
   descripcion = c(
-    "Tasa de criminalidad per capita por suburbio",
-    "Proporcion de suelo residencial para lotes grandes",
-    "Proporcion de acres industriales no minoristas",
-    "Indicador de limite con el rio Charles: 1 si limita, 0 si no",
-    "Concentracion de oxidos nitricos",
-    "Numero promedio de habitaciones por vivienda",
-    "Proporcion de viviendas construidas antes de 1940",
+    "Tasa de criminalidad per cápita por suburbio",
+    "Proporción de suelo residencial para lotes grandes",
+    "Proporción de acres industriales no minoristas",
+    "Indicador de límite con el río Charles: 1 si limita, 0 si no",
+    "Concentración de óxidos nítricos",
+    "Número promedio de habitaciones por vivienda",
+    "Proporción de viviendas construidas antes de 1940",
     "Distancia ponderada a centros de empleo de Boston",
-    "Indice de accesibilidad a autopistas radiales",
+    "Índice de accesibilidad a autopistas radiales",
     "Tasa de impuesto a la propiedad",
     "Ratio alumno-profesor por localidad",
-    "Variable historica B del dataset original",
-    "Porcentaje de poblacion de menor estatus socioeconomico",
-    "Valor mediano de viviendas en miles de dolares"
+    "Variable histórica B del dataset original",
+    "Porcentaje de población de menor estatus socioeconómico",
+    "Valor mediano de viviendas en miles de dólares"
   )
 )
 
@@ -125,7 +125,7 @@ print(dim(boston))
 cat("\nEstructura del dataset\n")
 str(boston)
 
-cat("\nResumen estadistico\n")
+cat("\nResumen estadístico\n")
 print(summary(boston[vars_analisis]))
 
 cat("\nValores faltantes por variable\n")
@@ -181,7 +181,7 @@ for (i in seq_along(vars_analisis)) {
 }
 dev.off()
 
-# Pregunta 1: valores atipicos con regla IQR
+# Pregunta 1: valores atípicos con regla IQR
 vars_outliers <- setdiff(vars_analisis, "chas")
 outliers_iqr <- data.frame()
 
@@ -226,9 +226,9 @@ for (variable in top_outliers) {
 }
 dev.off()
 
-# Pregunta 2: suburbios con casas mas baratas
+# Pregunta 2: suburbios con casas más baratas
 # Boston no entrega nombres reales de suburbios. Por eso se usa id_suburbio,
-# que corresponde al numero de fila de cada observacion.
+# que corresponde al número de fila de cada observación.
 orden_baratos <- order(boston$medv)
 suburbios_baratos <- boston[orden_baratos[1:10], c("id_suburbio", "medv", "rm", "lstat", "crim", "chas_factor")]
 names(suburbios_baratos) <- c("id_suburbio", "medv", "rm", "lstat", "crim", "chas")
@@ -241,13 +241,13 @@ barplot(
   horiz = TRUE,
   las = 1,
   col = "#7f7f7f",
-  xlab = "MEDV: valor mediano (miles de dolares)",
+  xlab = "MEDV: valor mediano (miles de dólares)",
   main = "10 observaciones con menor valor mediano de vivienda"
 )
 mtext("Boston no entrega nombres reales; se usa id_suburbio", side = 3, line = 0.3, cex = 0.85)
 dev.off()
 
-# Pregunta 3: tamano de la casa y precio
+# Pregunta 3: tamaño de la casa y precio
 cor_rm_medv <- cor(boston$rm, boston$medv)
 modelo_rm_medv <- lm(medv ~ rm, data = boston)
 guardar_csv(coeficientes_modelo(modelo_rm_medv), "05_modelo_rm_medv.csv")
@@ -258,15 +258,15 @@ plot(
   boston$medv,
   pch = 19,
   col = adjustcolor("#2166ac", alpha.f = 0.65),
-  xlab = "RM: numero promedio de habitaciones",
-  ylab = "MEDV: valor mediano (miles de dolares)",
-  main = "Relacion entre habitaciones promedio y precio"
+  xlab = "RM: número promedio de habitaciones",
+  ylab = "MEDV: valor mediano (miles de dólares)",
+  main = "Relación entre habitaciones promedio y precio"
 )
 abline(modelo_rm_medv, col = "#b2182b", lwd = 2)
-legend("topleft", legend = paste("Correlacion =", round(cor_rm_medv, 3)), bty = "n")
+legend("topleft", legend = paste("Correlación =", round(cor_rm_medv, 3)), bty = "n")
 dev.off()
 
-# Pregunta 4: condicion de limitar con el rio Charles y precio
+# Pregunta 4: condición de limitar con el río Charles y precio
 resumen_chas <- aggregate(
   medv ~ chas_factor,
   data = boston,
@@ -289,16 +289,16 @@ boxplot(
   medv ~ chas_factor,
   data = boston,
   col = c("#c7c7c7", "#9ecae1"),
-  xlab = "Limite con rio Charles",
-  ylab = "MEDV: valor mediano (miles de dolares)",
-  main = "Precio de viviendas segun limite con el rio Charles"
+  xlab = "Límite con río Charles",
+  ylab = "MEDV: valor mediano (miles de dólares)",
+  main = "Precio de viviendas según límite con el río Charles"
 )
 stripchart(medv ~ chas_factor, data = boston, vertical = TRUE, method = "jitter", pch = 19,
            col = adjustcolor("#333333", alpha.f = 0.35), add = TRUE)
 mtext(paste("p-value prueba t =", signif(test_chas$p.value, 3)), side = 3, line = 0.3, cex = 0.85)
 dev.off()
 
-# Pregunta 5: estatus socioeconomico y precio
+# Pregunta 5: estatus socioeconómico y precio
 cor_lstat_medv <- cor(boston$lstat, boston$medv)
 modelo_lstat_medv <- lm(medv ~ lstat, data = boston)
 guardar_csv(coeficientes_modelo(modelo_lstat_medv), "08_modelo_lstat_medv.csv")
@@ -309,22 +309,22 @@ plot(
   boston$medv,
   pch = 19,
   col = adjustcolor("#4d9221", alpha.f = 0.65),
-  xlab = "LSTAT: porcentaje de menor estatus socioeconomico",
-  ylab = "MEDV: valor mediano (miles de dolares)",
-  main = "Estatus socioeconomico y precio de vivienda"
+  xlab = "LSTAT: porcentaje de menor estatus socioeconómico",
+  ylab = "MEDV: valor mediano (miles de dólares)",
+  main = "Estatus socioeconómico y precio de vivienda"
 )
 abline(modelo_lstat_medv, col = "#b2182b", lwd = 2)
-legend("topright", legend = paste("Correlacion =", round(cor_lstat_medv, 3)), bty = "n")
+legend("topright", legend = paste("Correlación =", round(cor_lstat_medv, 3)), bty = "n")
 dev.off()
 
 cat("\nFase 2 completada: EDA y respuestas 1 a 5 preparadas.\n")
 
 # ============================================================
-# Fase 3: Preparacion de los datos
+# Fase 3: Preparación de los datos
 # ============================================================
 
 # PCA requiere variables comparables, por eso se estandarizan con z-score.
-# Se mantiene chas como variable binaria 0/1 dentro del conjunto numerico.
+# Se mantiene chas como variable binaria 0/1 dentro del conjunto numérico.
 pca_data <- boston[, vars_analisis]
 pca_scaled <- scale(pca_data)
 
@@ -335,7 +335,7 @@ revision_escalado <- data.frame(
 )
 guardar_csv(revision_escalado, "09_revision_escalado_pca.csv")
 
-cat("\nFase 3: revision de datos estandarizados para PCA\n")
+cat("\nFase 3: revisión de datos estandarizados para PCA\n")
 print(revision_escalado)
 
 # ============================================================
@@ -438,12 +438,12 @@ dibujar_biplot_pca(
 cat("\nFase 4 completada: PCA generado.\n")
 
 # ============================================================
-# Fase 5: Evaluacion y prediccion de criminalidad
+# Fase 5: Evaluación y predicción de criminalidad
 # ============================================================
 
 # Para responder la pregunta 6, crim es la variable objetivo. El PCA
 # predictivo se calcula solo con las otras variables; luego se entrena una
-# regresion lineal sobre log1p(crim), lo que reduce asimetria y outliers.
+# regresión lineal sobre log1p(crim), lo que reduce asimetría y outliers.
 vars_predictoras_crim <- setdiff(vars_analisis, "crim")
 datos_modelo <- boston[, c("crim", vars_predictoras_crim)]
 
@@ -480,7 +480,7 @@ rmse_baseline <- rmse(real_crim, pred_baseline)
 mejora_rmse_pct <- (1 - rmse_modelo / rmse_baseline) * 100
 
 metricas_crim <- data.frame(
-  modelo = "Regresion lineal con PCA",
+  modelo = "Regresión lineal con PCA",
   target = "log1p(crim)",
   n_train = nrow(train),
   n_test = nrow(test),
@@ -513,22 +513,22 @@ plot(
   col = adjustcolor("#2166ac", alpha.f = 0.70),
   xlab = "Criminalidad real transformada: log1p(crim)",
   ylab = "Criminalidad predicha transformada",
-  main = "Prediccion de criminalidad con PCA"
+  main = "Predicción de criminalidad con PCA"
 )
 abline(0, 1, col = "#b2182b", lwd = 2)
 legend("topleft", legend = paste("R2 log =", round(r2_log, 3)), bty = "n")
 dev.off()
 
-# Sintesis de respuestas de investigacion
+# Síntesis de respuestas de investigación
 top2_outliers <- head(outliers_iqr[outliers_iqr$n_outliers > 0, ], 2)
 outliers_sin_black <- outliers_iqr[outliers_iqr$variable != "black" & outliers_iqr$n_outliers > 0, ]
 coef_rm <- coef(modelo_rm_medv)["rm"]
 coef_lstat <- coef(modelo_lstat_medv)["lstat"]
-diferencia_chas <- resumen_chas$medv_media[resumen_chas$chas == "Limita con rio Charles"] -
-  resumen_chas$medv_media[resumen_chas$chas == "No limita con rio Charles"]
+diferencia_chas <- resumen_chas$medv_media[resumen_chas$chas == "Limita con río Charles"] -
+  resumen_chas$medv_media[resumen_chas$chas == "No limita con río Charles"]
 
 if (r2_log >= 0.50 && mejora_rmse_pct > 0) {
-  respuesta_crim <- "Si, el modelo con PCA muestra capacidad predictiva razonable sobre log1p(crim)."
+  respuesta_crim <- "Sí, el modelo con PCA muestra capacidad predictiva razonable sobre log1p(crim)."
 } else if (mejora_rmse_pct > 0) {
   respuesta_crim <- "Parcialmente, el modelo mejora al promedio base, pero su capacidad predictiva es limitada."
 } else {
@@ -537,59 +537,59 @@ if (r2_log >= 0.50 && mejora_rmse_pct > 0) {
 
 respuestas <- data.frame(
   pregunta = c(
-    "1. Valores atipicos",
-    "2. Suburbios mas baratos",
-    "3. Tamano de casa y precio",
-    "4. Limite con rio Charles y precio",
-    "5. Estatus socioeconomico",
-    "6. Prediccion de criminalidad"
+    "1. Valores atípicos",
+    "2. Suburbios más baratos",
+    "3. Tamaño de casa y precio",
+    "4. Límite con río Charles y precio",
+    "5. Estatus socioeconómico",
+    "6. Predicción de criminalidad"
   ),
   respuesta = c(
     paste0(
-      "Si. Las dos variables con mas outliers por IQR son ",
+      "Sí. Las dos variables con más outliers por IQR son ",
       top2_outliers$variable[1], " (", top2_outliers$n_outliers[1], ") y ",
       top2_outliers$variable[2], " (", top2_outliers$n_outliers[2], "). ",
-      "Sin depender de black, tambien destacan ", outliers_sin_black$variable[1],
+      "Sin depender de black, también destacan ", outliers_sin_black$variable[1],
       " (", outliers_sin_black$n_outliers[1], ") y ", outliers_sin_black$variable[2],
       " (", outliers_sin_black$n_outliers[2], ")."
     ),
     paste0(
       "El dataset no entrega nombres reales de suburbios. Se reportan observaciones/IDs; ",
-      "los registros mas baratos estan en ",
+      "los registros más baratos están en ",
       "04_suburbios_mas_baratos.csv; el menor MEDV observado es ",
-      min(suburbios_baratos$medv), " miles de dolares."
+      min(suburbios_baratos$medv), " miles de dólares."
     ),
     paste0(
-      "La relacion es positiva: correlacion rm-medv = ", round(cor_rm_medv, 3),
-      "; cada habitacion promedio adicional se asocia a ", round(coef_rm, 3),
-      " miles de dolares mas en MEDV."
+      "La relación es positiva: correlación rm-medv = ", round(cor_rm_medv, 3),
+      "; cada habitación promedio adicional se asocia a ", round(coef_rm, 3),
+      " miles de dólares más en MEDV."
     ),
     paste0(
-      "Los sectores que limitan con el rio Charles tienen una media de MEDV ",
-      round(diferencia_chas, 3), " miles de dolares mayor que las que no limitan; p-value = ",
+      "Los sectores que limitan con el río Charles tienen una media de MEDV ",
+      round(diferencia_chas, 3), " miles de dólares mayor que las que no limitan; p-value = ",
       signif(test_chas$p.value, 3), ". chas es binaria y no mide distancia exacta."
     ),
     paste0(
-      "El impacto es negativo: correlacion lstat-medv = ", round(cor_lstat_medv, 3),
+      "El impacto es negativo: correlación lstat-medv = ", round(cor_lstat_medv, 3),
       "; cada punto adicional en LSTAT se asocia a ", round(coef_lstat, 3),
-      " miles de dolares menos en MEDV."
+      " miles de dólares menos en MEDV."
     ),
     paste0(
       respuesta_crim,
       " R2 log = ", round(r2_log, 3),
       ", mejora RMSE vs base = ", round(mejora_rmse_pct, 2), "%.",
-      " Es un resultado academico, no un modelo listo para despliegue."
+      " Es un resultado académico, no un modelo listo para despliegue."
     )
   )
 )
 
 guardar_csv(respuestas, "15_respuestas_investigacion.csv")
 
-cat("\nFase 5 completada: evaluacion y respuestas consolidadas.\n")
-cat("\n--- Respuestas de investigacion ---\n")
+cat("\nFase 5 completada: evaluación y respuestas consolidadas.\n")
+cat("\n--- Respuestas de investigación ---\n")
 print(respuestas)
 
 cat("\n--- Archivos generados ---\n")
 cat("Figuras PDF en:", dir_figuras, "\n")
 cat("Tablas CSV en:", dir_salidas, "\n")
-cat("\nAnalisis completado exitosamente.\n")
+cat("\nAnálisis completado exitosamente.\n")
