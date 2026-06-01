@@ -1,0 +1,15 @@
+variable,descripcion
+age,Edad del paciente
+sex,"Sexo biologico codificado: 1 hombre, 0 mujer"
+cp,Tipo de dolor toracico
+trestbps,Presion arterial en reposo
+chol,Colesterol serico
+fbs,Glucosa en ayunas mayor a 120 mg/dl
+restecg,Resultado electrocardiografico en reposo
+thalach,Frecuencia cardiaca maxima alcanzada
+exang,Angina inducida por ejercicio
+oldpeak,Depresion ST inducida por ejercicio
+slope,Pendiente del segmento ST
+ca,Numero de vasos principales coloreados
+thal,Resultado de prueba thal
+target,"Presencia de enfermedad cardiaca: 1 si, 0 no"

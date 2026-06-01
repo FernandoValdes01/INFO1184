@@ -179,28 +179,3 @@ Se interpretan los resultados obtenidos en función de las preguntas de investig
 
 ---
 
-## Estructura del proyecto
-
-```txt
-proyecto-heart-disease/
-│
-├── data/
-│   └── heart.csv
-│
-├── notebooks/
-│   └── analisis_heart_disease.ipynb
-│
-├── src/
-│   └── analisis.py
-│
-├── img/
-│   ├── matriz_correlacion.png
-│   ├── distribucion_edad.png
-│   ├── matriz_confusion.png
-│   └── clusters_kmeans.png
-│
-├── informe/
-│   └── informe_heart_disease.pdf
-│
-├── README.md
-└── requirements.txt
