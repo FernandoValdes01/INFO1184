@@ -1,0 +1,6 @@
+variable,promedio_target_0,promedio_target_1,interpretacion_breve
+age,56.601,52.585,menor en target 1
+trestbps,134.399,129.25,menor en target 1
+chol,251.087,242.64,menor en target 1
+thalach,139.101,158.378,mayor en target 1
+oldpeak,1.586,0.587,menor en target 1

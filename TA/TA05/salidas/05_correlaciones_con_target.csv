@@ -1,14 +1,14 @@
-variable,correlacion_con_target,descripcion
-exang,-0.4356,Angina inducida por ejercicio
-cp,0.4321,Tipo de dolor toracico
-oldpeak,-0.4291,Depresion ST inducida por ejercicio
-thalach,0.42,Frecuencia cardiaca maxima alcanzada
-ca,-0.409,Numero de vasos principales coloreados
-slope,0.3439,Pendiente del segmento ST
-thal,-0.3431,Resultado de prueba thal
-sex,-0.2836,"Sexo biologico codificado: 1 hombre, 0 mujer"
-age,-0.2215,Edad del paciente
-trestbps,-0.1463,Presion arterial en reposo
-restecg,0.1349,Resultado electrocardiografico en reposo
-chol,-0.0814,Colesterol serico
-fbs,-0.0268,Glucosa en ayunas mayor a 120 mg/dl
+variable,correlacion_con_target,descripcion,nota_interpretacion
+exang,-0.4356,Angina inducida por ejercicio,Asociacion exploratoria; no implica causalidad ni diagnostico.
+cp,0.4321,Tipo de dolor toracico,Asociacion exploratoria; no implica causalidad ni diagnostico.
+oldpeak,-0.4291,Depresion ST inducida por ejercicio,Asociacion exploratoria; no implica causalidad ni diagnostico.
+thalach,0.42,Frecuencia cardiaca maxima alcanzada,Asociacion exploratoria; no implica causalidad ni diagnostico.
+ca,-0.409,Numero de vasos principales coloreados,Asociacion exploratoria; no implica causalidad ni diagnostico.
+slope,0.3439,Pendiente del segmento ST,Asociacion exploratoria; no implica causalidad ni diagnostico.
+thal,-0.3431,Resultado de prueba thal,Asociacion exploratoria; no implica causalidad ni diagnostico.
+sex,-0.2836,"Sexo biologico codificado: 1 hombre, 0 mujer",Asociacion exploratoria; no implica causalidad ni diagnostico.
+age,-0.2215,Edad del paciente,Asociacion exploratoria; no implica causalidad ni diagnostico.
+trestbps,-0.1463,Presion arterial en reposo,Asociacion exploratoria; no implica causalidad ni diagnostico.
+restecg,0.1349,Resultado electrocardiografico en reposo,Asociacion exploratoria; no implica causalidad ni diagnostico.
+chol,-0.0814,Colesterol serico,Asociacion exploratoria; no implica causalidad ni diagnostico.
+fbs,-0.0268,Glucosa en ayunas mayor a 120 mg/dl,Asociacion exploratoria; no implica causalidad ni diagnostico.

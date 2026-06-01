@@ -25,7 +25,12 @@ from sklearn.metrics import (
     recall_score,
     silhouette_score,
 )
-from sklearn.model_selection import train_test_split
+from sklearn.inspection import permutation_importance
+from sklearn.model_selection import (
+    StratifiedKFold,
+    cross_validate,
+    train_test_split,
+)
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
@@ -55,6 +60,40 @@ VARIABLE_LABELS = {
     "target": "Presencia de enfermedad cardiaca: 1 si, 0 no",
 }
 
+VARIABLE_TYPES = {
+    "age": "Numerica",
+    "sex": "Binaria",
+    "cp": "Categorica codificada",
+    "trestbps": "Numerica",
+    "chol": "Numerica",
+    "fbs": "Binaria",
+    "restecg": "Categorica codificada",
+    "thalach": "Numerica",
+    "exang": "Binaria",
+    "oldpeak": "Numerica",
+    "slope": "Categorica codificada",
+    "ca": "Categorica codificada",
+    "thal": "Categorica codificada",
+    "target": "Objetivo",
+}
+
+VARIABLE_USE = {
+    "age": "Exploracion, clasificacion y clustering",
+    "sex": "Exploracion y clasificacion",
+    "cp": "Exploracion y clasificacion",
+    "trestbps": "Exploracion, clasificacion y clustering",
+    "chol": "Exploracion, clasificacion y clustering",
+    "fbs": "Exploracion y clasificacion",
+    "restecg": "Exploracion y clasificacion",
+    "thalach": "Exploracion, clasificacion y clustering",
+    "exang": "Exploracion, clasificacion y perfilado",
+    "oldpeak": "Exploracion, clasificacion y clustering",
+    "slope": "Exploracion y clasificacion",
+    "ca": "Exploracion y clasificacion",
+    "thal": "Exploracion y clasificacion",
+    "target": "Variable objetivo y perfilado posterior",
+}
+
 NUMERIC_FOR_COMPARISON = ["age", "trestbps", "chol", "thalach", "oldpeak"]
 CATEGORICAL_FOR_COMPARISON = [
     "sex",
@@ -67,6 +106,18 @@ CATEGORICAL_FOR_COMPARISON = [
     "thal",
 ]
 FEATURES = [col for col in VARIABLE_LABELS if col != "target"]
+CLUSTER_FEATURES = ["age", "trestbps", "chol", "thalach", "oldpeak"]
+KNN_VALUES = [3, 5, 7, 9, 11]
+
+
+def validate_data_path() -> None:
+    """Verifica que el archivo heart.csv exista antes de ejecutar."""
+
+    if not DATA_PATH.exists():
+        raise FileNotFoundError(
+            "No se encontro heart.csv en TA/TA05. "
+            "El dataset debe llamarse exactamente heart.csv."
+        )
 
 
 def save_csv(
@@ -93,6 +144,12 @@ def export_dictionary() -> None:
         {
             "variable": list(VARIABLE_LABELS.keys()),
             "descripcion": list(VARIABLE_LABELS.values()),
+            "tipo_aproximado": [
+                VARIABLE_TYPES[var] for var in VARIABLE_LABELS.keys()
+            ],
+            "uso_en_analisis": [
+                VARIABLE_USE[var] for var in VARIABLE_LABELS.keys()
+            ],
         }
     )
     save_csv(dictionary, "00_diccionario_variables.csv")
@@ -169,6 +226,45 @@ def export_descriptive_tables(
         round_frame(by_target.reset_index(), 3), "04_resumen_por_target.csv"
     )
 
+    means_by_target = df.groupby("target")[NUMERIC_FOR_COMPARISON].mean()
+    comparison_rows = []
+    for variable in NUMERIC_FOR_COMPARISON:
+        mean_0 = means_by_target.loc[0, variable]
+        mean_1 = means_by_target.loc[1, variable]
+        if mean_1 > mean_0:
+            direction = "mayor en target 1"
+        else:
+            direction = "menor en target 1"
+        comparison_rows.append(
+            {
+                "variable": variable,
+                "promedio_target_0": mean_0,
+                "promedio_target_1": mean_1,
+                "interpretacion_breve": direction,
+            }
+        )
+    save_csv(
+        round_frame(pd.DataFrame(comparison_rows), 3),
+        "04b_comparacion_promedios_target.csv",
+    )
+
+    categorical_rows = []
+    for variable in CATEGORICAL_FOR_COMPARISON:
+        table = pd.crosstab(df[variable], df["target"], normalize="index")
+        for category, row in table.iterrows():
+            categorical_rows.append(
+                {
+                    "variable": variable,
+                    "categoria": category,
+                    "proporcion_target_0": row.get(0, 0),
+                    "proporcion_target_1": row.get(1, 0),
+                }
+            )
+    save_csv(
+        round_frame(pd.DataFrame(categorical_rows), 4),
+        "04c_resumen_categoricas_target.csv",
+    )
+
     correlations = (
         df.corr(numeric_only=True)["target"]
         .drop("target")
@@ -177,6 +273,9 @@ def export_descriptive_tables(
     corr_table = correlations.reset_index()
     corr_table.columns = ["variable", "correlacion_con_target"]
     corr_table["descripcion"] = corr_table["variable"].map(VARIABLE_LABELS)
+    corr_table["nota_interpretacion"] = (
+        "Asociacion exploratoria; no implica causalidad ni diagnostico."
+    )
     save_csv(round_frame(corr_table, 4), "05_correlaciones_con_target.csv")
 
 
@@ -245,18 +344,10 @@ def make_plots(df: pd.DataFrame) -> None:
     plt.close(fig)
 
 
-def train_classifiers(
-    df: pd.DataFrame,
-) -> tuple[pd.DataFrame, str, np.ndarray, np.ndarray, pd.DataFrame]:
-    """Entrena clasificadores simples y exporta sus metricas."""
+def build_models(knn_k: int = 7) -> dict[str, object]:
+    """Construye los modelos usados en clasificacion."""
 
-    x = df[FEATURES]
-    y = df["target"]
-    x_train, x_test, y_train, y_test = train_test_split(
-        x, y, test_size=0.25, random_state=RANDOM_STATE, stratify=y
-    )
-
-    models = {
+    return {
         "Regresion logistica": Pipeline(
             [
                 ("scaler", StandardScaler()),
@@ -268,16 +359,97 @@ def train_classifiers(
                 ),
             ]
         ),
-        "KNN k=7": Pipeline(
+        f"KNN k={knn_k}": Pipeline(
             [
                 ("scaler", StandardScaler()),
-                ("model", KNeighborsClassifier(n_neighbors=7)),
+                ("model", KNeighborsClassifier(n_neighbors=knn_k)),
             ]
         ),
         "Arbol de decision": DecisionTreeClassifier(
             max_depth=4, random_state=RANDOM_STATE
         ),
     }
+
+
+def validate_knn_k(x: pd.DataFrame, y: pd.Series) -> int:
+    """Evalua varios valores de k y devuelve el mejor por F1 promedio."""
+
+    cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=RANDOM_STATE)
+    rows = []
+    for k_value in KNN_VALUES:
+        model = Pipeline(
+            [
+                ("scaler", StandardScaler()),
+                ("model", KNeighborsClassifier(n_neighbors=k_value)),
+            ]
+        )
+        scores = cross_validate(
+            model,
+            x,
+            y,
+            cv=cv,
+            scoring={"accuracy": "accuracy", "f1": "f1"},
+        )
+        rows.append(
+            {
+                "k": k_value,
+                "accuracy_promedio": scores["test_accuracy"].mean(),
+                "accuracy_desv": scores["test_accuracy"].std(),
+                "f1_promedio": scores["test_f1"].mean(),
+                "f1_desv": scores["test_f1"].std(),
+            }
+        )
+    results = pd.DataFrame(rows).sort_values(
+        ["f1_promedio", "accuracy_promedio"], ascending=False
+    )
+    save_csv(round_frame(results, 4), "13_validacion_knn_k.csv")
+    return int(results.iloc[0]["k"])
+
+
+def export_cross_validation(
+    models: dict[str, object], x: pd.DataFrame, y: pd.Series
+) -> None:
+    """Exporta validacion cruzada estratificada de los modelos."""
+
+    cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=RANDOM_STATE)
+    rows = []
+    for name, model in models.items():
+        scores = cross_validate(
+            model,
+            x,
+            y,
+            cv=cv,
+            scoring={"accuracy": "accuracy", "f1": "f1"},
+        )
+        rows.append(
+            {
+                "modelo": name,
+                "accuracy_promedio": scores["test_accuracy"].mean(),
+                "accuracy_desv": scores["test_accuracy"].std(),
+                "f1_promedio": scores["test_f1"].mean(),
+                "f1_desv": scores["test_f1"].std(),
+            }
+        )
+    save_csv(
+        round_frame(pd.DataFrame(rows), 4),
+        "12_validacion_cruzada_modelos.csv",
+    )
+
+
+def train_classifiers(
+    df: pd.DataFrame,
+) -> tuple[pd.DataFrame, str, np.ndarray, np.ndarray, pd.DataFrame]:
+    """Entrena clasificadores simples y exporta sus metricas."""
+
+    x = df[FEATURES]
+    y = df["target"]
+    best_knn_k = validate_knn_k(x, y)
+    models = build_models(best_knn_k)
+    export_cross_validation(models, x, y)
+
+    x_train, x_test, y_train, y_test = train_test_split(
+        x, y, test_size=0.25, random_state=RANDOM_STATE, stratify=y
+    )
 
     rows = []
     predictions = {}
@@ -335,59 +507,64 @@ def train_classifiers(
     fig.savefig(FIG_DIR / "fig_06_comparacion_modelos.pdf")
     plt.close(fig)
 
-    importance = build_importance_table(models[best_name], best_name, df)
-    save_csv(round_frame(importance, 4), "08_importancia_variables.csv")
+    importance = build_association_ranking(df)
+    save_csv(round_frame(importance, 4), "08_ranking_asociacion_target.csv")
+    export_permutation_importance(models[best_name], best_name, x_test, y_test)
     return metrics, best_name, y_test.to_numpy(), best_pred, importance
 
 
-def build_importance_table(
-    model, model_name: str, df: pd.DataFrame
-) -> pd.DataFrame:
-    """Crea un ranking entendible de variables para el modelo elegido."""
+def build_association_ranking(df: pd.DataFrame) -> pd.DataFrame:
+    """Crea un ranking exploratorio de asociacion con target."""
 
-    if model_name == "Regresion logistica":
-        coefficients = model.named_steps["model"].coef_[0]
-        importance = pd.DataFrame(
-            {
-                "variable": FEATURES,
-                "importancia": np.abs(coefficients),
-                "coeficiente": coefficients,
-            }
-        )
-    elif model_name == "Arbol de decision":
-        values = model.feature_importances_
-        importance = pd.DataFrame(
-            {
-                "variable": FEATURES,
-                "importancia": values,
-                "coeficiente": np.nan,
-            }
-        )
-    else:
-        # KNN no entrega coeficientes propios; por eso se usan correlaciones
-        # simples como ranking transparente para el informe.
-        correlations = (
-            df[FEATURES + ["target"]]
-            .corr(numeric_only=True)["target"]
-            .drop("target")
-        )
-        importance = pd.DataFrame(
-            {
-                "variable": FEATURES,
-                "importancia": correlations.abs().reindex(FEATURES).to_numpy(),
-                "coeficiente": correlations.reindex(FEATURES).to_numpy(),
-            }
-        )
-    importance["descripcion"] = importance["variable"].map(VARIABLE_LABELS)
-    return importance.sort_values(
-        "importancia", ascending=False, na_position="last"
+    correlations = (
+        df[FEATURES + ["target"]]
+        .corr(numeric_only=True)["target"]
+        .drop("target")
     )
+    ranking = pd.DataFrame(
+        {
+            "variable": FEATURES,
+            "asociacion_absoluta": correlations.abs().reindex(FEATURES),
+            "correlacion_con_target": correlations.reindex(FEATURES),
+        }
+    )
+    ranking["descripcion"] = ranking["variable"].map(VARIABLE_LABELS)
+    ranking["nota"] = "Ranking exploratorio; no es importancia interna de KNN."
+    return ranking.sort_values("asociacion_absoluta", ascending=False)
+
+
+def export_permutation_importance(
+    model, model_name: str, x_test: pd.DataFrame, y_test: pd.Series
+) -> None:
+    """Calcula importancia por permutacion para el mejor modelo."""
+
+    result = permutation_importance(
+        model,
+        x_test,
+        y_test,
+        n_repeats=20,
+        random_state=RANDOM_STATE,
+        scoring="f1",
+    )
+    table = pd.DataFrame(
+        {
+            "modelo": model_name,
+            "variable": FEATURES,
+            "importancia_media_f1": result.importances_mean,
+            "importancia_desv_f1": result.importances_std,
+        }
+    )
+    table["descripcion"] = table["variable"].map(VARIABLE_LABELS)
+    table = table.sort_values("importancia_media_f1", ascending=False)
+    save_csv(round_frame(table, 4), "14_importancia_permutacion_modelo.csv")
 
 
 def cluster_patients(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Aplica K-Means sin usar la variable objetivo como entrada."""
 
-    x = df[FEATURES]
+    # Se usan solo variables continuas para que la distancia euclidiana de
+    # K-Means no trate categorias codificadas como magnitudes continuas.
+    x = df[CLUSTER_FEATURES]
     scaled = StandardScaler().fit_transform(x)
 
     rows = []
@@ -457,6 +634,8 @@ def cluster_patients(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
         thalach_media=("thalach", "mean"),
         oldpeak_medio=("oldpeak", "mean"),
         exang_promedio=("exang", "mean"),
+        cp_promedio=("cp", "mean"),
+        thal_promedio=("thal", "mean"),
     )
     profiles = profiles.reset_index().sort_values("cluster")
     save_csv(round_frame(profiles, 3), "10_perfiles_clusters.csv")
@@ -506,7 +685,9 @@ def export_research_answers(
         "silueta", ascending=False
     ).iloc[0]
     top_importance = (
-        importance.dropna(subset=["importancia"]).head(4)["variable"].tolist()
+        importance.dropna(subset=["asociacion_absoluta"])
+        .head(4)["variable"]
+        .tolist()
     )
     answers = pd.DataFrame(
         {
@@ -526,9 +707,7 @@ def export_research_answers(
                     "moderadas."
                 ),
                 "Las mayores asociaciones lineales absolutas con target "
-                "fueron: "
-                + ", ".join(top_corr.index.tolist())
-                + ".",
+                "fueron: " + ", ".join(top_corr.index.tolist()) + ".",
                 (
                     "Si es posible construir modelos predictivos "
                     f"exploratorios; el mejor modelo fue {best_model} "
@@ -536,13 +715,15 @@ def export_research_answers(
                     f"accuracy={metrics.iloc[0]['accuracy']:.3f}."
                 ),
                 (
-                    "K-Means encontro una mejor separacion segun silueta "
+                    "K-Means sugirio una segmentacion exploratoria segun "
+                    "silueta "
                     f"con k={int(best_cluster['k'])}; los perfiles "
                     "difieren en edad, frecuencia cardiaca, oldpeak, "
-                    "exang y proporcion de target 1."
+                    "exang y proporcion de target 1, pero la separacion "
+                    "es limitada."
                 ),
                 "Los modelos simples son utiles como linea base; las "
-                "variables mas influyentes del mejor modelo fueron: "
+                "variables mas asociadas a target fueron: "
                 + ", ".join(top_importance)
                 + ".",
             ],
@@ -554,6 +735,7 @@ def export_research_answers(
 def main() -> None:
     """Ejecuta todo el flujo de analisis."""
 
+    validate_data_path()
     FIG_DIR.mkdir(exist_ok=True)
     OUT_DIR.mkdir(exist_ok=True)
 

@@ -1,49 +1,68 @@
 # TA05 - INFO1184
 
-Analisis de enfermedad cardiaca usando Python, clasificacion supervisada y clustering no supervisado.
+Análisis de enfermedad cardíaca usando Python, clasificación supervisada y clustering no supervisado. El trabajo sigue una metodología paso a paso y genera evidencias reproducibles para el informe en LaTeX.
 
 ## Integrantes
 
-- Juan Munoz
+- Juan Muñoz
 - Vicente Rivera
-- Fernando Valdes
+- Fernando Valdés
 
-Docente: Marcos Levano Humacto.
+Docente: Marcos Lévano Humacto.
+
+## Estructura del proyecto
+
+```text
+TA05/
+├── heart.csv
+├── main.py
+├── main.tex
+├── pyproject.toml
+├── uv.lock
+├── README.md
+├── task.md
+├── figuras/
+└── salidas/
+```
 
 ## Archivos principales
 
 - `Tarea 5 INFO1184.pdf`: enunciado original de la tarea.
-- `task.md`: definicion del proyecto, preguntas y metodologia esperada.
-- `heart.csv`: dataset utilizado.
+- `task.md`: descripción del proyecto, preguntas y metodología esperada.
+- `heart.csv`: dataset utilizado. Debe llamarse exactamente `heart.csv` y estar en esta carpeta.
 - `pyproject.toml`: dependencias del proyecto para `uv`.
 - `main.py`: script Python reproducible.
-- `main.tex`: informe en LaTeX.
-- `figuras/`: graficos PDF generados por el script.
+- `main.tex`: informe académico en LaTeX.
+- `figuras/`: gráficos PDF generados por el script.
 - `salidas/`: tablas CSV generadas por el script.
 
 ## Requisitos
 
 - Python 3.10 o superior.
 - `uv` instalado.
+- Acceso al repositorio o carpeta del grupo para revisión docente.
 
-Las dependencias estan declaradas en `pyproject.toml` y se instalan automaticamente al ejecutar con `uv`.
+Las dependencias están declaradas en `pyproject.toml` y se sincronizan con `uv`.
 
-## Como regenerar resultados
+## Cómo regenerar resultados
 
 Desde la carpeta `TA05`, ejecutar:
 
 ```bash
-uv run main.py
+uv sync
+uv run python main.py
 ```
 
 Esto crea o actualiza:
 
 - `figuras/fig_01_distribucion_target.pdf` a `figuras/fig_09_perfiles_clusters.pdf`.
-- `salidas/00_diccionario_variables.csv` a `salidas/11_respuestas_investigacion.csv`.
+- `salidas/00_diccionario_variables.csv` a `salidas/14_importancia_permutacion_modelo.csv`.
 
-## Como compilar en LaTeX / Overleaf
+## Cómo compilar el informe
 
-1. Crear un proyecto nuevo en Overleaf o latex.com.
+Opción recomendada en Overleaf:
+
+1. Crear un proyecto nuevo en Overleaf.
 2. Subir `main.tex`.
 3. Subir la carpeta completa `figuras/` manteniendo el mismo nombre.
 4. Opcionalmente subir `main.py`, `pyproject.toml`, `heart.csv`, `salidas/` y este `README.md` como evidencia.
@@ -51,12 +70,19 @@ Esto crea o actualiza:
 6. Usar compilador `pdfLaTeX`.
 7. Compilar dos veces para actualizar referencias cruzadas.
 
+También puede compilarse localmente con una distribución de LaTeX como TeX Live o MiKTeX.
+
 ## Resultados clave
 
 - Dataset original: 1025 registros y 14 variables.
 - Valores faltantes: 0.
 - Duplicados exactos: 723.
 - Dataset depurado para modelamiento: 302 registros.
-- Variables mas asociadas a `target`: `exang`, `cp`, `oldpeak`, `thalach` y `ca`.
-- Mejor modelo: KNN con `k=7`, accuracy 0,803 y F1-score 0,835.
-- Clustering: K-Means selecciono `k=2` segun silueta, con separacion moderada-baja.
+- Variables con mayor asociación exploratoria con `target`: `exang`, `cp`, `oldpeak`, `thalach` y `ca`.
+- Mejor modelo en el split final: KNN con `k=9`, accuracy 0,803 y F1-score 0,832.
+- Validación cruzada: regresión logística y KNN tuvieron desempeños promedio muy cercanos.
+- Clustering: K-Means seleccionó `k=2` según silueta, con separación limitada.
+
+## Nota metodológica
+
+Los resultados son exploratorios y no constituyen diagnóstico médico. La eliminación de duplicados fue necesaria para reducir fuga de información entre entrenamiento y prueba, pero también redujo el tamaño efectivo del dataset, por lo que las métricas deben interpretarse con prudencia.

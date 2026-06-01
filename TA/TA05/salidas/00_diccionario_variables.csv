@@ -1,15 +1,15 @@
-variable,descripcion
-age,Edad del paciente
-sex,"Sexo biologico codificado: 1 hombre, 0 mujer"
-cp,Tipo de dolor toracico
-trestbps,Presion arterial en reposo
-chol,Colesterol serico
-fbs,Glucosa en ayunas mayor a 120 mg/dl
-restecg,Resultado electrocardiografico en reposo
-thalach,Frecuencia cardiaca maxima alcanzada
-exang,Angina inducida por ejercicio
-oldpeak,Depresion ST inducida por ejercicio
-slope,Pendiente del segmento ST
-ca,Numero de vasos principales coloreados
-thal,Resultado de prueba thal
-target,"Presencia de enfermedad cardiaca: 1 si, 0 no"
+variable,descripcion,tipo_aproximado,uso_en_analisis
+age,Edad del paciente,Numerica,"Exploracion, clasificacion y clustering"
+sex,"Sexo biologico codificado: 1 hombre, 0 mujer",Binaria,Exploracion y clasificacion
+cp,Tipo de dolor toracico,Categorica codificada,Exploracion y clasificacion
+trestbps,Presion arterial en reposo,Numerica,"Exploracion, clasificacion y clustering"
+chol,Colesterol serico,Numerica,"Exploracion, clasificacion y clustering"
+fbs,Glucosa en ayunas mayor a 120 mg/dl,Binaria,Exploracion y clasificacion
+restecg,Resultado electrocardiografico en reposo,Categorica codificada,Exploracion y clasificacion
+thalach,Frecuencia cardiaca maxima alcanzada,Numerica,"Exploracion, clasificacion y clustering"
+exang,Angina inducida por ejercicio,Binaria,"Exploracion, clasificacion y perfilado"
+oldpeak,Depresion ST inducida por ejercicio,Numerica,"Exploracion, clasificacion y clustering"
+slope,Pendiente del segmento ST,Categorica codificada,Exploracion y clasificacion
+ca,Numero de vasos principales coloreados,Categorica codificada,Exploracion y clasificacion
+thal,Resultado de prueba thal,Categorica codificada,Exploracion y clasificacion
+target,"Presencia de enfermedad cardiaca: 1 si, 0 no",Objetivo,Variable objetivo y perfilado posterior

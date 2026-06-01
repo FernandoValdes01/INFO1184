@@ -1,6 +1,6 @@
 pregunta,respuesta_sintesis
 Diferencias entre pacientes con y sin enfermedad,"Los pacientes con target 1 tienden a presentar mayor thalach y diferentes patrones en dolor toracico, angina por ejercicio, oldpeak y thal; la edad, presion y colesterol muestran diferencias mas moderadas."
 Variables con mayor relacion con target,"Las mayores asociaciones lineales absolutas con target fueron: exang, cp, oldpeak, thalach."
-Prediccion de enfermedad cardiaca,Si es posible construir modelos predictivos exploratorios; el mejor modelo fue KNN k=7 con F1=0.835 y accuracy=0.803.
-Perfiles mediante clustering,"K-Means encontro una mejor separacion segun silueta con k=2; los perfiles difieren en edad, frecuencia cardiaca, oldpeak, exang y proporcion de target 1."
-Comportamiento de modelos simples,"Los modelos simples son utiles como linea base; las variables mas influyentes del mejor modelo fueron: exang, cp, oldpeak, thalach."
+Prediccion de enfermedad cardiaca,Si es posible construir modelos predictivos exploratorios; el mejor modelo fue KNN k=9 con F1=0.831 y accuracy=0.803.
+Perfiles mediante clustering,"K-Means sugirio una segmentacion exploratoria segun silueta con k=2; los perfiles difieren en edad, frecuencia cardiaca, oldpeak, exang y proporcion de target 1, pero la separacion es limitada."
+Comportamiento de modelos simples,"Los modelos simples son utiles como linea base; las variables mas asociadas a target fueron: exang, cp, oldpeak, thalach."

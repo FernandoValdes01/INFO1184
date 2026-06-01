@@ -1,10 +1,10 @@
-# Análisis de Enfermedad Cardíaca mediante Técnicas de Data Science
+# Análisis Exploratorio, Clasificación y Segmentación de Pacientes en un Dataset de Enfermedad Cardíaca
 
 ## Descripción del proyecto
 
 Este proyecto corresponde a la Tarea 5 de la asignatura INFO1184 - Inteligencia de Negocios.
 
-El objetivo principal es analizar un conjunto de datos relacionado con la salud, específicamente sobre enfermedad cardíaca, utilizando técnicas de análisis de datos en Python. El estudio busca identificar patrones, relaciones entre variables clínicas y demográficas, y evaluar si es posible predecir la presencia de enfermedad cardíaca en pacientes.
+El objetivo principal es analizar un conjunto de datos relacionado con la salud, específicamente sobre enfermedad cardíaca, utilizando técnicas de análisis de datos en Python. Desde el enfoque de Inteligencia de Negocios, el estudio busca transformar datos clínicos en información interpretable para identificar patrones, relaciones entre variables clínicas y demográficas, perfiles de pacientes y evaluar si es posible predecir la presencia de enfermedad cardíaca.
 
 El dataset utilizado corresponde a Heart Disease Dataset, disponible en Kaggle:
 
@@ -47,7 +47,7 @@ Analizar el dataset de enfermedad cardíaca mediante técnicas de análisis expl
 - Visualizar la distribución de las variables más relevantes.
 - Comparar pacientes con y sin enfermedad cardíaca.
 - Aplicar técnicas de clasificación para predecir la variable `target`.
-- Aplicar clustering para identificar posibles perfiles de pacientes.
+- Aplicar clustering exploratorio para identificar posibles perfiles de pacientes.
 - Interpretar los resultados obtenidos desde una perspectiva de salud y análisis de datos.
 
 ---
@@ -147,16 +147,19 @@ Se evalúan los modelos mediante:
 - Precision
 - Recall
 - F1-score
+- Validación cruzada estratificada
+- Comparación de distintos valores de `k` para K-Nearest Neighbors
 
 ### 7. Clustering
 
-Se aplica K-Means para segmentar pacientes según sus características clínicas.
+Se aplica K-Means para segmentar pacientes según sus características clínicas. Para evitar que variables categóricas codificadas sean tratadas como magnitudes continuas, el clustering se realiza principalmente con variables continuas escaladas. La variable `target` no se usa como entrada del clustering; solo se utiliza después para perfilar los grupos.
 
 Pasos considerados:
 
 - Selección de variables numéricas.
 - Escalamiento de datos con `StandardScaler`.
 - Método del codo para estimar el número de clusters.
+- Coeficiente de silueta para evaluar separación de grupos.
 - Aplicación de K-Means.
 - Interpretación de los grupos obtenidos.
 
@@ -178,4 +181,3 @@ Se interpretan los resultados obtenidos en función de las preguntas de investig
 - LaTeX para el informe final
 
 ---
-
