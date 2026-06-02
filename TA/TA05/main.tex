@@ -16,6 +16,7 @@
 \usepackage{amsmath}
 \usepackage{caption}
 \usepackage{parskip}
+\usepackage[round,authoryear]{natbib}
 \usepackage{fancyhdr}
 
 \definecolor{headerdark}{HTML}{2C3E50}
@@ -56,15 +57,15 @@ Este informe analiza un dataset de enfermedad cardíaca disponible en Kaggle, co
 
 La Inteligencia de Negocios busca convertir datos en información útil para comprender fenómenos, apoyar decisiones y priorizar acciones analíticas. En salud, esta lógica permite transformar registros clínicos en indicadores sobre patrones, perfiles de pacientes y posibles señales de riesgo. En enfermedades cardiovasculares, variables como edad, presión arterial, colesterol, frecuencia cardíaca máxima, angina inducida por ejercicio y resultados de pruebas clínicas pueden entregar evidencia exploratoria relevante. Sin embargo, un análisis académico no reemplaza la evaluación médica ni constituye diagnóstico.
 
-El caso de estudio corresponde al \textit{Heart Disease Dataset}, publicado en Kaggle por John Smith \cite{smithkaggle}. La pregunta principal del grupo fue: ¿qué variables clínicas y demográficas se relacionan más con la presencia de enfermedad cardíaca en los pacientes del dataset? A partir de ella se plantearon preguntas secundarias sobre diferencias entre pacientes con y sin enfermedad, variables más asociadas, capacidad predictiva de modelos simples, identificación de perfiles mediante clustering y comportamiento comparado de clasificadores.
+El caso de estudio corresponde al \textit{Heart Disease Dataset}, publicado en Kaggle por John Smith \citep{smithkaggle}. La pregunta principal del grupo fue: ¿qué variables clínicas y demográficas se relacionan más con la presencia de enfermedad cardíaca en los pacientes del dataset? A partir de ella se plantearon preguntas secundarias sobre diferencias entre pacientes con y sin enfermedad, variables más asociadas, capacidad predictiva de modelos simples, identificación de perfiles mediante clustering y comportamiento comparado de clasificadores.
 
-El objetivo general fue analizar el dataset mediante exploración, visualización, clasificación y agrupamiento. El desarrollo se implementó en Python con \texttt{pandas}, \texttt{scikit-learn}, \texttt{matplotlib} y \texttt{seaborn} \cite{pandas2020,sklearn2011,hunter2007,waskom2021}, dejando un flujo reproducible y salidas exportadas como evidencia.
+El objetivo general fue analizar el dataset mediante exploración, visualización, clasificación y agrupamiento. El desarrollo se implementó en Python con \texttt{pandas}, \texttt{scikit-learn}, \texttt{matplotlib} y \texttt{seaborn} \citep{pandas2020,sklearn2011,hunter2007,waskom2021}, dejando un flujo reproducible y salidas exportadas como evidencia.
 
 \section{Fundamentos de Teoría}
 
-CRISP-DM organiza proyectos de minería de datos en seis fases: comprensión del negocio, comprensión de los datos, preparación, modelamiento, evaluación y despliegue \cite{chapman2000}. En esta tarea se desarrollaron las primeras cinco fases, porque el alcance solicitado es analítico.
+CRISP-DM organiza proyectos de minería de datos en comprensión del negocio, comprensión de datos, preparación, modelamiento, evaluación y despliegue \citep{chapman2000,levano2026crispdm}. En esta tarea se desarrollaron las primeras cinco fases, porque el alcance solicitado es analítico.
 
-Para clasificación supervisada se usaron tres modelos. La regresión logística estima la probabilidad de una clase binaria mediante una función logística \cite{hosmer2013}. K-Nearest Neighbors clasifica una observación según la clase predominante entre sus vecinos más cercanos, por lo que requiere escalamiento cuando las variables tienen magnitudes distintas \cite{james2021}. El árbol de decisión separa datos mediante reglas sucesivas, aunque puede sobreajustar si no se controla su profundidad \cite{breiman1984}. El desempeño se evaluó con accuracy, precision, recall y F1-score:
+Para clasificación supervisada se usaron tres modelos vinculados al modelamiento predictivo y la estimación del error revisada en clases \citep{levano2026regresion}: regresión logística, K-Nearest Neighbors y árbol de decisión. La regresión logística estima la probabilidad de una clase binaria \citep{hosmer2013}; KNN clasifica según vecinos cercanos y requiere escalamiento cuando las magnitudes difieren \citep{james2021}; el árbol separa datos mediante reglas sucesivas, con riesgo de sobreajuste si no se controla su profundidad \citep{breiman1984}. El desempeño se evaluó con accuracy, precision, recall y F1-score:
 
 \begin{equation}
   \text{Accuracy}=\frac{VP+VN}{VP+VN+FP+FN}, \quad
@@ -76,11 +77,13 @@ Para clasificación supervisada se usaron tres modelos. La regresión logística
   F1 = 2 \cdot \frac{\text{Precision}\cdot\text{Recall}}{\text{Precision}+\text{Recall}}.
 \end{equation}
 
-K-Means es un algoritmo no supervisado que particiona observaciones en $k$ grupos minimizando la suma de cuadrados intra-cluster o inercia \cite{macqueen1967}. Una menor inercia indica mayor compactación, pero siempre disminuye al aumentar $k$; por ello se complementa con el coeficiente de silueta, que compara cohesión interna y separación respecto de otros clusters. Valores cercanos a 1 indican mejor separación, mientras que valores bajos sugieren grupos solapados. Antes de aplicar K-Means se escalan las variables, porque el algoritmo usa distancias euclidianas. La variable \texttt{target} no se usa como entrada del clustering, ya que corresponde a la clase supervisada y su inclusión contaminaría el análisis no supervisado. Además, variables como \texttt{cp}, \texttt{thal}, \texttt{ca}, \texttt{slope} o \texttt{restecg} son categóricas codificadas numéricamente; por ello, se usaron solo variables continuas para ajustar K-Means y las categorías se dejaron para perfilado posterior.
+K-Means es un algoritmo no supervisado que particiona observaciones en $k$ grupos minimizando distancias a centroides \citep{macqueen1967,levano2026clustering,levano2026kmeans}. Como trabaja con distancias euclidianas, se escalaron las variables y se usaron solo variables continuas; \texttt{target} quedó excluida de la entrada para no contaminar el análisis no supervisado. La selección de $k$ se apoyó en inercia y silueta, entendiendo que valores bajos de silueta indican grupos solapados.
 
 \section{Desarrollo del Trabajo}
 
 \subsection{Metodología paso a paso}
+
+La Tabla~\ref{tab:metodologia} resume las etapas ejecutadas y la Tabla~\ref{tab:preguntas} conecta cada pregunta de investigación con la técnica y evidencia usada para responderla.
 
 \begin{table}[H]
 \centering
@@ -123,7 +126,7 @@ Perfiles de pacientes & K-Means, inercia, silueta y PCA & Gráfico de codo, proy
 
 El dataset contiene 14 variables: edad, sexo, tipo de dolor torácico, presión arterial en reposo, colesterol, glucosa en ayunas, electrocardiograma en reposo, frecuencia cardíaca máxima, angina inducida por ejercicio, depresión ST, pendiente ST, vasos coloreados, resultado \textit{thal} y \texttt{target}. La clase 0 indica ausencia de enfermedad cardíaca y la clase 1 indica presencia.
 
-La revisión inicial identificó 1.025 filas, 14 columnas, cero valores faltantes y 723 duplicados exactos. Se eliminaron duplicados para evitar que observaciones idénticas aparecieran simultáneamente en entrenamiento y prueba, lo que produciría fuga de información y métricas artificialmente optimistas.
+La revisión inicial identificó 1.025 filas, 14 columnas, cero valores faltantes y 723 duplicados exactos, como resume la Tabla~\ref{tab:limpieza}. Se eliminaron duplicados para evitar que observaciones idénticas aparecieran simultáneamente en entrenamiento y prueba, lo que produciría fuga de información y métricas artificialmente optimistas.
 
 \begin{table}[H]
 \centering
@@ -172,14 +175,7 @@ Oldpeak & 1,59 & 0,59 & Menor en \texttt{target=1}. \\
 \label{tab:comparaciontarget}
 \end{table}
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.88\textwidth]{figuras/fig_02_variables_numericas_por_target.pdf}
-\caption{Comparación de variables numéricas según presencia de enfermedad cardíaca.}
-\label{fig:numericas}
-\end{figure}
-
-La matriz de correlación sugiere que \texttt{exang} ($r=-0,436$), \texttt{cp} ($r=0,432$), \texttt{oldpeak} ($r=-0,429$), \texttt{thalach} ($r=0,420$) y \texttt{ca} ($r=-0,409$) son las señales exploratorias más relevantes. Como varias son categóricas codificadas, la correlación debe entenderse solo como asociación numérica exploratoria.
+La Fig.~\ref{fig:correlacion} sugiere que \texttt{exang} ($r=-0,436$), \texttt{cp} ($r=0,432$), \texttt{oldpeak} ($r=-0,429$), \texttt{thalach} ($r=0,420$) y \texttt{ca} ($r=-0,409$) son las señales exploratorias más relevantes. Como varias son categóricas codificadas, la correlación debe entenderse solo como asociación numérica exploratoria; los boxplots de la Fig.~\ref{fig:numericas_anexo} y los gráficos categóricos de la Fig.~\ref{fig:categoricas_anexo} quedan como evidencia complementaria en el anexo.
 
 \begin{figure}[H]
 \centering
@@ -188,16 +184,9 @@ La matriz de correlación sugiere que \texttt{exang} ($r=-0,436$), \texttt{cp} (
 \label{fig:correlacion}
 \end{figure}
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.82\textwidth]{figuras/fig_04_cp_exang_thal_por_target.pdf}
-\caption{Distribución proporcional de variables categóricas codificadas por \texttt{target}.}
-\label{fig:categoricas}
-\end{figure}
-
 \subsection{Clasificación}
 
-Se dividieron los datos en entrenamiento y prueba, usando 25\% para prueba con partición estratificada. Además, se aplicó validación cruzada estratificada de cinco pliegues. Para KNN se probaron $k=3,5,7,9,11$ y el mejor promedio de F1 fue $k=9$, por lo que se usó en la comparación final.
+Se dividieron los datos en entrenamiento y prueba, usando 25\% para prueba con partición estratificada. Además, se aplicó validación cruzada estratificada de cinco pliegues. Para KNN se probaron $k=3,5,7,9,11$ y el mejor promedio de F1 fue $k=9$, por lo que se usó en la comparación final. Las métricas del split se presentan en la Tabla~\ref{tab:modelos} y su comparación visual queda en la Fig.~\ref{fig:comparacionmodelos_anexo}.
 
 \begin{table}[H]
 \centering
@@ -230,7 +219,7 @@ KNN k=9 & 0,828 & 0,030 & 0,849 & 0,026 \\
 \label{tab:cv}
 \end{table}
 
-El mejor modelo en el split final por F1-score fue KNN con $F1=0,832$. Su matriz de confusión obtuvo 24 verdaderos negativos, 37 verdaderos positivos, 11 falsos positivos y 4 falsos negativos. La validación cruzada muestra que regresión logística y KNN tienen desempeños muy cercanos, por lo que no se debe afirmar superioridad absoluta de un modelo.
+El mejor modelo en el split final por F1-score fue KNN con $F1=0,832$. Su matriz de confusión, mostrada en la Fig.~\ref{fig:confusion}, obtuvo 24 verdaderos negativos, 37 verdaderos positivos, 11 falsos positivos y 4 falsos negativos. La validación cruzada de la Tabla~\ref{tab:cv} muestra que regresión logística y KNN tienen desempeños muy cercanos, por lo que no se debe afirmar superioridad absoluta de un modelo.
 
 \begin{figure}[H]
 \centering
@@ -239,16 +228,9 @@ El mejor modelo en el split final por F1-score fue KNN con $F1=0,832$. Su matriz
 \label{fig:confusion}
 \end{figure}
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.72\textwidth]{figuras/fig_06_comparacion_modelos.pdf}
-\caption{Comparación visual de métricas de clasificación.}
-\label{fig:comparacionmodelos}
-\end{figure}
-
 \subsection{Clustering}
 
-Para clustering se usaron solo variables continuas escaladas: edad, presión arterial en reposo, colesterol, frecuencia cardíaca máxima y \texttt{oldpeak}. Se excluyó \texttt{target} y se evitaron variables categóricas codificadas como entrada directa. El mejor valor de silueta fue $k=2$, con silueta 0,240. Este valor permite una lectura exploratoria, pero indica separación limitada.
+Para clustering se usaron solo variables continuas escaladas: edad, presión arterial en reposo, colesterol, frecuencia cardíaca máxima y \texttt{oldpeak}. Se excluyó \texttt{target} y se evitaron variables categóricas codificadas como entrada directa. Según el codo y la silueta de la Fig.~\ref{fig:elbow}, el mejor valor fue $k=2$, con silueta 0,240. Este valor permite una lectura exploratoria, pero indica separación limitada.
 
 \begin{figure}[H]
 \centering
@@ -257,7 +239,7 @@ Para clustering se usaron solo variables continuas escaladas: edad, presión art
 \label{fig:elbow}
 \end{figure}
 
-El cluster 0 agrupó 173 pacientes, con proporción de \texttt{target=1} de 0,717, edad media 49,60, frecuencia máxima media 161,47 y \texttt{oldpeak} medio 0,52. El cluster 1 agrupó 129 pacientes, con proporción de \texttt{target=1} de 0,310, edad media 60,89, frecuencia máxima media 133,61 y \texttt{oldpeak} medio 1,75. Por tanto, K-Means sugirió dos perfiles exploratorios, aunque no clases clínicas cerradas.
+El cluster 0 agrupó 173 pacientes, con proporción de \texttt{target=1} de 0,717, edad media 49,60, frecuencia máxima media 161,47 y \texttt{oldpeak} medio 0,52. El cluster 1 agrupó 129 pacientes, con proporción de \texttt{target=1} de 0,310, edad media 60,89, frecuencia máxima media 133,61 y \texttt{oldpeak} medio 1,75. La proyección de la Fig.~\ref{fig:clusters_pca_anexo} y los perfiles de la Fig.~\ref{fig:perfiles_clusters_anexo} apoyan esta lectura exploratoria, aunque no representan clases clínicas cerradas.
 
 \section{Discusión y Reflexión}
 
@@ -277,46 +259,16 @@ Fernando Valdés concluye que los modelos simples sirven como línea base reprod
 
 Como conclusión general, el dataset permite transformar registros clínicos en indicadores interpretables y perfiles exploratorios. Las limitaciones principales son el tamaño reducido después de eliminar duplicados, la naturaleza secundaria del dataset, la codificación numérica de variables categóricas y la separación limitada del clustering. El estudio no constituye diagnóstico médico.
 
-\begin{thebibliography}{99}
+\bibliographystyle{apalike}
+\bibliography{referencias}
 
-\bibitem{breiman1984}
-Breiman, L., Friedman, J. H., Olshen, R. A., \& Stone, C. J. (1984). \textit{Classification and regression trees}. Wadsworth.
-
-\bibitem{chapman2000}
-Chapman, P., Clinton, J., Kerber, R., Khabaza, T., Reinartz, T., Shearer, C., \& Wirth, R. (2000). \textit{CRISP-DM 1.0: Step-by-step data mining guide}. SPSS Inc.
-
-\bibitem{hosmer2013}
-Hosmer, D. W., Lemeshow, S., \& Sturdivant, R. X. (2013). \textit{Applied logistic regression} (3rd ed.). Wiley.
-
-\bibitem{hunter2007}
-Hunter, J. D. (2007). Matplotlib: A 2D graphics environment. \textit{Computing in Science \& Engineering, 9}(3), 90--95.
-
-\bibitem{james2021}
-James, G., Witten, D., Hastie, T., \& Tibshirani, R. (2021). \textit{An introduction to statistical learning} (2nd ed.). Springer.
-
-\bibitem{macqueen1967}
-MacQueen, J. (1967). Some methods for classification and analysis of multivariate observations. En \textit{Proceedings of the Fifth Berkeley Symposium on Mathematical Statistics and Probability} (pp. 281--297).
-
-\bibitem{pandas2020}
-The pandas development team. (2020). \textit{pandas-dev/pandas: Pandas}. Zenodo. \url{https://doi.org/10.5281/zenodo.3509134}
-
-\bibitem{sklearn2011}
-Pedregosa, F., Varoquaux, G., Gramfort, A., Michel, V., Thirion, B., Grisel, O., Blondel, M., Prettenhofer, P., Weiss, R., Dubourg, V., Vanderplas, J., Passos, A., Cournapeau, D., Brucher, M., Perrot, M., \& Duchesnay, É. (2011). Scikit-learn: Machine learning in Python. \textit{Journal of Machine Learning Research, 12}, 2825--2830.
-
-\bibitem{smithkaggle}
-Smith, J. (s. f.). \textit{Heart Disease Dataset}. Kaggle. Recuperado en 2026, de \url{https://www.kaggle.com/datasets/johnsmith88/heart-disease-dataset}
-
-\bibitem{waskom2021}
-Waskom, M. L. (2021). Seaborn: Statistical data visualization. \textit{Journal of Open Source Software, 6}(60), 3021.
-
-\end{thebibliography}
-
+\newpage
 \appendix
 \section{Anexo: Evidencias del Desarrollo}
 
 \subsection{Código fuente y reproducibilidad}
 
-El análisis fue implementado en Python mediante \texttt{main.py}. Las dependencias se declararon en \texttt{pyproject.toml} para ejecución con \texttt{uv}. El repositorio del grupo se encuentra en: \url{https://github.com/FernandoValdes01/INFO1184}. La ruta del trabajo es \texttt{TA/TA05/}. El comando de ejecución usado fue \texttt{uv run python main.py}.
+El análisis fue implementado en Python mediante \texttt{main.py}. Las dependencias se declararon en \texttt{pyproject.toml} para ejecución con \texttt{uv}. La Tabla~\ref{tab:estructura} detalla la estructura del proyecto y la Tabla~\ref{tab:diccionario} resume el diccionario de variables. El repositorio del grupo se encuentra en: \url{https://github.com/FernandoValdes01/INFO1184}. La ruta del trabajo es \texttt{TA/TA05/}. El comando de ejecución usado fue \texttt{uv run python main.py}.
 
 \subsection{Estructura del proyecto}
 
@@ -336,6 +288,7 @@ Ruta & Descripción \\
 \bottomrule
 \end{tabularx}
 \caption{Estructura de archivos del proyecto.}
+\label{tab:estructura}
 \end{table}
 
 \subsection{Diccionario de variables}
@@ -364,41 +317,70 @@ target & Presencia de enfermedad cardíaca & Objetivo & Clase y perfilado poster
 \bottomrule
 \end{tabularx}
 \caption{Diccionario resumido de variables.}
+\label{tab:diccionario}
 \end{table}
 
 \subsection{Figuras complementarias}
+
+Las figuras complementarias amplían las evidencias citadas en el cuerpo principal: la Fig.~\ref{fig:numericas_anexo} compara variables continuas por clase, la Fig.~\ref{fig:categoricas_anexo} resume variables categóricas codificadas, la Fig.~\ref{fig:comparacionmodelos_anexo} compara modelos, y las Figs.~\ref{fig:clusters_pca_anexo}--\ref{fig:perfiles_clusters_anexo} apoyan el perfilado de clusters.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.82\textwidth]{figuras/fig_02_variables_numericas_por_target.pdf}
+\caption{Comparación de variables numéricas según presencia de enfermedad cardíaca.}
+\label{fig:numericas_anexo}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.78\textwidth]{figuras/fig_04_cp_exang_thal_por_target.pdf}
+\caption{Distribución proporcional de variables categóricas codificadas por \texttt{target}.}
+\label{fig:categoricas_anexo}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.70\textwidth]{figuras/fig_06_comparacion_modelos.pdf}
+\caption{Comparación visual de métricas de clasificación.}
+\label{fig:comparacionmodelos_anexo}
+\end{figure}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.75\textwidth]{figuras/fig_08_clusters_pca.pdf}
 \caption{Proyección PCA de los clusters generados por K-Means.}
+\label{fig:clusters_pca_anexo}
 \end{figure}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.82\textwidth]{figuras/fig_09_perfiles_clusters.pdf}
 \caption{Perfiles relativos de los clusters.}
+\label{fig:perfiles_clusters_anexo}
 \end{figure}
 
 \subsection{Archivos generados}
 
+La Tabla~\ref{tab:archivos_generados} lista las salidas principales que respaldan los resultados reportados, mientras que la Tabla~\ref{tab:bitacora} documenta la participación y secuencia de trabajo del grupo.
+
 \begin{table}[H]
 \centering
-\small
-\begin{tabularx}{\textwidth}{p{5.2cm}X}
+\scriptsize
+\begin{tabularx}{\textwidth}{p{6.2cm}X}
 \toprule
 Archivo & Evidencia \\
 \midrule
-\texttt{00\_diccionario\_variables.csv} & Diccionario de variables con tipo y uso. \\
-\texttt{03\_duplicados\_y\_limpieza.csv} & Resumen de limpieza y duplicados. \\
-\texttt{04b\_comparacion\_promedios\_target.csv} & Comparación de promedios por clase objetivo. \\
-\texttt{06\_metricas\_clasificacion.csv} & Métricas del split final. \\
-\texttt{12\_validacion\_cruzada\_modelos.csv} & Validación cruzada estratificada. \\
-\texttt{13\_validacion\_knn\_k.csv} & Evaluación de valores de $k$ para KNN. \\
-\texttt{14\_importancia\_permutacion\_modelo.csv} & Importancia por permutación del mejor modelo. \\
+\path{00_diccionario_variables.csv} & Diccionario de variables con tipo y uso. \\
+\path{03_duplicados_y_limpieza.csv} & Resumen de limpieza y duplicados. \\
+\path{04b_comparacion_promedios_target.csv} & Comparación de promedios por clase objetivo. \\
+\path{06_metricas_clasificacion.csv} & Métricas del split final. \\
+\path{12_validacion_cruzada_modelos.csv} & Validación cruzada estratificada. \\
+\path{13_validacion_knn_k.csv} & Evaluación de valores de $k$ para KNN. \\
+\path{14_importancia_permutacion_modelo.csv} & Importancia por permutación del mejor modelo. \\
 \bottomrule
 \end{tabularx}
 \caption{Principales archivos de evidencia generados por el script.}
+\label{tab:archivos_generados}
 \end{table}
 
 \subsection{Bitácora de trabajo}
@@ -419,6 +401,7 @@ Informe & Grupo completo & Redacción, revisión de resultados, referencias, ane
 \bottomrule
 \end{tabularx}
 \caption{Bitácora resumida del desarrollo.}
+\label{tab:bitacora}
 \end{table}
 
 \end{document}
