@@ -337,7 +337,7 @@ def make_plots(df: pd.DataFrame) -> None:
         )
         ax.set_title(f"{variable} por target")
         ax.set_xlabel(variable)
-        ax.set_ylabel("Proporcion")
+        ax.set_ylabel("Proporción")
         ax.legend(title="target", loc="best")
     fig.tight_layout()
     fig.savefig(FIG_DIR / "fig_04_cp_exang_thal_por_target.pdf")
@@ -651,6 +651,16 @@ def cluster_patients(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
             "oldpeak_medio",
         ]
     ]
+    profile_plot = profile_plot.rename(
+        columns={
+            "target_promedio": "Target promedio",
+            "edad_media": "Edad media",
+            "colesterol_medio": "Colesterol medio",
+            "presion_media": "Presión media",
+            "thalach_media": "Frecuencia máxima",
+            "oldpeak_medio": "Oldpeak medio",
+        }
+    )
     profile_scaled = (profile_plot - profile_plot.mean()) / profile_plot.std(
         ddof=0
     )
