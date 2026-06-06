@@ -32,6 +32,7 @@
 \captionsetup{font=small,labelfont=bf}
 \renewcommand{\figurename}{Fig.}
 \renewcommand{\tablename}{Tabla}
+\addto\captionsspanish{\renewcommand{\tablename}{Tabla}}
 \setlength{\parskip}{3pt}
 \setlength{\textfloatsep}{8pt plus 1pt minus 2pt}
 \setlength{\floatsep}{6pt plus 1pt minus 2pt}
@@ -239,7 +240,22 @@ Para clustering se usaron solo variables continuas escaladas: edad, presión art
 \label{fig:elbow}
 \end{figure}
 
-El cluster 0 agrupó 173 pacientes, con proporción de \texttt{target=1} de 0,717, edad media 49,60, frecuencia máxima media 161,47 y \texttt{oldpeak} medio 0,52. El cluster 1 agrupó 129 pacientes, con proporción de \texttt{target=1} de 0,310, edad media 60,89, frecuencia máxima media 133,61 y \texttt{oldpeak} medio 1,75. La proyección de la Fig.~\ref{fig:clusters_pca_anexo} y los perfiles de la Fig.~\ref{fig:perfiles_clusters_anexo} apoyan esta lectura exploratoria, aunque no representan clases clínicas cerradas.
+El cluster 0 agrupó 173 pacientes, con proporción de \texttt{target=1} de 0,717, edad media 49,60, frecuencia máxima media 161,47 y \texttt{oldpeak} medio 0,52. El cluster 1 agrupó 129 pacientes, con proporción de \texttt{target=1} de 0,310, edad media 60,89, frecuencia máxima media 133,61 y \texttt{oldpeak} medio 1,75. La Tabla~\ref{tab:perfilesclusters} resume estos perfiles y muestra que el primer grupo concentra pacientes más jóvenes, con mayor frecuencia cardíaca máxima y menor \texttt{oldpeak}; el segundo agrupa pacientes de mayor edad, mayor presión promedio y mayor \texttt{oldpeak}. La proyección de la Fig.~\ref{fig:clusters_pca_anexo} y los perfiles de la Fig.~\ref{fig:perfiles_clusters_anexo} apoyan esta lectura exploratoria, aunque no representan clases clínicas cerradas.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{lrrrrrrr}
+\toprule
+Cluster & n & Prop. target 1 & Edad & Colesterol & Presión & Frec. máx. & Oldpeak \\
+\midrule
+0 & 173 & 0,717 & 49,60 & 235,20 & 125,76 & 161,47 & 0,52 \\
+1 & 129 & 0,310 & 60,89 & 261,66 & 139,43 & 133,61 & 1,75 \\
+\bottomrule
+\end{tabular}
+\caption{Perfil descriptivo de los clusters obtenidos con K-Means.}
+\label{tab:perfilesclusters}
+\end{table}
 
 \section{Discusión y Reflexión}
 
@@ -272,7 +288,7 @@ El informe, el análisis de datos y la interpretación de resultados fueron elab
 
 \subsection{Código fuente y reproducibilidad}
 
-El análisis fue implementado en Python mediante \texttt{main.py}. Las dependencias se declararon en \texttt{pyproject.toml} para ejecución con \texttt{uv}. La Tabla~\ref{tab:estructura} detalla la estructura del proyecto y la Tabla~\ref{tab:diccionario} resume el diccionario de variables. El repositorio del grupo se encuentra en: \url{https://github.com/FernandoValdes01/INFO1184}. La ruta del trabajo es \texttt{TA/TA05/}. El comando de ejecución usado fue \texttt{uv run python main.py}.
+El análisis fue implementado en Python mediante \texttt{main.py}. Las dependencias se declararon en \texttt{pyproject.toml} y se ejecutaron con \href{https://docs.astral.sh/uv/}{\texttt{uv}}, una herramienta moderna para gestionar entornos y dependencias en proyectos Python, siguiendo prácticas actuales de reproducibilidad usadas en la industria. La Tabla~\ref{tab:estructura} detalla la estructura del proyecto y la Tabla~\ref{tab:diccionario} resume el diccionario de variables. La carpeta Drive del grupo con el código fuente y las evidencias se encuentra en: \url{https://drive.google.com/drive/folders/1x_mu9vE2p7X2_7_snnuNxTs8ditVrN8k?usp=sharing}. El comando de ejecución usado fue \texttt{uv run python main.py}.
 
 \subsection{Estructura del proyecto}
 
@@ -365,7 +381,7 @@ Las figuras complementarias amplían las evidencias citadas en el cuerpo princip
 
 \subsection{Archivos generados}
 
-La Tabla~\ref{tab:archivos_generados} lista las salidas principales que respaldan los resultados reportados, mientras que la Tabla~\ref{tab:bitacora} documenta la participación y secuencia de trabajo del grupo.
+Además de las figuras usadas en el informe, el script genera algunas tablas de apoyo en formato CSV. Estas permiten revisar resultados numéricos clave, pero no reemplazan el análisis presentado en el cuerpo del informe. La Tabla~\ref{tab:archivos_generados} resume las evidencias principales y la Tabla~\ref{tab:bitacora} documenta la participación y secuencia de trabajo del grupo.
 
 \begin{table}[H]
 \centering
@@ -374,16 +390,14 @@ La Tabla~\ref{tab:archivos_generados} lista las salidas principales que respalda
 \toprule
 Archivo & Evidencia \\
 \midrule
-\path{00_diccionario_variables.csv} & Diccionario de variables con tipo y uso. \\
-\path{03_duplicados_y_limpieza.csv} & Resumen de limpieza y duplicados. \\
-\path{04b_comparacion_promedios_target.csv} & Comparación de promedios por clase objetivo. \\
-\path{06_metricas_clasificacion.csv} & Métricas del split final. \\
-\path{12_validacion_cruzada_modelos.csv} & Validación cruzada estratificada. \\
-\path{13_validacion_knn_k.csv} & Evaluación de valores de $k$ para KNN. \\
-\path{14_importancia_permutacion_modelo.csv} & Importancia por permutación del mejor modelo. \\
+\path{03_duplicados_y_limpieza.csv} & Resumen de filas, valores faltantes y duplicados eliminados. \\
+\path{04b_comparacion_promedios_target.csv} & Promedios de variables continuas por clase objetivo. \\
+\path{06_metricas_clasificacion.csv} & Métricas del conjunto de prueba para los modelos evaluados. \\
+\path{12_validacion_cruzada_modelos.csv} & Resultados de validación cruzada estratificada. \\
+\path{10_perfiles_clusters.csv} & Perfil descriptivo de los clusters obtenidos con K-Means. \\
 \bottomrule
 \end{tabularx}
-\caption{Principales archivos de evidencia generados por el script.}
+\caption{Tablas de apoyo generadas para revisar resultados numéricos relevantes.}
 \label{tab:archivos_generados}
 \end{table}
 

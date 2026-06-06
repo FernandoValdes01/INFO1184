@@ -1,15 +1,15 @@
 variable,descripcion,tipo_aproximado,uso_en_analisis
-age,Edad del paciente,Numerica,"Exploracion, clasificacion y clustering"
-sex,"Sexo biologico codificado: 1 hombre, 0 mujer",Binaria,Exploracion y clasificacion
-cp,Tipo de dolor toracico,Categorica codificada,Exploracion y clasificacion
-trestbps,Presion arterial en reposo,Numerica,"Exploracion, clasificacion y clustering"
-chol,Colesterol serico,Numerica,"Exploracion, clasificacion y clustering"
-fbs,Glucosa en ayunas mayor a 120 mg/dl,Binaria,Exploracion y clasificacion
-restecg,Resultado electrocardiografico en reposo,Categorica codificada,Exploracion y clasificacion
-thalach,Frecuencia cardiaca maxima alcanzada,Numerica,"Exploracion, clasificacion y clustering"
-exang,Angina inducida por ejercicio,Binaria,"Exploracion, clasificacion y perfilado"
-oldpeak,Depresion ST inducida por ejercicio,Numerica,"Exploracion, clasificacion y clustering"
-slope,Pendiente del segmento ST,Categorica codificada,Exploracion y clasificacion
-ca,Numero de vasos principales coloreados,Categorica codificada,Exploracion y clasificacion
-thal,Resultado de prueba thal,Categorica codificada,Exploracion y clasificacion
-target,"Presencia de enfermedad cardiaca: 1 si, 0 no",Objetivo,Variable objetivo y perfilado posterior
+age,Edad del paciente,Numérica,"Exploración, clasificación y clustering"
+sex,"Sexo biológico codificado: 1 hombre, 0 mujer",Binaria,Exploración y clasificación
+cp,Tipo de dolor torácico,Categórica codificada,Exploración y clasificación
+trestbps,Presión arterial en reposo,Numérica,"Exploración, clasificación y clustering"
+chol,Colesterol sérico,Numérica,"Exploración, clasificación y clustering"
+fbs,Glucosa en ayunas mayor a 120 mg/dl,Binaria,Exploración y clasificación
+restecg,Resultado electrocardiográfico en reposo,Categórica codificada,Exploración y clasificación
+thalach,Frecuencia cardíaca máxima alcanzada,Numérica,"Exploración, clasificación y clustering"
+exang,Angina inducida por ejercicio,Binaria,"Exploración, clasificación y perfilado"
+oldpeak,Depresión ST inducida por ejercicio,Numérica,"Exploración, clasificación y clustering"
+slope,Pendiente del segmento ST,Categórica codificada,Exploración y clasificación
+ca,Número de vasos principales coloreados,Categórica codificada,Exploración y clasificación
+thal,Resultado de prueba thal,Categórica codificada,Exploración y clasificación
+target,"Presencia de enfermedad cardíaca: 1 sí, 0 no",Objetivo,Variable objetivo y perfilado posterior

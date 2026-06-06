@@ -1,4 +1,4 @@
 modelo,accuracy_promedio,accuracy_desv,f1_promedio,f1_desv
-Regresion logistica,0.8313,0.0375,0.8506,0.034
+Regresión logística,0.8313,0.0375,0.8506,0.034
 KNN k=9,0.8279,0.0301,0.8489,0.0263
-Arbol de decision,0.7845,0.0535,0.8011,0.0573
+Árbol de decisión,0.7845,0.0535,0.8011,0.0573

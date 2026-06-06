@@ -1,4 +1,4 @@
 modelo,accuracy,precision,recall,f1_score
 KNN k=9,0.8026,0.7708,0.9024,0.8315
-Regresion logistica,0.8026,0.7826,0.878,0.8276
-Arbol de decision,0.7895,0.7778,0.8537,0.814
+Regresión logística,0.8026,0.7826,0.878,0.8276
+Árbol de decisión,0.7895,0.7778,0.8537,0.814

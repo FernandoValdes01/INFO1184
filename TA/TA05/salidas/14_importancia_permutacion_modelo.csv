@@ -1,14 +1,14 @@
 modelo,variable,importancia_media_f1,importancia_desv_f1,descripcion
 KNN k=9,exang,0.034,0.0145,Angina inducida por ejercicio
-KNN k=9,ca,0.0291,0.0266,Numero de vasos principales coloreados
-KNN k=9,sex,0.0224,0.016,"Sexo biologico codificado: 1 hombre, 0 mujer"
+KNN k=9,ca,0.0291,0.0266,Número de vasos principales coloreados
+KNN k=9,sex,0.0224,0.016,"Sexo biológico codificado: 1 hombre, 0 mujer"
 KNN k=9,thal,0.0216,0.0139,Resultado de prueba thal
 KNN k=9,slope,0.0168,0.0138,Pendiente del segmento ST
-KNN k=9,oldpeak,0.0123,0.0137,Depresion ST inducida por ejercicio
-KNN k=9,cp,0.0114,0.0174,Tipo de dolor toracico
+KNN k=9,oldpeak,0.0123,0.0137,Depresión ST inducida por ejercicio
+KNN k=9,cp,0.0114,0.0174,Tipo de dolor torácico
 KNN k=9,fbs,-0.0006,0.0028,Glucosa en ayunas mayor a 120 mg/dl
-KNN k=9,thalach,-0.0026,0.0177,Frecuencia cardiaca maxima alcanzada
-KNN k=9,trestbps,-0.007,0.013,Presion arterial en reposo
-KNN k=9,restecg,-0.0126,0.0147,Resultado electrocardiografico en reposo
-KNN k=9,chol,-0.0227,0.0143,Colesterol serico
+KNN k=9,thalach,-0.0026,0.0177,Frecuencia cardíaca máxima alcanzada
+KNN k=9,trestbps,-0.007,0.013,Presión arterial en reposo
+KNN k=9,restecg,-0.0126,0.0147,Resultado electrocardiográfico en reposo
+KNN k=9,chol,-0.0227,0.0143,Colesterol sérico
 KNN k=9,age,-0.0329,0.0192,Edad del paciente

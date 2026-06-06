@@ -1,7 +1,7 @@
-"""Analisis reproducible de enfermedad cardiaca para INFO1184 TA05.
+"""Análisis reproducible de enfermedad cardíaca para INFO1184 TA05.
 
 El script carga ``heart.csv``, limpia duplicados, genera tablas descriptivas,
-entrena modelos de clasificacion y aplica K-Means para segmentar pacientes.
+entrena modelos de clasificación y aplica K-Means para segmentar pacientes.
 Todas las salidas se guardan en ``salidas/`` y ``figuras/``.
 """
 
@@ -45,52 +45,52 @@ OUT_DIR = BASE_DIR / "salidas"
 
 VARIABLE_LABELS = {
     "age": "Edad del paciente",
-    "sex": "Sexo biologico codificado: 1 hombre, 0 mujer",
-    "cp": "Tipo de dolor toracico",
-    "trestbps": "Presion arterial en reposo",
-    "chol": "Colesterol serico",
+    "sex": "Sexo biológico codificado: 1 hombre, 0 mujer",
+    "cp": "Tipo de dolor torácico",
+    "trestbps": "Presión arterial en reposo",
+    "chol": "Colesterol sérico",
     "fbs": "Glucosa en ayunas mayor a 120 mg/dl",
-    "restecg": "Resultado electrocardiografico en reposo",
-    "thalach": "Frecuencia cardiaca maxima alcanzada",
+    "restecg": "Resultado electrocardiográfico en reposo",
+    "thalach": "Frecuencia cardíaca máxima alcanzada",
     "exang": "Angina inducida por ejercicio",
-    "oldpeak": "Depresion ST inducida por ejercicio",
+    "oldpeak": "Depresión ST inducida por ejercicio",
     "slope": "Pendiente del segmento ST",
-    "ca": "Numero de vasos principales coloreados",
+    "ca": "Número de vasos principales coloreados",
     "thal": "Resultado de prueba thal",
-    "target": "Presencia de enfermedad cardiaca: 1 si, 0 no",
+    "target": "Presencia de enfermedad cardíaca: 1 sí, 0 no",
 }
 
 VARIABLE_TYPES = {
-    "age": "Numerica",
+    "age": "Numérica",
     "sex": "Binaria",
-    "cp": "Categorica codificada",
-    "trestbps": "Numerica",
-    "chol": "Numerica",
+    "cp": "Categórica codificada",
+    "trestbps": "Numérica",
+    "chol": "Numérica",
     "fbs": "Binaria",
-    "restecg": "Categorica codificada",
-    "thalach": "Numerica",
+    "restecg": "Categórica codificada",
+    "thalach": "Numérica",
     "exang": "Binaria",
-    "oldpeak": "Numerica",
-    "slope": "Categorica codificada",
-    "ca": "Categorica codificada",
-    "thal": "Categorica codificada",
+    "oldpeak": "Numérica",
+    "slope": "Categórica codificada",
+    "ca": "Categórica codificada",
+    "thal": "Categórica codificada",
     "target": "Objetivo",
 }
 
 VARIABLE_USE = {
-    "age": "Exploracion, clasificacion y clustering",
-    "sex": "Exploracion y clasificacion",
-    "cp": "Exploracion y clasificacion",
-    "trestbps": "Exploracion, clasificacion y clustering",
-    "chol": "Exploracion, clasificacion y clustering",
-    "fbs": "Exploracion y clasificacion",
-    "restecg": "Exploracion y clasificacion",
-    "thalach": "Exploracion, clasificacion y clustering",
-    "exang": "Exploracion, clasificacion y perfilado",
-    "oldpeak": "Exploracion, clasificacion y clustering",
-    "slope": "Exploracion y clasificacion",
-    "ca": "Exploracion y clasificacion",
-    "thal": "Exploracion y clasificacion",
+    "age": "Exploración, clasificación y clustering",
+    "sex": "Exploración y clasificación",
+    "cp": "Exploración y clasificación",
+    "trestbps": "Exploración, clasificación y clustering",
+    "chol": "Exploración, clasificación y clustering",
+    "fbs": "Exploración y clasificación",
+    "restecg": "Exploración y clasificación",
+    "thalach": "Exploración, clasificación y clustering",
+    "exang": "Exploración, clasificación y perfilado",
+    "oldpeak": "Exploración, clasificación y clustering",
+    "slope": "Exploración y clasificación",
+    "ca": "Exploración y clasificación",
+    "thal": "Exploración y clasificación",
     "target": "Variable objetivo y perfilado posterior",
 }
 
@@ -274,13 +274,13 @@ def export_descriptive_tables(
     corr_table.columns = ["variable", "correlacion_con_target"]
     corr_table["descripcion"] = corr_table["variable"].map(VARIABLE_LABELS)
     corr_table["nota_interpretacion"] = (
-        "Asociacion exploratoria; no implica causalidad ni diagnostico."
+        "Asociación exploratoria; no implica causalidad ni diagnóstico."
     )
     save_csv(round_frame(corr_table, 4), "05_correlaciones_con_target.csv")
 
 
 def make_plots(df: pd.DataFrame) -> None:
-    """Genera las figuras del analisis exploratorio."""
+    """Genera las figuras del análisis exploratorio."""
 
     sns.set_theme(style="whitegrid", palette="Set2")
 
@@ -289,7 +289,7 @@ def make_plots(df: pd.DataFrame) -> None:
     sns.barplot(
         x=target_counts.index.astype(str), y=target_counts.values, ax=ax
     )
-    ax.set_title("Distribucion de presencia de enfermedad cardiaca")
+    ax.set_title("Distribución de presencia de enfermedad cardíaca")
     ax.set_xlabel("Target: 0 = no presenta, 1 = presenta")
     ax.set_ylabel("Cantidad de pacientes")
     for i, value in enumerate(target_counts.values):
@@ -306,7 +306,7 @@ def make_plots(df: pd.DataFrame) -> None:
         ax.set_xlabel("Target")
         ax.set_ylabel(variable)
     axes[-1].axis("off")
-    fig.suptitle("Variables numericas segun presencia de enfermedad", y=1.02)
+    fig.suptitle("Variables numéricas según presencia de enfermedad", y=1.02)
     fig.tight_layout()
     fig.savefig(FIG_DIR / "fig_02_variables_numericas_por_target.pdf")
     plt.close(fig)
@@ -322,7 +322,7 @@ def make_plots(df: pd.DataFrame) -> None:
         linewidths=0.3,
         ax=ax,
     )
-    ax.set_title("Matriz de correlacion del dataset depurado")
+    ax.set_title("Matriz de correlación del dataset depurado")
     fig.tight_layout()
     fig.savefig(FIG_DIR / "fig_03_matriz_correlacion.pdf")
     plt.close(fig)
@@ -345,10 +345,10 @@ def make_plots(df: pd.DataFrame) -> None:
 
 
 def build_models(knn_k: int = 7) -> dict[str, object]:
-    """Construye los modelos usados en clasificacion."""
+    """Construye los modelos usados en clasificación."""
 
     return {
-        "Regresion logistica": Pipeline(
+        "Regresión logística": Pipeline(
             [
                 ("scaler", StandardScaler()),
                 (
@@ -365,7 +365,7 @@ def build_models(knn_k: int = 7) -> dict[str, object]:
                 ("model", KNeighborsClassifier(n_neighbors=knn_k)),
             ]
         ),
-        "Arbol de decision": DecisionTreeClassifier(
+        "Árbol de decisión": DecisionTreeClassifier(
             max_depth=4, random_state=RANDOM_STATE
         ),
     }
@@ -409,7 +409,7 @@ def validate_knn_k(x: pd.DataFrame, y: pd.Series) -> int:
 def export_cross_validation(
     models: dict[str, object], x: pd.DataFrame, y: pd.Series
 ) -> None:
-    """Exporta validacion cruzada estratificada de los modelos."""
+    """Exporta validación cruzada estratificada de los modelos."""
 
     cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=RANDOM_STATE)
     rows = []
@@ -439,7 +439,7 @@ def export_cross_validation(
 def train_classifiers(
     df: pd.DataFrame,
 ) -> tuple[pd.DataFrame, str, np.ndarray, np.ndarray, pd.DataFrame]:
-    """Entrena clasificadores simples y exporta sus metricas."""
+    """Entrena clasificadores simples y exporta sus métricas."""
 
     x = df[FEATURES]
     y = df["target"]
@@ -484,10 +484,11 @@ def train_classifiers(
     )
 
     fig, ax = plt.subplots(figsize=(5, 4))
-    ConfusionMatrixDisplay(matrix, display_labels=["No", "Si"]).plot(
-        ax=ax, cmap="Blues", colorbar=False
+    ConfusionMatrixDisplay(matrix, display_labels=["No", "Sí"]).plot(
+        ax=ax, cmap="Blues", colorbar=False, im_kw={"interpolation": "nearest"}
     )
-    ax.set_title(f"Matriz de confusion: {best_name}")
+    ax.grid(False)
+    ax.set_title(f"Matriz de confusión: {best_name}")
     fig.tight_layout()
     fig.savefig(FIG_DIR / "fig_05_matriz_confusion_mejor_modelo.pdf")
     plt.close(fig)
@@ -498,7 +499,7 @@ def train_classifiers(
     )
     sns.barplot(data=metrics_plot, x="modelo", y="valor", hue="metrica", ax=ax)
     ax.set_ylim(0, 1)
-    ax.set_title("Comparacion de modelos de clasificacion")
+    ax.set_title("Comparación de modelos de clasificación")
     ax.set_xlabel("Modelo")
     ax.set_ylabel("Valor")
     ax.tick_params(axis="x", rotation=15)
@@ -514,7 +515,7 @@ def train_classifiers(
 
 
 def build_association_ranking(df: pd.DataFrame) -> pd.DataFrame:
-    """Crea un ranking exploratorio de asociacion con target."""
+    """Crea un ranking exploratorio de asociación con target."""
 
     correlations = (
         df[FEATURES + ["target"]]
@@ -536,7 +537,7 @@ def build_association_ranking(df: pd.DataFrame) -> pd.DataFrame:
 def export_permutation_importance(
     model, model_name: str, x_test: pd.DataFrame, y_test: pd.Series
 ) -> None:
-    """Calcula importancia por permutacion para el mejor modelo."""
+    """Calcula importancia por permutación para el mejor modelo."""
 
     result = permutation_importance(
         model,
@@ -588,7 +589,7 @@ def cluster_patients(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
         marker="o",
         color="#4477AA",
     )
-    ax1.set_xlabel("Numero de clusters k")
+    ax1.set_xlabel("Número de clusters k")
     ax1.set_ylabel("Inercia", color="#4477AA")
     ax2 = ax1.twinx()
     ax2.plot(
@@ -598,7 +599,7 @@ def cluster_patients(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
         color="#CC6677",
     )
     ax2.set_ylabel("Coeficiente de silueta", color="#CC6677")
-    ax1.set_title("Metodo del codo y silueta para K-Means")
+    ax1.set_title("Método del codo y silueta para K-Means")
     fig.tight_layout()
     fig.savefig(FIG_DIR / "fig_07_elbow_kmeans.pdf")
     plt.close(fig)
@@ -672,7 +673,7 @@ def export_research_answers(
     cluster_metrics: pd.DataFrame,
     profiles: pd.DataFrame,
 ) -> None:
-    """Exporta respuestas breves a las preguntas de investigacion."""
+    """Exporta respuestas breves a las preguntas de investigación."""
 
     top_corr = (
         df.corr(numeric_only=True)["target"]
@@ -693,37 +694,37 @@ def export_research_answers(
         {
             "pregunta": [
                 "Diferencias entre pacientes con y sin enfermedad",
-                "Variables con mayor relacion con target",
-                "Prediccion de enfermedad cardiaca",
+                "Variables con mayor relación con target",
+                "Predicción de enfermedad cardíaca",
                 "Perfiles mediante clustering",
                 "Comportamiento de modelos simples",
             ],
             "respuesta_sintesis": [
                 (
                     "Los pacientes con target 1 tienden a presentar mayor "
-                    "thalach y diferentes patrones en dolor toracico, "
+                    "thalach y diferentes patrones en dolor torácico, "
                     "angina por ejercicio, oldpeak y thal; la edad, "
-                    "presion y colesterol muestran diferencias mas "
+                    "presión y colesterol muestran diferencias más "
                     "moderadas."
                 ),
                 "Las mayores asociaciones lineales absolutas con target "
                 "fueron: " + ", ".join(top_corr.index.tolist()) + ".",
                 (
-                    "Si es posible construir modelos predictivos "
+                    "Sí es posible construir modelos predictivos "
                     f"exploratorios; el mejor modelo fue {best_model} "
                     f"con F1={metrics.iloc[0]['f1_score']:.3f} y "
                     f"accuracy={metrics.iloc[0]['accuracy']:.3f}."
                 ),
                 (
-                    "K-Means sugirio una segmentacion exploratoria segun "
+                    "K-Means sugirió una segmentación exploratoria según "
                     "silueta "
                     f"con k={int(best_cluster['k'])}; los perfiles "
-                    "difieren en edad, frecuencia cardiaca, oldpeak, "
-                    "exang y proporcion de target 1, pero la separacion "
+                    "difieren en edad, frecuencia cardíaca, oldpeak, "
+                    "exang y proporción de target 1, pero la separación "
                     "es limitada."
                 ),
-                "Los modelos simples son utiles como linea base; las "
-                "variables mas asociadas a target fueron: "
+                "Los modelos simples son útiles como línea base; las "
+                "variables más asociadas a target fueron: "
                 + ", ".join(top_importance)
                 + ".",
             ],
@@ -733,7 +734,7 @@ def export_research_answers(
 
 
 def main() -> None:
-    """Ejecuta todo el flujo de analisis."""
+    """Ejecuta todo el flujo de análisis."""
 
     validate_data_path()
     FIG_DIR.mkdir(exist_ok=True)
@@ -749,7 +750,7 @@ def main() -> None:
         df, metrics, best_model, importance, cluster_metrics, profiles
     )
 
-    print("Analisis TA05 completado")
+    print("Análisis TA05 completado")
     print(f"Dataset original: {df_original.shape[0]} filas")
     print(f"Dataset depurado: {df.shape[0]} filas")
     print(f"Mejor modelo: {best_model}")

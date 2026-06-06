@@ -1,14 +1,14 @@
 variable,asociacion_absoluta,correlacion_con_target,descripcion,nota
 exang,0.4356,-0.4356,Angina inducida por ejercicio,Ranking exploratorio; no es importancia interna de KNN.
-cp,0.4321,0.4321,Tipo de dolor toracico,Ranking exploratorio; no es importancia interna de KNN.
-oldpeak,0.4291,-0.4291,Depresion ST inducida por ejercicio,Ranking exploratorio; no es importancia interna de KNN.
-thalach,0.42,0.42,Frecuencia cardiaca maxima alcanzada,Ranking exploratorio; no es importancia interna de KNN.
-ca,0.409,-0.409,Numero de vasos principales coloreados,Ranking exploratorio; no es importancia interna de KNN.
+cp,0.4321,0.4321,Tipo de dolor torácico,Ranking exploratorio; no es importancia interna de KNN.
+oldpeak,0.4291,-0.4291,Depresión ST inducida por ejercicio,Ranking exploratorio; no es importancia interna de KNN.
+thalach,0.42,0.42,Frecuencia cardíaca máxima alcanzada,Ranking exploratorio; no es importancia interna de KNN.
+ca,0.409,-0.409,Número de vasos principales coloreados,Ranking exploratorio; no es importancia interna de KNN.
 slope,0.3439,0.3439,Pendiente del segmento ST,Ranking exploratorio; no es importancia interna de KNN.
 thal,0.3431,-0.3431,Resultado de prueba thal,Ranking exploratorio; no es importancia interna de KNN.
-sex,0.2836,-0.2836,"Sexo biologico codificado: 1 hombre, 0 mujer",Ranking exploratorio; no es importancia interna de KNN.
+sex,0.2836,-0.2836,"Sexo biológico codificado: 1 hombre, 0 mujer",Ranking exploratorio; no es importancia interna de KNN.
 age,0.2215,-0.2215,Edad del paciente,Ranking exploratorio; no es importancia interna de KNN.
-trestbps,0.1463,-0.1463,Presion arterial en reposo,Ranking exploratorio; no es importancia interna de KNN.
-restecg,0.1349,0.1349,Resultado electrocardiografico en reposo,Ranking exploratorio; no es importancia interna de KNN.
-chol,0.0814,-0.0814,Colesterol serico,Ranking exploratorio; no es importancia interna de KNN.
+trestbps,0.1463,-0.1463,Presión arterial en reposo,Ranking exploratorio; no es importancia interna de KNN.
+restecg,0.1349,0.1349,Resultado electrocardiográfico en reposo,Ranking exploratorio; no es importancia interna de KNN.
+chol,0.0814,-0.0814,Colesterol sérico,Ranking exploratorio; no es importancia interna de KNN.
 fbs,0.0268,-0.0268,Glucosa en ayunas mayor a 120 mg/dl,Ranking exploratorio; no es importancia interna de KNN.
