@@ -105,8 +105,8 @@ def construir_matrices(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.Series, list[
 
 def graficar_distribucion_clases(y: pd.Series) -> None:
     """Grafica el balance de casos esporadicos y familiares."""
-    conteos = y.map({0: "Esporadico", 1: "Familiar"}).value_counts().reindex(
-        ["Esporadico", "Familiar"]
+    conteos = y.map({0: "Esporádico", 1: "Familiar"}).value_counts().reindex(
+        ["Esporádico", "Familiar"]
     )
 
     plt.figure(figsize=(7, 4.5))
@@ -117,9 +117,9 @@ def graficar_distribucion_clases(y: pd.Series) -> None:
         palette=["#5DADE2", "#AF7AC5"],
         legend=False,
     )
-    ax.set_title("Distribucion de clases: tipo de caso NF1")
+    ax.set_title("Distribución de clases: tipo de caso NF1")
     ax.set_xlabel("Clase")
-    ax.set_ylabel("Numero de pacientes")
+    ax.set_ylabel("Número de pacientes")
     for i, valor in enumerate(conteos.values):
         ax.text(i, valor + 2, str(int(valor)), ha="center", fontweight="bold")
     plt.tight_layout()
@@ -128,11 +128,11 @@ def graficar_distribucion_clases(y: pd.Series) -> None:
 
 
 def graficar_prevalencia_sintomas(df: pd.DataFrame) -> pd.DataFrame:
-    """Grafica prevalencia de sintomas binarios por tipo de caso."""
+    """Grafica prevalencia de síntomas binarios por tipo de caso."""
     excluir = {"ID", "Case Type", "Age of Mother", "Age of Father", "Age at First Diagnosis"}
     sintomas = [col for col in df.columns if col not in excluir]
     datos = df.copy()
-    datos["Tipo de caso"] = datos["Case Type"].map({0: "Esporadico", 1: "Familiar"})
+    datos["Tipo de caso"] = datos["Case Type"].map({0: "Esporádico", 1: "Familiar"})
 
     prevalencia = (
         datos.groupby("Tipo de caso")[sintomas]
@@ -156,8 +156,8 @@ def graficar_prevalencia_sintomas(df: pd.DataFrame) -> pd.DataFrame:
         order=orden,
         palette=["#5DADE2", "#AF7AC5"],
     )
-    ax.set_title("Prevalencia de sintomas y tumores por tipo de caso")
-    ax.set_xlabel("Proporcion de pacientes con presencia del indicador")
+    ax.set_title("Prevalencia de síntomas y tumores por tipo de caso")
+    ax.set_xlabel("Proporción de pacientes con presencia del indicador")
     ax.set_ylabel("")
     ax.set_xlim(0, 1)
     ax.legend(title="Tipo de caso", loc="lower right")
@@ -173,7 +173,7 @@ def entrenar_y_evaluar(
     y: pd.Series,
     variables_edad: list[str],
 ) -> dict[str, object]:
-    """Entrena el arbol de decision y calcula metricas de evaluacion."""
+    """Entrena el árbol de decisión y calcula métricas de evaluación."""
     preprocesador = ColumnTransformer(
         transformers=[("edad", SimpleImputer(strategy="median"), variables_edad)],
         remainder="passthrough",
@@ -227,7 +227,7 @@ def entrenar_y_evaluar(
 
     print("\n=== MODELADO Y EVALUACION ===")
     print("Modelo: DecisionTreeClassifier(criterion='gini', max_depth=3, min_samples_leaf=15, class_weight='balanced')")
-    print("\nMetricas en conjunto de prueba:")
+    print("\nMétricas en conjunto de prueba:")
     for nombre, valor in metricas.items():
         print(f"{nombre}: {valor:.4f}")
 
@@ -236,12 +236,12 @@ def entrenar_y_evaluar(
         classification_report(
             y_test,
             y_pred,
-            target_names=["Esporadico", "Familiar"],
+            target_names=["Esporádico", "Familiar"],
             zero_division=0,
         )
     )
 
-    print("Validacion cruzada estratificada de 5 pliegues:")
+    print("Validación cruzada estratificada de 5 pliegues:")
     for clave in ["test_accuracy", "test_precision", "test_recall", "test_f1", "test_roc_auc"]:
         print(f"{clave}: media={cv_resultados[clave].mean():.4f}, desv={cv_resultados[clave].std():.4f}")
 
@@ -259,12 +259,12 @@ def entrenar_y_evaluar(
 
 
 def graficar_matriz_confusion(y_test: pd.Series, y_pred: np.ndarray) -> None:
-    """Guarda matriz de confusion del arbol de decision."""
+    """Guarda matriz de confusión del árbol de decisión."""
     cm = confusion_matrix(y_test, y_pred)
-    disp = ConfusionMatrixDisplay(cm, display_labels=["Esporadico", "Familiar"])
+    disp = ConfusionMatrixDisplay(cm, display_labels=["Esporádico", "Familiar"])
     fig, ax = plt.subplots(figsize=(6, 5))
     disp.plot(ax=ax, cmap="Blues", colorbar=False, values_format="d")
-    ax.set_title("Matriz de confusion - Arbol de Decision")
+    ax.set_title("Matriz de confusión - Árbol de Decisión")
     plt.tight_layout()
     plt.savefig(FIG_DIR / "matriz_confusion.png", dpi=300)
     plt.close()
@@ -280,7 +280,7 @@ def graficar_curva_roc(y_test: pd.Series, y_prob: np.ndarray) -> None:
     plt.plot([0, 1], [0, 1], color="gray", linestyle="--", label="Azar")
     plt.xlabel("Tasa de falsos positivos")
     plt.ylabel("Tasa de verdaderos positivos")
-    plt.title("Curva ROC - Clasificacion familiar vs. esporadica")
+    plt.title("Curva ROC - Clasificación familiar vs. esporádica")
     plt.legend(loc="lower right")
     plt.tight_layout()
     plt.savefig(FIG_DIR / "curva_roc.png", dpi=300)
@@ -294,14 +294,14 @@ def graficar_arbol(pipeline: Pipeline, feature_names: list[str]) -> None:
     plot_tree(
         arbol,
         feature_names=feature_names,
-        class_names=["Esporadico", "Familiar"],
+        class_names=["Esporádico", "Familiar"],
         filled=True,
         rounded=True,
         impurity=True,
         proportion=True,
         fontsize=8,
     )
-    plt.title("Arbol de decision para tipo de caso NF1")
+    plt.title("Árbol de decisión para tipo de caso NF1")
     plt.tight_layout()
     plt.savefig(FIG_DIR / "arbol_decision.png", dpi=300)
     plt.close()
@@ -316,7 +316,7 @@ def graficar_importancia_features(pipeline: Pipeline, feature_names: list[str]) 
 
     plt.figure(figsize=(9, 5.5))
     ax = sns.barplot(data=tabla_plot, x="Importancia", y="Variable", color="#45B39D")
-    ax.set_title("Importancia de variables en el arbol de decision")
+    ax.set_title("Importancia de variables en el árbol de decisión")
     ax.set_xlabel("Importancia relativa")
     ax.set_ylabel("")
     plt.tight_layout()
@@ -344,12 +344,12 @@ def imprimir_resumen_final(
     print(f"Pacientes con tumores: {int(df['Tumour Case'].sum())}")
     print(f"Pacientes sin tumores: {int((df['Tumour Case'] == 0).sum())}")
     print(
-        "Metricas test: "
+        "Métricas test: "
         f"accuracy={metricas['accuracy']:.4f}, precision={metricas['precision']:.4f}, "
         f"recall={metricas['recall']:.4f}, f1={metricas['f1']:.4f}, auc={metricas['auc']:.4f}"
     )
     print(
-        "Validacion cruzada: "
+        "Validación cruzada: "
         f"accuracy media={cv['test_accuracy'].mean():.4f}, "
         f"f1 media={cv['test_f1'].mean():.4f}, "
         f"auc media={cv['test_roc_auc'].mean():.4f}"

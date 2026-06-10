@@ -15,6 +15,7 @@ Docente: Marcos Lévano Humacto.
 ```text
 TA06/
 ├── informe.tex
+├── referencias.bib
 ├── informe.pdf
 ├── nf1_analisis.py
 ├── dataset-uci.xlsx
@@ -48,9 +49,11 @@ El script carga `dataset-uci.xlsx`, hoja `Dataset`, entrena el arbol de decision
 
 ## Compilar Informe
 
-Desde `TA06/`, ejecutar dos veces:
+Desde `TA06/`, ejecutar:
 
 ```bash
+pdflatex -interaction=nonstopmode informe.tex
+bibtex informe
 pdflatex -interaction=nonstopmode informe.tex
 pdflatex -interaction=nonstopmode informe.tex
 ```
