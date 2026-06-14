@@ -19,7 +19,6 @@ import seaborn as sns
 from sklearn.compose import ColumnTransformer
 from sklearn.impute import SimpleImputer
 from sklearn.metrics import (
-    ConfusionMatrixDisplay,
     accuracy_score,
     auc,
     classification_report,
@@ -260,11 +259,29 @@ def entrenar_y_evaluar(
 
 def graficar_matriz_confusion(y_test: pd.Series, y_pred: np.ndarray) -> None:
     """Guarda matriz de confusión del árbol de decisión."""
-    cm = confusion_matrix(y_test, y_pred)
-    disp = ConfusionMatrixDisplay(cm, display_labels=["Esporádico", "Familiar"])
-    fig, ax = plt.subplots(figsize=(6, 5))
-    disp.plot(ax=ax, cmap="Blues", colorbar=False, values_format="d")
-    ax.set_title("Matriz de confusión - Árbol de Decisión")
+    etiquetas = ["Esporádico", "Familiar"]
+    cm = confusion_matrix(y_test, y_pred, labels=[0, 1])
+
+    fig, ax = plt.subplots(figsize=(6.2, 5.2))
+    sns.heatmap(
+        cm,
+        annot=True,
+        fmt="d",
+        cmap="Blues",
+        cbar=False,
+        square=True,
+        linewidths=1.2,
+        linecolor="white",
+        xticklabels=etiquetas,
+        yticklabels=etiquetas,
+        annot_kws={"fontsize": 16, "fontweight": "bold"},
+        ax=ax,
+    )
+    ax.set_title("Matriz de confusión del árbol de decisión", pad=12)
+    ax.set_xlabel("Clase predicha")
+    ax.set_ylabel("Clase real")
+    ax.tick_params(axis="x", rotation=0)
+    ax.tick_params(axis="y", rotation=0)
     plt.tight_layout()
     plt.savefig(FIG_DIR / "matriz_confusion.png", dpi=300)
     plt.close()

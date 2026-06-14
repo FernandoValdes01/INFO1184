@@ -60,11 +60,11 @@ La neurofibromatosis tipo 1 (NF1) es una condición genética asociada a manifes
 
 El objetivo general es aplicar el método árbol de decisión a un problema de clasificación binaria. La variable objetivo corresponde a \texttt{Case Type}: 0 para caso esporádico y 1 para caso familiar. La variable \texttt{Tumour Case} se mantiene como predictor y también se interpreta descriptivamente para discutir diferencias de prevalencia tumoral. La pregunta central es: ¿qué síntomas y variables clínicas ayudan a clasificar casos familiares y esporádicos de NF1?
 
-El trabajo se implementó en Python mediante \texttt{pandas}, \texttt{numpy}, \texttt{scikit-learn}, \texttt{matplotlib} y \texttt{seaborn} \citep{pandas2020,sklearn2011,hunter2007,waskom2021}. El proceso completo quedó automatizado en \texttt{nf1\_analisis.py}, que carga datos, prepara variables, entrena el modelo, evalúa métricas y genera figuras reproducibles.
+El trabajo se implementó en Python mediante \texttt{pandas}, \texttt{numpy}, \texttt{scikit-learn}, \texttt{matplotlib} y \texttt{seaborn} \citep{pandas2020,sklearn2011,hunter2007,waskom2021}. Estas herramientas permitieron cargar los datos, preparar variables, entrenar el modelo, evaluar métricas y generar visualizaciones reproducibles.
 
 \section{Fundamentos de Teoría}
 
-CRISP-DM organiza proyectos de minería de datos en seis fases: comprensión del negocio, comprensión de datos, preparación, modelado, evaluación e implementación. En el material de clases se destaca que el proceso es iterativo: los resultados de evaluación pueden exigir volver a preparación o modelado antes de comunicar conclusiones \citep{chapman2000,levano2026}. En esta tarea se desarrollan las primeras cinco fases y la implementación se limita a documentar un flujo reproducible mediante informe, script y figuras.
+CRISP-DM organiza proyectos de minería de datos en seis fases: comprensión del negocio, comprensión de datos, preparación, modelado, evaluación e implementación. En el material de clases se destaca que el proceso es iterativo: los resultados de evaluación pueden exigir volver a preparación o modelado antes de comunicar conclusiones \citep{chapman2000,levano2026}. En esta tarea se desarrollan las primeras cinco fases y la implementación se limita a documentar un flujo reproducible mediante informe y visualizaciones.
 
 La clasificación supervisada busca aprender una función que asigne una clase a cada observación a partir de variables predictoras. En este caso, la clase positiva corresponde a caso familiar de NF1. Un árbol de decisión divide los datos con reglas sucesivas del tipo ``si-entonces'', por lo que resulta interpretable para comunicar hallazgos. Su riesgo principal es el sobreajuste: un árbol demasiado profundo puede memorizar el conjunto de entrenamiento y generalizar mal. Por esa razón se usa poda previa mediante profundidad máxima, mínimo de observaciones por hoja y validación cruzada \citep{breiman1984,sklearn2011}.
 
@@ -89,14 +89,14 @@ El criterio de éxito no se limita a obtener una métrica alta. Dado que el data
 \small
 \begin{tabularx}{\textwidth}{p{3.2cm}X}
 \toprule
-Etapa CRISP-DM & Aplicación en TA06 \\
+Etapa CRISP-DM & Aplicación en el análisis \\
 \midrule
 Comprensión del negocio & Clasificar casos de NF1 como familiares o esporádicos usando síntomas clínicos. \\
 Comprensión de datos & Revisar dimensiones, variables, clases, faltantes, duplicados y prevalencia de síntomas. \\
 Preparación de datos & Separar \texttt{Case Type}, eliminar ID, imputar edades y dividir train/test estratificado. \\
 Modelado & Entrenar un árbol de decisión interpretable con poda previa y ponderación balanceada. \\
 Evaluación & Reportar accuracy, precision, recall, F1, AUC-ROC, matriz de confusión y validación cruzada. \\
-Comunicación & Documentar hallazgos, limitaciones y reproducibilidad en informe, figuras y README. \\
+Comunicación & Documentar hallazgos, limitaciones y visualizaciones en el informe. \\
 \bottomrule
 \end{tabularx}
 \caption{Aplicación de CRISP-DM en el análisis NF1.}
@@ -105,7 +105,7 @@ Comunicación & Documentar hallazgos, limitaciones y reproducibilidad en informe
 
 \subsection{Comprensión de los Datos}
 
-El archivo usado fue \texttt{dataset-uci.xlsx}, ubicado en \texttt{TA06/}. La hoja \texttt{Dataset} contiene 296 registros y 20 columnas. La descripción UCI menciona 331 probandos, pero el Excel local disponible para la tarea contiene 296 filas efectivas; esta diferencia se mantiene documentada para reproducibilidad. La Tabla~\ref{tab:estructura_datos} resume la estructura principal.
+El archivo usado fue \texttt{dataset-uci.xlsx}. La hoja \texttt{Dataset} contiene 296 registros y 20 columnas. La descripción UCI menciona 331 probandos, pero el Excel local disponible para la tarea contiene 296 filas efectivas; esta diferencia se mantiene documentada para reproducibilidad. La Tabla~\ref{tab:estructura_datos} resume la estructura principal.
 
 \begin{table}[H]
 \centering
@@ -160,9 +160,9 @@ La diferencia descriptiva más visible fue que nódulos de Lisch aparecieron má
 
 \subsection{Preparación de los Datos}
 
-La preparación mantuvo el archivo original sin modificar. En el script se eliminó la columna identificadora \texttt{ID}, se separó \texttt{Case Type} como variable objetivo y se convirtieron las variables predictoras a formato numérico. Las variables binarias ya estaban codificadas como 0 para ausencia y 1 para presencia. Las edades se imputaron con la mediana, estrategia simple y robusta frente a asimetría moderada.
+La preparación mantuvo el archivo original sin modificar. Se eliminó la columna identificadora \texttt{ID}, se separó \texttt{Case Type} como variable objetivo y se convirtieron las variables predictoras a formato numérico. Las variables binarias ya estaban codificadas como 0 para ausencia y 1 para presencia. Las edades se imputaron con la mediana, estrategia simple y robusta frente a asimetría moderada.
 
-La división de datos usó 75\% para entrenamiento y 25\% para prueba, con estratificación por clase y semilla 1184. Además, se aplicó validación cruzada estratificada de cinco pliegues para estimar estabilidad y evitar depender solo de una partición. El procedimiento completo queda disponible en el script del anexo, evitando incorporar código fuente extenso en el cuerpo del informe.
+La división de datos usó 75\% para entrenamiento y 25\% para prueba, con estratificación por clase y semilla 1184. Además, se aplicó validación cruzada estratificada de cinco pliegues para estimar estabilidad y evitar depender solo de una partición.
 
 \subsection{Modelado}
 
@@ -258,7 +258,7 @@ Como conclusión general, el trabajo cumple el objetivo de investigar y aplicar 
 
 El informe, el análisis de datos y la interpretación de resultados fueron elaborados por el grupo. Se utilizó GPT 5.5 como herramienta de apoyo editorial y de asistencia en programación para revisar consistencia formal, redacción y estructura reproducible \citep{openai2026gpt}. El contenido, los resultados y las conclusiones fueron revisados y validados por los autores del informe.
 
-El análisis se reproduce ejecutando \texttt{nf1\_analisis.py} desde la carpeta \texttt{TA06/}. El script genera automáticamente las seis figuras usadas en el informe dentro de \texttt{figuras/}. La Tabla~\ref{tab:archivos} resume los archivos principales.
+Las figuras del anexo complementan la evaluación del modelo y la revisión de distribución de clases.
 
 \begin{figure}[H]
 \centering
@@ -274,27 +274,6 @@ El análisis se reproduce ejecutando \texttt{nf1\_analisis.py} desde la carpeta 
 \caption{Matriz de confusión y curva ROC del árbol de decisión.}
 \label{fig:evaluacion_anexo}
 \end{figure}
-
-\begin{table}[H]
-\centering
-\small
-\begin{tabularx}{\textwidth}{p{6.4cm}X}
-\toprule
-Archivo & Descripción \\
-\midrule
-\texttt{dataset-uci.xlsx} & Excel local con hoja \texttt{Dataset}. \\
-\texttt{nf1\_analisis.py} & Script reproducible de carga, preparación, modelado, evaluación y figuras. \\
-\texttt{figuras/arbol\_decision.png} & Visualización del árbol entrenado. \\
-\texttt{figuras/matriz\_confusion.png} & Matriz de confusión del conjunto de prueba. \\
-\texttt{figuras/curva\_roc.png} & Curva ROC y AUC del modelo. \\
-\texttt{figuras/importancia\_features.png} & Ranking de importancia de variables. \\
-\texttt{figuras/distribucion\_clases.png} & Balance de clases objetivo. \\
-\texttt{figuras/prevalencia\_sintomas.png} & Prevalencia de síntomas por tipo de caso. \\
-\bottomrule
-\end{tabularx}
-\caption{Estructura de archivos principales de TA06.}
-\label{tab:archivos}
-\end{table}
 
 \begin{table}[H]
 \centering
